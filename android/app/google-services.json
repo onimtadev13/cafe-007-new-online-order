@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "727006768161",
+    "project_id": "online-food-order-d220b",
+    "storage_bucket": "online-food-order-d220b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:727006768161:android:64d1e49dee46c8e97fc760",
+        "android_client_info": {
+          "package_name": "com.cafe_007"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "727006768161-nqfqrhn5ecp4lh74bkk40j7ijcejh3uu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cafe_007",
+            "certificate_hash": "8281927fbab9ccd43ee4cc71627cde115233de85"
+          }
+        },
+        {
+          "client_id": "727006768161-hb1nsp85aie3p7th4mindigfjoej302a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJxrdJWEkY2nZ-eYz3idToJyBHFSrxvQI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "727006768161-hb1nsp85aie3p7th4mindigfjoej302a.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "727006768161-ov7b3ajsii0bv1cnvs279jlqha6ddhhv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cafe_007"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

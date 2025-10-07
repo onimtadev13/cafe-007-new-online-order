@@ -83,7 +83,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "0.6.8"
+        multiDexEnabled true  // Add this line if you encounter dex limit issues
     }
     signingConfigs {
         debug {
@@ -107,9 +108,23 @@ android {
     }
 }
 
+// Add this configuration block to resolve dependency conflicts
+configurations.all {
+    resolutionStrategy {
+        // Force exclude all support library dependencies
+        exclude group: 'com.android.support'
+        
+        // Alternative: Force specific versions if needed
+        // force 'androidx.core:core:1.13.1'
+    }
+}
+
 dependencies {
+    
+
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation project(':react-native-splash-screen')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
@@ -117,3 +132,12 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+// IMPORTANT: Apply this plugin at the very end of the file
+apply plugin: 'com.google.gms.google-services'
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
+// apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
+// For newer React Native versions
+// apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+// applyNativeModulesAppBuildGradle(project)

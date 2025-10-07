@@ -24,6 +24,39 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	
+	<!-- ADD BRANCH KEY -->
+	<key>branch_key</key>
+	<dict>
+		<key>live</key>
+		<string>YOUR_BRANCH_LIVE_KEY_HERE</string>
+		<key>test</key>
+		<string>YOUR_BRANCH_TEST_KEY_HERE</string>
+	</dict>
+	
+	<!-- ADD URL SCHEMES FOR DEEP LINKING -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>cafe007.lk</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>https</string>
+				<string>cafe007</string>
+			</array>
+		</dict>
+	</array>
+	
+	<!-- ADD ASSOCIATED DOMAINS FOR UNIVERSAL LINKS -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:cafe007.app.link</string>
+		<string>applinks:cafe007-alternate.app.link</string>
+		<string>applinks:cafe007.test-app.link</string>
+		<string>applinks:cafe007.lk</string>
+	</array>
+	
 	<key>NSAppTransportSecurity</key>
 	<dict>
 	  <!-- Do not change NSAllowsArbitraryLoads to true, or you will risk app rejection! -->
