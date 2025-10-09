@@ -23,6 +23,17 @@ target 'Cafe_007' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  # ✅ Firebase pods - Add these explicitly
+  pod 'Firebase/Core'
+  pod 'Firebase/Messaging'
+  pod 'FirebaseCore', :modular_headers => true
+  pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'FirebaseMessaging', :modular_headers => true
+  
+  # ✅ Enable modular headers for problematic pods
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'SDWebImage', :modular_headers => true
+
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
@@ -31,5 +42,15 @@ target 'Cafe_007' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Ensure consistent deployment target and modular headers
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version_supported
+        
+        # Fix for Firebase modules
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      end
+    end
   end
 end

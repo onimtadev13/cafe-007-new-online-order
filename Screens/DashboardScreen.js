@@ -95,9 +95,9 @@ class DashboardScreen extends React.PureComponent {
     'promoShown',
   ]);
 
- componentDidMount() {
+  componentDidMount() {
     this.startGlow();
-    this.hasRestoredCart = false; 
+    this.hasRestoredCart = false;
 
     this._unsubscribe = this.props.navigation.addListener('focus', async () => {
       this.fadeIn();
@@ -128,13 +128,13 @@ class DashboardScreen extends React.PureComponent {
     }, 500); // Give time for CheckUserLog to complete
 
     setTimeout(() => {
-      this.debugAsyncStorage(); 
+      this.debugAsyncStorage();
     }, 1000);
 
     this.onSaveOrderID();
   }
 
-componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps) {
     // Only sync to AsyncStorage if cart was modified (not on initial restore)
     if (
       this.hasRestoredCart &&
@@ -247,7 +247,6 @@ componentDidUpdate(prevProps) {
     return valid;
   };
 
-
   startGlow() {
     Animated.loop(
       Animated.timing(this.state.glowAnim, {
@@ -279,7 +278,6 @@ componentDidUpdate(prevProps) {
       this.setState({ isEnableScroll: true });
     });
   };
-
 
   fadeIn = () => {
     Animated.timing(this.state.fadeAnim, {
@@ -395,7 +393,7 @@ componentDidUpdate(prevProps) {
       this.props.navigation.navigate('RatingScreen');
     }, 700);
   };
-  
+
   onAsyncToRedux = async () => {
     const cartKeys = await this.getCartKeys();
     const storedItems = await this.getValidStoredItems(cartKeys);
@@ -412,7 +410,7 @@ componentDidUpdate(prevProps) {
     this.CRBSheet.close();
   };
 
- debugAsyncStorage = async () => {
+  debugAsyncStorage = async () => {
     const allKeys = await AsyncStorage.getAllKeys();
     console.log('=== ALL ASYNC STORAGE KEYS ===');
     console.log(allKeys);
@@ -436,7 +434,6 @@ componentDidUpdate(prevProps) {
     this.props.resetCart();
     this.CRBSheet.close();
   };
-
 
   retreiveLocation = async () => {
     await AsyncStorage.multiGet(['LOCA', 'LOCA_NAME']).then(res => {
@@ -758,6 +755,8 @@ componentDidUpdate(prevProps) {
             >
               <View style={{ flex: 0.2 }}>
                 <TouchableOpacity onPress={() => this.LocaSheet.open()}>
+                  {/* <Fon></Fon> */}
+
                   <Icons name="options-outline" size={25} />
                 </TouchableOpacity>
               </View>
@@ -969,13 +968,12 @@ componentDidUpdate(prevProps) {
                   {/* White border + glow */}
                   <MaskedView
                     style={{
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        left: 0,
-                      }
-                    }
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      bottom: 0,
+                      left: 0,
+                    }}
                     maskElement={
                       <View
                         style={{
@@ -1116,13 +1114,12 @@ componentDidUpdate(prevProps) {
                   {/* White border + glow */}
                   <MaskedView
                     style={{
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        left: 0,
-                      }
-                    }
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      bottom: 0,
+                      left: 0,
+                    }}
                     maskElement={
                       <View
                         style={{

@@ -1,9 +1,9 @@
 // import {NavigationContainer, DefaultTheme as NavigationDefaultTheme, DarkTheme as NavigationDarkTheme} from '@react-navigation/native';
-import {useEffect, useState, useRef} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
+import { useEffect, useState, useRef } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
 import {
-  Alert, 
+  Alert,
   BackHandler,
   StatusBar,
   Platform,
@@ -12,16 +12,18 @@ import {
 } from 'react-native';
 import AuthContext from './Components/Context';
 import BottomTabNavigation from './Routes/BottomTabNavigation';
-import {Provider} from 'react-redux';
+import { Provider } from 'react-redux';
 import store from './Store';
-import {openDatabase} from 'react-native-sqlite-storage';
+import { openDatabase } from 'react-native-sqlite-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {AuthStackNavigation} from './Routes/StackNavigation';
-import {createStackNavigator} from '@react-navigation/stack';
+import { AuthStackNavigation } from './Routes/StackNavigation';
+import { createStackNavigator } from '@react-navigation/stack';
 import SplashScreen from 'react-native-splash-screen';
-import {APIURL, OTPAPIURL, SENDTESTNOTIFICTION} from './Data/CloneData';
-import {firebase} from '@react-native-firebase/messaging';
-import {getVersion} from 'react-native-device-info';
+import { APIURL, OTPAPIURL, SENDTESTNOTIFICTION } from './Data/CloneData';
+// ✅ FIXED FIREBASE IMPORTS
+import messaging from '@react-native-firebase/messaging';
+import { firebase } from '@react-native-firebase/app';
+import { getVersion } from 'react-native-device-info';
 // import dynamicLinks from '@react-native-firebase/dynamic-links';
 import branch from 'react-native-branch';
 import LocalNotificationService from './Services/LocalNotificationService';
@@ -37,14 +39,14 @@ import {
   initialWindowMetrics,
 } from 'react-native-safe-area-context';
 
-var db = openDatabase({name: 'UserDatabase.db'});
+var db = openDatabase({ name: 'UserDatabase.db' });
 const RootStack = createStackNavigator();
 
 const App = () => {
   const [isClick, setClick] = React.useState(false);
   const [isOTPVisible, setOTPVisible] = React.useState(false);
   const [OtpCode, setOtpCode] = React.useState('');
-const otpRef = React.useRef('');
+  const otpRef = React.useRef('');
   const [OtpNotification, setOtpNotification] = React.useState('');
   const [isButtonClick, setButtonClick] = React.useState(false);
   const [isRegister, setRegister] = React.useState(false);
@@ -62,38 +64,10 @@ const otpRef = React.useRef('');
     isMenuButtonVisible: false,
     isVisible: false,
   });
- 
-
-
-  // Merge Paper + Navigation themes
-  // const CombinedDefaultTheme = {
-  //   ...MD3LightTheme,
-  //   ...NavigationDefaultTheme,
-  //   colors: {
-  //     ...MD3LightTheme.colors,
-  //     ...NavigationDefaultTheme.colors,
-  //   },
-  // };
-
-  // const CombinedDarkTheme = {
-  //   ...MD3DarkTheme,
-  //   ...NavigationDarkTheme,
-  //   colors: {
-  //     ...MD3DarkTheme.colors,
-  //     ...NavigationDarkTheme.colors,
-  //   },
-  // };
-
-  // const theme = scheme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme;
 
   const navigationRef = React.createRef();
 
   const [showPromo, setShowPromo] = useState(false);
-  // const appState = useRef(AppState.currentState);
-
-  // Example: loginstate from your reducer
-  // const [loginstate, dispatch] = React.useReducer(LoginReducer, Initialloginstate);
- 
 
   function navigate(name, params) {
     navigationRef.current && navigationRef.current.navigate(name, params);
@@ -157,95 +131,32 @@ const otpRef = React.useRef('');
         }
       },
 
-      // OTPVerification: async (OTPCode, mobilenumber, navigation) => {
-        
-      //   console.log('Entered OTPCode:', OTPCode);
-      //   console.log('Expected OtpCode:', OtpCode);
-      //   if (OTPCode !== OtpCode) {
-      //     console.log('OTP does not match');
-      //   }
-      //   if (OTPCode == '') {
-      //     setOTPVisible(false);
-      //     setButtonClick(false);
-      //     // setOTPVisible(false);
+      OTPVerification: async (OTPCode, mobilenumber, navigation) => {
+        console.log('Entered OTPCode:', OTPCode);
+        console.log('Expected OtpCode(ref):', otpRef.current);
 
-      //     Alert.alert(
-      //       'Warning',
-      //       'The OTP you entered could not be authenticated. Please try again.',
-      //     );
+        if (!OTPCode || OTPCode.trim() === '') {
+          setOTPVisible(false);
+          setButtonClick(false);
+          Alert.alert(
+            'Warning',
+            'The OTP you entered could not be authenticated. Please try again.',
+          );
+          return;
+        }
 
-      //     // getToken().then(fcmToken => {
-      //     //   CheckUserDetailExist(mobilenumber, navigation);
-      //     // });
-      //   } else {
-      //     setOTPVisible(false);
-      //     setButtonClick(false);
+        if (OTPCode !== otpRef.current) {
+          Alert.alert('Warning', 'Incorrect OTP. Please try again.');
+          return;
+        }
 
-      //     getToken().then(fcmToken => {
-      //       CheckUserDetailExist(mobilenumber, navigation);
-      //     });
+        setOTPVisible(false);
+        setButtonClick(false);
 
-      //     // console.log("OTPVerification ", OTPCode);
-      //   }
-      // },
-
-//       OTPVerification: async (OTPCode, mobilenumber, navigation) => {
-//   console.log('Entered OTPCode:', OTPCode);
-//   console.log('Expected OtpCode(context):', OtpCode); 
-
- 
-//   if (!OTPCode || OTPCode.trim() === '') {
-//     setOTPVisible(false);
-//     setButtonClick(false);
-//     Alert.alert(
-//       'Warning',
-//       'The OTP you entered could not be authenticated. Please try again.',
-//     );
-//     return;
-//   }
-
- 
-//   if (OTPCode !== OtpCode) {
-//     console.log('OTP does not match');
-//     Alert.alert(
-//       'Warning',
-//       'The OTP you entered is incorrect. Please try again.',
-//     );
-//     return;
-//   }
-
-  
-//   setOTPVisible(false);
-//   setButtonClick(false);
-//   getToken().then(fcmToken => {
-//     CheckUserDetailExist(mobilenumber, navigation);
-//   });
-// },
-
-OTPVerification: async (OTPCode, mobilenumber, navigation) => {
-  console.log('Entered OTPCode:', OTPCode);
-  console.log('Expected OtpCode(ref):', otpRef.current);
-
-  if (!OTPCode || OTPCode.trim() === '') {
-    setOTPVisible(false);
-    setButtonClick(false);
-    Alert.alert('Warning', 'The OTP you entered could not be authenticated. Please try again.');
-    return;
-  }
-
-  if (OTPCode !== otpRef.current) {
-    Alert.alert('Warning', 'Incorrect OTP. Please try again.');
-    return;
-  }
-
-  setOTPVisible(false);
-  setButtonClick(false);
- 
-  getToken().then(fcmToken => {
-    CheckUserDetailExist(mobilenumber, navigation);
-  });
-},
-
+        getToken().then(fcmToken => {
+          CheckUserDetailExist(mobilenumber, navigation);
+        });
+      },
 
       ResendOTP: async mobilenumber => {
         if (mobilenumber === '11111') {
@@ -253,7 +164,6 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
         } else {
           ResendSMS(mobilenumber);
         }
-        // console.log("ResendOTP ", mobilenumber);
       },
 
       CloseOtpBox: () => {
@@ -276,7 +186,7 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
         ];
 
         AsyncStorage.multiRemove(keys).then(res => {
-          dispatch({Type: 'LOGIN', Token: 'Osanda'});
+          dispatch({ Type: 'LOGIN', Token: 'Osanda' });
         });
       },
 
@@ -288,15 +198,15 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
       },
 
       CheckSign: () => {
-        dispatch({Type: 'LOGOUT'});
+        dispatch({ Type: 'LOGOUT' });
       },
 
       Rememberme: () => {
-        dispatch({Type: 'LOGIN', Token: 'Osanda'});
+        dispatch({ Type: 'LOGIN', Token: 'Osanda' });
       },
- 
+
       logout: async () => {
-        dispatch({Type: 'LOGOUT'});
+        dispatch({ Type: 'LOGOUT' });
         const keys = await AsyncStorage.getAllKeys();
         await AsyncStorage.multiRemove(keys);
       },
@@ -305,16 +215,16 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
     [],
   );
 
-
+  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
   const registerAppWithFCM = async () => {
     if (Platform.OS === 'ios') {
-      await firebase.messaging().setAutoInitEnabled(true);
+      await messaging().setAutoInitEnabled(true);
     }
   };
 
+  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
   const checkPermission = () => {
-    firebase
-      .messaging()
+    messaging()
       .hasPermission()
       .then(enabled => {
         if (enabled) {
@@ -328,10 +238,10 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
       });
   };
 
+  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
   const getToken = async () => {
     return new Promise((resolve, reject) => {
-      firebase
-        .messaging()
+      messaging()
         .getToken()
         .then(fcmToken => {
           if (fcmToken === null) {
@@ -354,9 +264,9 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
     });
   };
 
+  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
   const requestPermission = async () => {
-    firebase
-      .messaging()
+    messaging()
       .requestPermission()
       .then(() => {
         getToken();
@@ -395,7 +305,7 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
     let FCMToken = await AsyncStorage.getItem('fcmToken');
     var code = generateOTP(4);
     setOtpCode(code);
-  otpRef.current = code;
+    otpRef.current = code;
 
     fetch(SENDTESTNOTIFICTION, {
       method: 'POST',
@@ -424,20 +334,9 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
     var code = generateOTP(4);
 
     setOtpCode(code);
-  otpRef.current = code;
+    otpRef.current = code;
 
-  console.log('Generated OTP:', code);
-    // var message = "Your one time password is " + code;
-    // console.log(message);
-
-    // fetch(q, {
-    //   method: 'GET',
-    //   cache: 'no-cache',
-    //   headers: {
-    //     'content-type': 'application/json',
-    //     'cache-control': 'no-cache'
-    //   }
-    // });
+    console.log('Generated OTP:', code);
 
     fetch(OTPAPIURL, {
       method: 'POST',
@@ -497,8 +396,7 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
   const ResendSMS = mobilenumber => {
     var code = generateOTP(4);
     setOtpCode(code);
-  otpRef.current = code;
-
+    otpRef.current = code;
 
     fetch(OTPAPIURL, {
       method: 'POST',
@@ -521,7 +419,6 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
         "SELECT name FROM sqlite_master WHERE type='table' AND name='credit_card'",
         [],
         function (tx, res) {
-          // console.log('credit_card:', res.rows.length);
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS credit_card', []);
             txn.executeSql(
@@ -603,14 +500,13 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
                 onPress: () => openAppStore(AppURL),
               },
             ],
-            {cancelable: false},
+            { cancelable: false },
           );
         }
       })
       .catch(er => {
         console.log('CheckAppVersion', er);
-      
-        
+
         Alert.alert(
           'Warning',
           "The operation couldn't be completed.",
@@ -624,48 +520,48 @@ OTPVerification: async (OTPCode, mobilenumber, navigation) => {
               onPress: () => BackHandler.exitApp(),
             },
           ],
-          {cancelable: false},
+          { cancelable: false },
         );
       });
   };
 
-  
-
-useEffect(() => {
-  if (loginstate.userToken) {
-    AsyncStorage.removeItem('promoShown');
-  }
-}, [loginstate.userToken]);
-
-
-useEffect(() => {
-  if (!loginstate.userToken) return;
-
-  const checkPromo = async () => {
-    const hasShown = await AsyncStorage.getItem('promoShown');
-    if (!hasShown) {
-      setShowPromo(true);
-      await AsyncStorage.setItem('promoShown', 'true');
+  useEffect(() => {
+    if (loginstate.userToken) {
+      AsyncStorage.removeItem('promoShown');
     }
-  };
+  }, [loginstate.userToken]);
 
-  checkPromo();
+  useEffect(() => {
+    if (!loginstate.userToken) return;
 
-  const subscription = AppState.addEventListener('change', async nextAppState => {
-    if (
-      appState.current.match(/inactive|background/) &&
-      nextAppState === 'active' &&
-      loginstate.userToken
-    ) {
-      await AsyncStorage.removeItem('promoShown'); 
-      setShowPromo(true);
-      await AsyncStorage.setItem('promoShown', 'true');
-    }
-    appState.current = nextAppState;
-  });
+    const checkPromo = async () => {
+      const hasShown = await AsyncStorage.getItem('promoShown');
+      if (!hasShown) {
+        setShowPromo(true);
+        await AsyncStorage.setItem('promoShown', 'true');
+      }
+    };
 
-  return () => subscription.remove();
-}, [loginstate.userToken]);
+    checkPromo();
+
+    const subscription = AppState.addEventListener(
+      'change',
+      async nextAppState => {
+        if (
+          appState.current.match(/inactive|background/) &&
+          nextAppState === 'active' &&
+          loginstate.userToken
+        ) {
+          await AsyncStorage.removeItem('promoShown');
+          setShowPromo(true);
+          await AsyncStorage.setItem('promoShown', 'true');
+        }
+        appState.current = nextAppState;
+      },
+    );
+
+    return () => subscription.remove();
+  }, [loginstate.userToken]);
 
   const handleDismissPromo = () => {
     setShowPromo(false);
@@ -674,11 +570,10 @@ useEffect(() => {
   const handleMoreOptions = () => {
     setShowPromo(false);
     navigate('PromotionsScreen', {
-        screen: 'PromotionsScreen',
-        params: {},
-      });
+      screen: 'PromotionsScreen',
+      params: {},
+    });
   };
-
 
   const CheckUserDetailExist = async (mobilenumber, navigation) => {
     AsyncStorage.getItem('fcmToken').then(FCMToken => {
@@ -732,8 +627,6 @@ useEffect(() => {
           var UserCity = json.CommonResult.Table[0].City;
 
           if (UserExist === 'Success') {
-            // console.log(UserExist, UserAddress);
-
             const items = [
               ['firstname', UserFirstname],
               ['lastname', UserLastname],
@@ -746,11 +639,12 @@ useEffect(() => {
 
             AsyncStorage.multiSet(items, () => {
               setRegister(false);
-              dispatch({Type: 'LOGIN', Token: mobilenumber});
+              dispatch({ Type: 'LOGIN', Token: mobilenumber });
             });
           } else {
-            // console.log(UserExist, UserAddress);
-            navigation.navigate('AddInfoScreen', {mobilenumber: mobilenumber});
+            navigation.navigate('AddInfoScreen', {
+              mobilenumber: mobilenumber,
+            });
           }
         })
         .catch(er => {
@@ -768,7 +662,7 @@ useEffect(() => {
                 onPress: () => BackHandler.exitApp(),
               },
             ],
-            {cancelable: false},
+            { cancelable: false },
           );
         });
     });
@@ -833,8 +727,6 @@ useEffect(() => {
           var UserCity = json.CommonResult.Table[0].City;
 
           if (UserExist === 'Success') {
-            // console.log(UserExist, UserAddress);
-
             const items = [
               ['firstname', UserFirstname],
               ['lastname', UserLastname],
@@ -847,11 +739,10 @@ useEffect(() => {
 
             AsyncStorage.multiSet(items, () => {
               setRegister(false);
-              dispatch({Type: 'LOGIN', Token: mobilenumber});
+              dispatch({ Type: 'LOGIN', Token: mobilenumber });
             });
           } else {
-            // console.log(UserExist, UserAddress);
-            dispatch({Type: 'RETREIVE_TOKEN', Token: null});
+            dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
           }
         })
         .catch(er => {
@@ -869,7 +760,7 @@ useEffect(() => {
                 onPress: () => BackHandler.exitApp(),
               },
             ],
-            {cancelable: false},
+            { cancelable: false },
           );
         })
         .finally(() => {
@@ -878,8 +769,6 @@ useEffect(() => {
           }, 1000);
         });
     });
-
-    //       Alert.alert(FCMToken);
   };
 
   const RegisterUser = async (
@@ -985,7 +874,7 @@ useEffect(() => {
 
             AsyncStorage.multiSet(items, () => {
               setRegister(false);
-              dispatch({Type: 'LOGIN', Token: mobilenumber});
+              dispatch({ Type: 'LOGIN', Token: mobilenumber });
             });
           } else {
             setRegister(false);
@@ -996,10 +885,10 @@ useEffect(() => {
                 {
                   text: 'Try Again',
                   onPress: () =>
-                    dispatch({Type: 'RETREIVE_TOKEN', Token: null}),
+                    dispatch({ Type: 'RETREIVE_TOKEN', Token: null }),
                 },
               ],
-              {cancelable: false},
+              { cancelable: false },
             );
           }
         })
@@ -1027,7 +916,7 @@ useEffect(() => {
                 onPress: () => BackHandler.exitApp(),
               },
             ],
-            {cancelable: false},
+            { cancelable: false },
           );
         });
     });
@@ -1089,7 +978,7 @@ useEffect(() => {
               onPress: () => BackHandler.exitApp(),
             },
           ],
-          {cancelable: false},
+          { cancelable: false },
         );
       });
   };
@@ -1103,19 +992,22 @@ useEffect(() => {
     });
   };
 
-  const handleBranchLink = (params) => {
-  // Branch passes data in params object
-  if (params && params.link_url === 'https://cafe007.lk/embilipitiya-cafe007/') {
-    UpdateEmailVerify();
-  }
-  // You can also check for specific keys you set when creating the link
-  if (params && params.action === 'email_verification') {
-    UpdateEmailVerify();
-  }
-};
+  const handleBranchLink = params => {
+    // Branch passes data in params object
+    if (
+      params &&
+      params.link_url === 'https://cafe007.lk/embilipitiya-cafe007/'
+    ) {
+      UpdateEmailVerify();
+    }
+    // You can also check for specific keys you set when creating the link
+    if (params && params.action === 'email_verification') {
+      UpdateEmailVerify();
+    }
+  };
 
   const onNotification_Model_Press = ItemCode => {
-    setstate({isVisible: false});
+    setstate({ isVisible: false });
     if (ItemCode === 'Menu') {
       navigate('Home', {
         screen: 'HomeScreen',
@@ -1132,7 +1024,8 @@ useEffect(() => {
     }
   };
 
-  firebase.messaging().onNotificationOpenedApp(remoteMessage => {
+  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
+  messaging().onNotificationOpenedApp(remoteMessage => {
     console.log(
       '[FCMService] onNotificationOpenedApp Notification caused app to open',
     );
@@ -1143,7 +1036,7 @@ useEffect(() => {
         const OrderID = remoteMessage.data.OrderID;
         navigate('Orders', {
           screen: 'OrderDetailsScreen',
-          params: {OrderID: OrderID},
+          params: { OrderID: OrderID },
         });
       } else if (Platform.OS === 'android') {
         if (remoteMessage.notification.android.imageUrl !== '') {
@@ -1159,12 +1052,8 @@ useEffect(() => {
           });
 
           AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
-
-          // setTimeout(() => {
-          //   setstate({ ...state, isVisible: true })
-          // }, 100);
         } else {
-          setstate({...state, isVisible: false});
+          setstate({ ...state, isVisible: false });
         }
       } else {
         if (remoteMessage.data.fcm_options.image !== '') {
@@ -1181,14 +1070,14 @@ useEffect(() => {
 
           AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
         } else {
-          setstate({...state, isVisible: false});
+          setstate({ ...state, isVisible: false });
         }
       }
     }
   });
 
-  firebase
-    .messaging()
+  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
+  messaging()
     .getInitialNotification()
     .then(remoteMessage => {
       if (remoteMessage) {
@@ -1196,7 +1085,7 @@ useEffect(() => {
           const OrderID = remoteMessage.data.OrderID;
           navigate('Orders', {
             screen: 'OrderDetailsScreen',
-            params: {OrderID: OrderID},
+            params: { OrderID: OrderID },
           });
         } else if (Platform.OS === 'android') {
           if (remoteMessage.notification.android.imageUrl !== '') {
@@ -1213,7 +1102,7 @@ useEffect(() => {
 
             AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
           } else {
-            setstate({...state, isVisible: false});
+            setstate({ ...state, isVisible: false });
           }
         } else {
           if (remoteMessage.data.fcm_options.image !== '') {
@@ -1233,7 +1122,7 @@ useEffect(() => {
             }, 1000);
           } else {
             setTimeout(() => {
-              setstate({...state, isVisible: false});
+              setstate({ ...state, isVisible: false });
             }, 1000);
           }
         }
@@ -1242,24 +1131,21 @@ useEffect(() => {
 
   React.useEffect(() => {
     requestPermission();
-    // const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
     const branchUnsubscribe = branch.subscribe(handleBranchLink);
     registerAppWithFCM();
-    // checkPermission();
     CreatSqlitTable();
-   CheckAppVersion();
+    CheckAppVersion();
 
     LocalNotificationService.configure(onNotificationPop);
 
     function onNotificationPop(notification) {
       console.log('START  onNotificationPop');
-      // AsyncStorage.setItem("PUSH", "true");
 
       if (notification.data.Status !== undefined) {
         const OrderID = notification.data.OrderID;
         navigate('Orders', {
           screen: 'OrderDetailsScreen',
-          params: {OrderID: OrderID},
+          params: { OrderID: OrderID },
         });
       } else if (
         notification.bigPictureUrl !== '' ||
@@ -1279,13 +1165,13 @@ useEffect(() => {
           isMenuButtonVisible: notification.data.is_visible_Menu_Button,
         });
       } else {
-        setstate({...state, isVisible: false});
+        setstate({ ...state, isVisible: false });
       }
     }
 
-    const unsubscribeNotification = firebase
-      .messaging()
-      .onMessage(async remoteMessage => {
+    // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
+    const unsubscribeNotification = messaging().onMessage(
+      async remoteMessage => {
         const data = remoteMessage.data;
         if (data.OTP !== undefined) {
           Alert.alert('OTP Verification', data.OTP);
@@ -1306,28 +1192,21 @@ useEffect(() => {
             );
           }
         }
-      });
+      },
+    );
 
-    // dynamicLinks()
-    //   .getInitialLink()
-    //   .then(link => {
-    //     if (link !== null) {
-    //       if (link.url === 'https://cafe007.lk/embilipitiya-cafe007/') {
-    //         // ...set initial route as offers screen
-    //         UpdateEmailVerify();
-    //       }
-    //     }
-    //   });
-
-      branch.getFirstReferringParams().then((params) => {
-    if (params && params['+clicked_branch_link']) {
-      if (params.$canonical_url === 'https://cafe007.lk/embilipitiya-cafe007/' || 
+    branch.getFirstReferringParams().then(params => {
+      if (params && params['+clicked_branch_link']) {
+        if (
+          params.$canonical_url ===
+            'https://cafe007.lk/embilipitiya-cafe007/' ||
           params.$desktop_url === 'https://cafe007.lk/embilipitiya-cafe007/' ||
-          params.custom_url === 'https://cafe007.lk/embilipitiya-cafe007/') {
-        UpdateEmailVerify();
+          params.custom_url === 'https://cafe007.lk/embilipitiya-cafe007/'
+        ) {
+          UpdateEmailVerify();
+        }
       }
-    }
-  });
+    });
 
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (
@@ -1342,7 +1221,6 @@ useEffect(() => {
     });
 
     return () => {
-      // unsubscribe();
       branchUnsubscribe();
       unsubscribeNotification();
       LocalNotificationService.unregister();
@@ -1352,18 +1230,16 @@ useEffect(() => {
   }, []);
 
   function onClosePopUp() {
-    setstate({isVisible: false});
+    setstate({ isVisible: false });
   }
-
-
 
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <SafeAreaView
         edges={['top']}
-        style={{flex: 0, backgroundColor: '#F0F0F0'}}
+        style={{ flex: 0, backgroundColor: '#F0F0F0' }}
       />
-      <SafeAreaView edges={['bottom']} style={{flex: 1}}>
+      <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
         <AuthContext.Provider value={authContext}>
           <StatusBar
             animated={true}
@@ -1372,12 +1248,14 @@ useEffect(() => {
             barStyle="default"
           />
 
-          {/* <PaperProvider> */}
           <NavigationContainer ref={navigationRef}>
             <Provider store={store}>
               <RootStack.Navigator>
                 {loginstate.userToken == null ? (
-                  <RootStack.Screen name="Auth" options={{headerShown: false}}>
+                  <RootStack.Screen
+                    name="Auth"
+                    options={{ headerShown: false }}
+                  >
                     {() => (
                       <AuthStackNavigation
                         isClick={isClick}
@@ -1391,17 +1269,20 @@ useEffect(() => {
                 ) : (
                   <RootStack.Screen
                     name="App"
-                    options={{headerShown: false}}
+                    options={{ headerShown: false }}
                     component={BottomTabNavigation}
-                  /> 
+                  />
                 )}
               </RootStack.Navigator>
             </Provider>
             {loginstate.userToken && (
-    <PromoCard visible={showPromo} onDismiss={handleDismissPromo} onMoreOptions={handleMoreOptions}/>
-  )}
+              <PromoCard
+                visible={showPromo}
+                onDismiss={handleDismissPromo}
+                onMoreOptions={handleMoreOptions}
+              />
+            )}
           </NavigationContainer>
-          {/* </PaperProvider> */}
         </AuthContext.Provider>
         <NotificationModal
           type={state.Type}
