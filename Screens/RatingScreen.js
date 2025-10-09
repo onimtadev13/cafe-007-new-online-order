@@ -12,9 +12,10 @@ import {
   UIManager,
   View,
 } from 'react-native';
-import IonicIcon from 'react-native-vector-icons/Ionicons';
+// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {Rating} from 'react-native-ratings';
+import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 
 const screenwidth = Dimensions.get('window').width;
 
@@ -359,13 +360,13 @@ export default class RatingScreen extends React.PureComponent {
                   marginLeft: 5,
                 }}>
                 <TouchableOpacity style={{marginRight: 10}}>
-                  <IonicIcon name="logo-facebook" size={25} />
+                  <FontAwesome6 name="facebook" size={25} brand />
                 </TouchableOpacity>
                 <TouchableOpacity style={{marginRight: 10}}>
-                  <IonicIcon name="logo-instagram" size={25} />
+                  <FontAwesome6 name="instagram" size={25} brand />
                 </TouchableOpacity>
                 <TouchableOpacity style={{marginRight: 10}}>
-                  <IonicIcon name="logo-google" size={25} />
+                  <FontAwesome6 name="google" size={25} brand />
                 </TouchableOpacity>
                 {/* <TouchableOpacity style={{ marginRight: 10 }}>
                                     <IonicIcon name="logo-linkedin" size={25} />
@@ -397,7 +398,7 @@ export default class RatingScreen extends React.PureComponent {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <IonicIcon
+              {/* <IonicIcon
                 name={
                   this.state.pageIndex === 1
                     ? 'close-outline'
@@ -406,7 +407,14 @@ export default class RatingScreen extends React.PureComponent {
                 size={30}
                 color={'black'}
                 style={{marginRight: 3}}
-              />
+              /> */}
+              <FontAwesome6
+  name={this.state.pageIndex === 1 ? 'xmark' : 'chevron-left'}
+  size={30}
+  color="black"
+  style={{ marginRight: 3 }}
+  solid
+/>
             </View>
           </TouchableOpacity>
           <Text

@@ -21,6 +21,7 @@ import {
 import {Card} from 'react-native-shadow-cards';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
 import Icon from 'react-native-vector-icons/Ionicons';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import {isTablet} from 'react-native-device-info';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {CountryCodes} from '../Data/CountryCodes';
@@ -360,11 +361,16 @@ export default class LoginScreen extends React.PureComponent {
                         }}>
                         {this.state.flag}
                       </Text>
-                      <Icon
+                      {/* <Icon
                         name="caret-down-outline"
                         size={18}
                         style={{marginTop: 5, marginLeft: 5}}
-                      />
+                      /> */}
+                      <FontAwesome6
+  name="caret-down"
+  size={18}
+  style={{marginTop: 5, marginLeft: 5}}
+/>
                     </TouchableOpacity>
                     <Text
                       style={{
@@ -507,7 +513,8 @@ export default class LoginScreen extends React.PureComponent {
                   <TouchableOpacity
                     style={{position: 'relative', marginTop: 10}}
                     onPress={() => this.onClosePress()}>
-                    <Icon name="close-circle" size={40} />
+                    {/* <Icon name="close-circle" size={40} /> */}
+                    <FontAwesome6 name="circle-xmark" size={35} />
                   </TouchableOpacity>
                 </View>
 
@@ -525,10 +532,15 @@ export default class LoginScreen extends React.PureComponent {
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}>
-                    <Icon
+                    {/* <Icon
                       name="lock-closed-outline"
                       size={25}
-                      color={'black'}></Icon>
+                      color={'black'}></Icon> */}
+                      <FontAwesome6
+  name="lock"
+  size={25}
+  color={'black'}
+/>
                   </View>
 
                   <Text style={{fontSize: 20, fontWeight: 'bold'}}>

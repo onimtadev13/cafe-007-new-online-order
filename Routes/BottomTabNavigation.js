@@ -1,6 +1,6 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+// import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   AccountStackNavigation,
   CartStackNavigation,
@@ -10,6 +10,8 @@ import {
 } from './StackNavigation';
 import {connect} from 'react-redux';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/core';
+// import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 const activeTintLabelColor = 'black';
 const inactiveTintLabelColor = '#808080';
@@ -34,66 +36,89 @@ const getTabBarVisible = route => {
   return true;
 };
 
+const iconMap = {
+  Home: { name: 'house' },
+  Search: { name: 'magnifying-glass' },
+  Cart: { name: 'cart-shopping' },
+  Orders: { name: 'basket-shopping' },
+  Account: { name: 'user' },
+};
+
+
 const BottomTabNavigation = props => {
   return (
     <Tab.Navigator
       initialRouteName="Home"
-      safeAreaInsets={{bottom: 0, top: 0}}
-      screenOptions={({route}) => ({
-        tabBarIcon: ({focused, color, size}) => {
-          let iconName;
-          if (route.name === 'Home') {
-            iconName = focused ? 'home-sharp' : 'home-outline';
-          } else if (route.name === 'Search') {
-            iconName = focused ? 'search' : 'search-outline';
-          } else if (route.name === 'Cart') {
-            iconName = focused ? 'cart' : 'cart-outline';
-            // return <CartIcon IconName={iconName} />
-          } else if (route.name === 'Orders') {
-            iconName = focused ? 'basket' : 'basket-outline';
-          } else if (route.name === 'Account') {
-            iconName = focused ? 'person' : 'person-outline';
-          }
-          return <Ionicons name={iconName} size={30} color={color} />;
+      safeAreaInsets={{ bottom: 0, top: 0 }}
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          const iconInfo = iconMap[route.name];
+
+          if (!iconInfo) return null;
+
+          return (
+            <FontAwesome6
+              name={iconInfo.name}
+              size={25}
+              color={color}
+              solid={focused}
+            />
+          );
         },
-        tabBarStyle: {height: 50},
-        tabBarLabelStyle: {fontSize: 12, fontWeight: 'bold', marginBottom: 5},
-        tabBarIconStyle: {marginTop: 5},
+        tabBarStyle: { height: 50 },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: 'bold',
+          marginBottom: 5,
+        },
+        tabBarIconStyle: { marginTop: 5 },
         tabBarShowLabel: false,
         tabBarActiveTintColor: activeTintLabelColor,
         tabBarInactiveTintColor: inactiveTintLabelColor,
         tabBarHideOnKeyboard: false,
         headerShown: false,
       })}
-      animationEnabled={true}>
+      animationEnabled={true}
+    >
       <Tab.Screen
         name="Home"
         component={StackNavigation}
-        options={({route}) => ({tabBarVisible: getTabBarVisible(route)})}
+        options={({ route }) => ({
+          tabBarVisible: getTabBarVisible(route),
+        })}
       />
 
-      <Tab.Screen name="Search" component={ItemSearchStackNavigation} />
+      <Tab.Screen
+        name="Search"
+        component={ItemSearchStackNavigation}
+      />
 
       <Tab.Screen
         name="Cart"
         component={CartStackNavigation}
-        options={({route}) => ({
+        options={({ route }) => ({
           tabBarVisible: getTabBarVisible(route),
           tabBarBadge:
-            props.cartItems.length === 0 ? null : props.cartItems.length,
+            props.cartItems && props.cartItems.length > 0
+              ? props.cartItems.length
+              : null,
         })}
       />
 
       <Tab.Screen
         name="Orders"
         component={OrderStackNavigation}
-        options={({route}) => ({tabBarVisible: getTabBarVisible(route)})}
+        options={({ route }) => ({
+          tabBarVisible: getTabBarVisible(route),
+        })}
       />
 
       <Tab.Screen
         name="Account"
         component={AccountStackNavigation}
-        options={({route}) => ({tabBarVisible: getTabBarVisible(route)})}
+        options={({ route }) => ({
+          tabBarVisible: getTabBarVisible(route),
+        })}
       />
     </Tab.Navigator>
   );

@@ -11,7 +11,8 @@ import {
   View,
 } from 'react-native';
 import {openDatabase} from 'react-native-sqlite-storage';
-import Icon from 'react-native-vector-icons/Ionicons';
+// import Icon from 'react-native-vector-icons/Ionicons';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import AppContext from '../Components/Context';
 
 var db = openDatabase({name: 'UserDatabase.db'});
@@ -73,7 +74,8 @@ export default class AddInfoScreen extends React.PureComponent {
                     backgroundColor: '#e6e6e6',
                   },
                 ]}>
-                <Icon name="chevron-back" size={35} />
+                {/* <Icon name="chevron-back" size={35} /> */}
+                   <FontAwesome6 name="chevron-left" size={35} solid />
               </View>
             </TouchableOpacity>
             <View style={{alignItems: 'flex-end', marginRight: 25}}>

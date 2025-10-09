@@ -1,9 +1,10 @@
 import React, {PureComponent} from 'react';
 import {Alert, ScrollView, Text, TouchableOpacity, View} from 'react-native';
-import IonicIcon from 'react-native-vector-icons/Ionicons';
+// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import {CreditCardInput} from '@rajeshsmallarc/react-native-creditcard';
 import {openDatabase} from 'react-native-sqlite-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 
 var db = openDatabase({name: 'UserDatabase.db'});
 
@@ -88,7 +89,8 @@ export default class CreditCardScreen extends PureComponent {
     return (
       <View style={{flex: 1}}>
         <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-          <IonicIcon name="chevron-back" size={35} style={{margin: 30}} />
+          {/* <IonicIcon name="chevron-back" size={35} style={{margin: 30}} /> */}
+           <FontAwesome6 name="chevron-left" size={35} style={{ margin: 30 }} solid />
         </TouchableOpacity>
         <ScrollView>
           <CreditCardInput

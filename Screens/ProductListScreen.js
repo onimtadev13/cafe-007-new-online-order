@@ -1,7 +1,10 @@
 import React from 'react';
 import {Platform, Text, TouchableOpacity, View} from 'react-native';
 import {FlatList} from 'react-native-gesture-handler';
-import IonicIcon from 'react-native-vector-icons/Ionicons';
+// import IonicIcon from 'react-native-vector-icons/Ionicons';
+// import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import {connect} from 'react-redux';
 import ItemView from '../Components/ItemView';
 
@@ -42,7 +45,7 @@ class ProductListScreen extends React.PureComponent {
             alignItems: 'center',
           }}>
           <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-            <IonicIcon
+            {/* <IonicIcon
               name={'arrow-back'}
               size={25}
               color="black"
@@ -52,7 +55,20 @@ class ProductListScreen extends React.PureComponent {
                 marginTop: Platform.OS === 'ios' ? 30 : 20,
                 marginBottom: 15,
               }}
-            />
+            /> */}
+            <FontAwesome6
+  name="arrow-left"
+  size={25}
+  color="black"
+  style={{
+    marginLeft: 15,
+    marginRight: 15,
+    marginTop: Platform.OS === 'ios' ? 30 : 20,
+    marginBottom: 15,
+  }}
+  solid
+/>
+
           </TouchableOpacity>
           <Text
             style={{
