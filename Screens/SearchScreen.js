@@ -16,11 +16,12 @@ import {
   View,
 } from 'react-native';
 import {FlatList} from 'react-native-gesture-handler';
-import IonicIcon from 'react-native-vector-icons/Ionicons';
+// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import {connect} from 'react-redux';
 import ItemView from '../Components/ItemView';
 import {APIURL} from '../Data/CloneData';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -294,12 +295,17 @@ class SearchScreen extends React.PureComponent {
             marginTop: 20,
           }}>
           <TouchableOpacity onPress={() => this.onSearchBackPress()}>
-            <IonicIcon
-              name={this.state.isTextInputPress ? 'arrow-back' : 'search'}
-              size={25}
-              color="black"
-              style={{marginLeft: 20}}
-            />
+           
+
+<FontAwesome6
+  name={
+    this.state.isTextInputPress ? 'arrow-left' : 'magnifying-glass'
+  }
+  size={25}
+  color="black"
+  style={{ marginLeft: 20 }}
+/>
+
           </TouchableOpacity>
           <TextInput
             ref={ref => {

@@ -13,8 +13,10 @@ import {
   BackHandler,
   ToastAndroid,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+// import Ionicons from 'react-native-vector-icons/Ionicons';
 import {APIURL, CancelReason} from '../Data/CloneData';
+// import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 export default class OrderCancelScreen extends React.PureComponent {
   constructor(props) {
@@ -115,7 +117,9 @@ export default class OrderCancelScreen extends React.PureComponent {
                 Screen: 'OrderScreen',
               })
             }>
-            <Ionicons name={'close-outline'} size={30} color={'black'} />
+            {/* <Ionicons name={'close-outline'} size={30} color={'black'} /> */}
+            <FontAwesome6 name="xmark" size={30} color="black" solid />
+
           </TouchableOpacity>
           <Text
             style={{

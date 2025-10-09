@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import * as ImagePicker from 'react-native-image-picker';
-import IonicIcon from 'react-native-vector-icons/Ionicons';
+// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import {openDatabase} from 'react-native-sqlite-storage';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -25,6 +25,8 @@ import {CommonActions} from '@react-navigation/routers';
 import {APIURL} from '../Data/CloneData';
 // import dynamicLinks from '@react-native-firebase/dynamic-links';
 import branch from 'react-native-branch';
+import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+
 
 const Tab = createMaterialTopTabNavigator();
 var db = openDatabase({name: 'UserDatabase.db'});
@@ -389,7 +391,9 @@ class AccountScreen extends React.Component {
           </Text>
           <TouchableOpacity
             onPress={() => this.onDeleteCardPress(item.card_number)}>
-            <IonicIcon name="trash-outline" size={25} />
+            {/* <IonicIcon name="trash-outline" size={25} /> */}
+            <FontAwesome6 name="trash" size={25} solid />
+
           </TouchableOpacity>
         </View>
       );
@@ -880,7 +884,8 @@ class AccountScreen extends React.Component {
                   margin: 10,
                   alignItems: 'center',
                 }}>
-                <IonicIcon name="add-circle" size={30} color={'#d1d1d1'} />
+                {/* <IonicIcon name="add-circle" size={30} color={'#d1d1d1'} /> */}
+                <FontAwesome6 name="circle-plus" size={30} color="#d1d1d1" solid />
                 <Text
                   style={{
                     flex: 1,
@@ -894,7 +899,8 @@ class AccountScreen extends React.Component {
                   }}>
                   Add Credit or Debit card
                 </Text>
-                <IonicIcon name="chevron-forward" size={30} color={'#d1d1d1'} />
+                {/* <IonicIcon name="chevron-forward" size={30} color={'#d1d1d1'} /> */}
+                <FontAwesome6 name="chevron-right" size={30} color="#d1d1d1" solid />
               </View>
             </TouchableOpacity>
           </View>

@@ -13,11 +13,13 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {APIURL} from '../Data/CloneData';
-import IonicIcon from 'react-native-vector-icons/Ionicons';
+// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import moment from 'moment';
 import {NumericFormat} from 'react-number-format';
 import {firebase} from '@react-native-firebase/messaging';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
+// import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 const height = Dimensions.get('window').height;
 const Tab = createMaterialTopTabNavigator();
@@ -194,11 +196,11 @@ export default class OrderScreen extends React.PureComponent {
 
     switch (item.DineType) {
       case 'EatIn':
-        Icon = 'restaurant';
+        Icon = 'utensils';
         break;
 
       case 'PickUp':
-        Icon = 'basket';
+        Icon = 'basket-shopping';
         break;
 
       case 'Delivery':
@@ -355,8 +357,8 @@ export default class OrderScreen extends React.PureComponent {
               justifyContent: 'center',
               borderRadius: 10,
             }}>
-            <IonicIcon
-              name={item.PaymentType === 'Cash' ? 'cash' : 'card'}
+            <FontAwesome6
+              name={item.PaymentType === 'Cash' ? 'money-bill' : 'credit-card'}
               size={30}
               color={'#FF6900'}
             />
@@ -397,7 +399,7 @@ export default class OrderScreen extends React.PureComponent {
               justifyContent: 'center',
               borderRadius: 10,
             }}>
-            <IonicIcon name={Icon} size={30} color={'#FF6900'} />
+            <FontAwesome6 name={Icon} size={30} color={'#FF6900'} />
           </View>
           <View style={{marginLeft: 20}}>
             <Text

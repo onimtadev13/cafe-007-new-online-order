@@ -29,7 +29,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { openDatabase } from 'react-native-sqlite-storage';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { getVersion, isTablet } from 'react-native-device-info';
-import IonicIcon from 'react-native-vector-icons/Ionicons';
+// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import ScaledImage from '../Components/ScaledImage';
 import RadioButtonRN from 'radio-buttons-react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -38,6 +38,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AlertDialog from '../Components/AlertDialog';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
+// import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -758,7 +760,8 @@ componentDidUpdate(prevProps) {
             >
               <View style={{ flex: 0.2 }}>
                 <TouchableOpacity onPress={() => this.LocaSheet.open()}>
-                  <Icons name="options-outline" size={25} />
+                  {/* <Icons name="options-outline" size={25} /> */}
+                  <FontAwesome6 name="sliders" size={25} solid />
                 </TouchableOpacity>
               </View>
 
@@ -800,7 +803,7 @@ componentDidUpdate(prevProps) {
             >
               <View style={{ flex: 0.6 }}>
                 <TouchableOpacity onPress={() => this.SRBSheet.open()}>
-                  <FontAwesome name="align-left" size={20} />
+                  <FontAwesome6 name="align-left" size={20} />
                 </TouchableOpacity>
               </View>
               {}
@@ -1780,13 +1783,15 @@ componentDidUpdate(prevProps) {
                   style={{ marginLeft: 10, marginRight: 10 }}
                   onPress={() => this.onFacebookPress()}
                 >
-                  <IonicIcon name="logo-facebook" size={25} />
+                  {/* <IonicIcon name="logo-facebook" size={25} /> */}
+                  <FontAwesome6 name="facebook" size={25} brand />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ marginRight: 10 }}
                   onPress={() => this.onInstagramPress()}
                 >
-                  <IonicIcon name="logo-instagram" size={25} />
+                  {/* <IonicIcon name="logo-instagram" size={25} /> */}
+                  <FontAwesome6 name="instagram" size={25} brand />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ marginRight: 10 }}
@@ -1794,13 +1799,15 @@ componentDidUpdate(prevProps) {
                     Linking.openURL('https://cafe007.lk/embilipitiya-cafe007/')
                   }
                 >
-                  <IonicIcon name="logo-google" size={25} />
+                  {/* <IonicIcon name="logo-google" size={25} /> */}
+                  <FontAwesome6 name="google" size={25} brand />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ marginRight: 10 }}
                   onPress={() => this.onYoutubePress()}
                 >
-                  <IonicIcon name="logo-youtube" size={25} />
+                  {/* <IonicIcon name="logo-youtube" size={25} /> */}
+                  <FontAwesome6 name="youtube" size={25} brand />
                 </TouchableOpacity>
               </View>
 

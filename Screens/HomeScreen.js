@@ -17,9 +17,10 @@ import Tabbar from '../Components/Tabbar';
 import HeaderView from '../Components/HeaderView';
 import ItemView from '../Components/ItemView';
 import HeaderImage from '../Components/HeaderImage';
-import IonicIcon from 'react-native-vector-icons/Ionicons';
+// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 
 const HEADER_MAX_HEIGHT = Platform.OS == 'ios' ? 320 : 340;
 const HEADER_MIN_HEIGHT = 45;
@@ -384,11 +385,18 @@ class HomeScreen extends React.PureComponent {
                     {opacity: buttonopacity},
                   ]}
                 />
-                <IonicIcon
+                {/* <IonicIcon
                   name="chevron-back-outline"
                   size={30}
                   style={{position: 'absolute'}}
-                />
+                /> */}
+                <FontAwesome6
+  name="chevron-left"
+  size={30}
+  style={{ position: 'absolute' }}
+  solid
+/>
+
               </View>
             </TouchableOpacity>
           </Animated.View>

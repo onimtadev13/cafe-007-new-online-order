@@ -1,6 +1,7 @@
 import React from 'react';
 import {Platform, Text, View} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+// import Ionicons from 'react-native-vector-icons/Ionicons';
+import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 
 export default class RatingStarIcon extends React.PureComponent {
   render() {
@@ -9,7 +10,8 @@ export default class RatingStarIcon extends React.PureComponent {
     return (
       <View
         style={{flexDirection: 'row', alignItems: 'center', marginBottom: 5}}>
-        <Ionicons name="star" size={20} color={'#fcba03'} />
+        {/* <Ionicons name="star" size={20} color={'#fcba03'} /> */}
+        <FontAwesome6 name="star" size={20} color="#fcba03" solid />
         <Text
           style={{
             flex: 1,

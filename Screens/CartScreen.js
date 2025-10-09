@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+// import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import React from 'react';
 import {
   Alert,
@@ -482,7 +483,7 @@ class CartScreen extends React.Component {
             {this.props.cartItems.length <= 0 ? null : (
               <View>
                 <TouchableOpacity onPress={() => this.RBSheet.open()}>
-                  <FontAwesome name="align-right" size={20} />
+                  <FontAwesome6 name="align-right" size={20} />
                 </TouchableOpacity>
               </View>
             )}

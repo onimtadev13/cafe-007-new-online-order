@@ -19,6 +19,7 @@ import OTPInputView from '@twotalltotems/react-native-otp-input';
 import {openDatabase} from 'react-native-sqlite-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {APIURL, OTPAPIURL} from '../Data/CloneData';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 var db = openDatabase({name: 'UserDatabase.db'});
 
@@ -448,7 +449,8 @@ export default class EditInfoScreen extends React.Component {
                   backgroundColor: '#e6e6e6',
                 },
               ]}>
-              <Icon name="chevron-back" size={35} />
+              {/* <Icon name="chevron-back" size={35} /> */}
+              <FontAwesome6 name="chevron-left" size={35} solid />
             </View>
           </TouchableOpacity>
 
@@ -648,7 +650,8 @@ export default class EditInfoScreen extends React.Component {
                   <TouchableOpacity
                     style={{position: 'relative', marginTop: 10}}
                     onPress={() => this.onClosePres()}>
-                    <Icon name="close-circle" size={40} />
+                    {/* <Icon name="close-circle" size={40} /> */}
+                    <FontAwesome6 name="circle-xmark" size={40} />
                   </TouchableOpacity>
                 </View>
 
@@ -663,10 +666,15 @@ export default class EditInfoScreen extends React.Component {
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}>
-                    <Icon
+                    {/* <Icon
                       name="lock-closed-outline"
                       size={25}
-                      color={'black'}></Icon>
+                      color={'black'}></Icon> */}
+                      <FontAwesome6
+  name="lock"
+  size={25}
+  color={'black'}
+/>
                   </View>
 
                   <Text

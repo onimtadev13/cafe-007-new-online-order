@@ -3,8 +3,9 @@ import moment from 'moment';
 import React from 'react';
 import {Animated, Platform, Text, View} from 'react-native';
 import {WaveIndicator} from 'react-native-indicators';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+// import Ionicons from 'react-native-vector-icons/Ionicons';
 import {APIURL} from '../Data/CloneData';
+import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 
 export default class OrderProcess extends React.PureComponent {
   constructor(props) {
@@ -220,7 +221,8 @@ export default class OrderProcess extends React.PureComponent {
                 },
                 {transform: [{scale: this.state.processAnimate}]},
               ]}>
-              <Ionicons name={'checkmark'} size={18} color={'white'} />
+              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
+              <FontAwesome6 name="check" size={18} color="white" solid />
             </Animated.View>
             <View>
               <Text
@@ -268,7 +270,8 @@ export default class OrderProcess extends React.PureComponent {
                 },
                 {transform: [{scale: this.state.acceptAnimate}]},
               ]}>
-              <Ionicons name={'checkmark'} size={18} color={'white'} />
+              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
+              <FontAwesome6 name="check" size={18} color="white" solid />
             </Animated.View>
 
             <View>
@@ -318,7 +321,8 @@ export default class OrderProcess extends React.PureComponent {
                 },
                 {transform: [{scale: this.state.acceptAnimate}]},
               ]}>
-              <Ionicons name={'checkmark'} size={18} color={'white'} />
+              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
+              <FontAwesome6 name="check" size={18} color="white" solid />
             </Animated.View>
 
             <View>
@@ -449,7 +453,8 @@ export default class OrderProcess extends React.PureComponent {
                 },
                 {transform: [{scale: this.state.prepairAnimate}]},
               ]}>
-              <Ionicons name={'checkmark'} size={18} color={'white'} />
+              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
+              <FontAwesome6 name="check" size={18} color="white" solid />
             </Animated.View>
 
             <View>
@@ -603,7 +608,8 @@ export default class OrderProcess extends React.PureComponent {
                 },
                 {transform: [{scale: this.state.deliveryAnimate}]},
               ]}>
-              <Ionicons name={'checkmark'} size={18} color={'white'} />
+              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
+              <FontAwesome6 name="check" size={18} color="white" solid />
             </Animated.View>
 
             <View>
@@ -698,7 +704,8 @@ export default class OrderProcess extends React.PureComponent {
                 },
                 {transform: [{scale: this.state.deliveryAnimate}]},
               ]}>
-              <Ionicons name={'checkmark'} size={18} color={'white'} />
+              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
+              <FontAwesome6 name="check" size={18} color="white" solid />
             </Animated.View>
 
             <View>
@@ -804,7 +811,8 @@ export default class OrderProcess extends React.PureComponent {
                 justifyContent: 'center',
                 marginLeft: 45,
               }}>
-              <Ionicons name="notifications" size={20} color={'red'} />
+              {/* <Ionicons name="notifications" size={20} color={'red'} /> */}
+              <FontAwesome6 name="bell" size={20} color="red" solid />
               <Text
                 style={{
                   marginLeft: 10,

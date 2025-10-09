@@ -19,7 +19,7 @@ import {
   View,
   Easing,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+// import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 // import {Card} from 'react-native-shadow-cards';
 import { Card } from 'react-native-paper';
@@ -29,7 +29,7 @@ import { NumericFormat } from 'react-number-format';
 import { connect } from 'react-redux';
 import { openDatabase } from 'react-native-sqlite-storage';
 import RadioButton from 'react-native-radio-button';
-import IonicIcon from 'react-native-vector-icons/Ionicons';
+// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { APIURL, PLACEORDERURL } from '../Data/CloneData';
@@ -40,6 +40,9 @@ import PayHere from '@payhere/payhere-mobilesdk-reactnative';
 import AlertDialog from '../Components/AlertDialog';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
+// import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+
 
 var db = openDatabase({ name: 'UserDatabase.db' });
 
@@ -1629,7 +1632,9 @@ class CheckoutScreen extends React.Component {
                   justifyContent: 'center',
                 }}
               >
-                <IonicIcon name="add-outline" size={20} />
+                {/* <IonicIcon name="add-outline" size={20} /> */}
+               <FontAwesome6 name="plus" size={20} solid />
+
                 <Text
                   style={{
                     fontFamily:
@@ -2004,7 +2009,9 @@ class CheckoutScreen extends React.Component {
                       backgroundColor: '#F0F0F0',
                     }}
                   >
-                    <Ionicons name={'bookmark'} size={18} color={'#ffa363'} />
+                    {/* <Ionicons name={'bookmark'} size={18} color={'#ffa363'} /> */}
+                    <FontAwesome6 name="bookmark" size={18} color="#ffa363" solid />
+
                     <Text
                       style={{
                         color: '#ffa363',
@@ -2047,7 +2054,9 @@ class CheckoutScreen extends React.Component {
                       backgroundColor: '#F0F0F0',
                     }}
                   >
-                    <Ionicons name={'basket'} size={18} color={'#7a7a7a'} />
+                    {/* <Ionicons name={'basket'} size={18} color={'#7a7a7a'} /> */}
+                    <FontAwesome6 name="basket-shopping" size={18} color="#7a7a7a" solid />
+
                     <Text
                       style={{
                         color: '#7a7a7a',
@@ -2090,7 +2099,9 @@ class CheckoutScreen extends React.Component {
                       backgroundColor: '#F0F0F0',
                     }}
                   >
-                    <Ionicons name={'pricetag'} size={18} color={'#7a7a7a'} />
+                    {/* <Ionicons name={'pricetag'} size={18} color={'#7a7a7a'} /> */}
+                    <FontAwesome6 name="tag" size={18} color="#7a7a7a" solid />
+
                     <Text
                       style={{
                         color: '#7a7a7a',
@@ -2133,7 +2144,9 @@ class CheckoutScreen extends React.Component {
                       backgroundColor: '#F0F0F0',
                     }}
                   >
-                    <Ionicons name={'beer'} size={18} color={'#7a7a7a'} />
+                    {/* <Ionicons name={'beer'} size={18} color={'#7a7a7a'} /> */}
+                    <FontAwesome6 name="beer-mug-empty" size={18} color="#7a7a7a" solid />
+
                     <Text
                       style={{
                         color: '#7a7a7a',
@@ -2176,7 +2189,9 @@ class CheckoutScreen extends React.Component {
                       backgroundColor: '#F0F0F0',
                     }}
                   >
-                    <Ionicons name={'pricetag'} size={18} color={'#7a7a7a'} />
+                    {/* <Ionicons name={'pricetag'} size={18} color={'#7a7a7a'} /> */}
+                    <FontAwesome6 name="tag" size={18} color="#7a7a7a" solid />
+
                     <Text
                       style={{
                         color: '#7a7a7a',
@@ -2192,7 +2207,9 @@ class CheckoutScreen extends React.Component {
                     >
                       Have a promo code?...
                     </Text>
-                    <Ionicons name={'add'} size={18} color={'#7a7a7a'} />
+                    {/* <Ionicons name={'add'} size={18} color={'#7a7a7a'} /> */}
+                    <FontAwesome6 name="plus" size={18} color="#7a7a7a" solid />
+
                   </View>
                 </TouchableOpacity>
               </Card>
@@ -2319,11 +2336,18 @@ class CheckoutScreen extends React.Component {
                       justifyContent: 'center',
                     }}
                   >
-                    <Ionicons
+                    {/* <Ionicons
                       name="restaurant"
                       size={22}
                       color={
                         this.state.dineType === 'EatIn' ? 'white' : '#ffa363'
+                      }
+                    /> */}
+    <FontAwesome
+                      name="cutlery"
+                      size={22}
+                      color={
+                        this.state.dineType === 'PickUp' ? 'white' : '#ffa363'
                       }
                     />
                     <Text
@@ -2547,11 +2571,13 @@ class CheckoutScreen extends React.Component {
                         }}
                       >
                         {this.state.scheduleStatus === 'Now' ? (
-                          <IonicIcon
-                            name="checkmark"
-                            size={20}
-                            color={'black'}
-                          />
+                          // <IonicIcon
+                          //   name="checkmark"
+                          //   size={20}
+                          //   color={'black'}
+                          // />
+                          <FontAwesome6 name="check" size={20} color="black" solid />
+
                         ) : null}
                       </View>
                       <Text
@@ -2605,11 +2631,13 @@ class CheckoutScreen extends React.Component {
                         }}
                       >
                         {this.state.scheduleStatus === 'Later' ? (
-                          <IonicIcon
-                            name="checkmark"
-                            size={20}
-                            color={'black'}
-                          />
+                          // <IonicIcon
+                          //   name="checkmark"
+                          //   size={20}
+                          //   color={'black'}
+                          // />
+                          <FontAwesome6 name="check" size={20} color="black" solid />
+
                         ) : null}
                       </View>
                       <Text
@@ -2801,11 +2829,12 @@ class CheckoutScreen extends React.Component {
                         }}
                       >
                         {this.state.scheduleStatus === 'Now' ? (
-                          <IonicIcon
-                            name="checkmark"
-                            size={20}
-                            color={'black'}
-                          />
+                          // <IonicIcon
+                          //   name="checkmark"
+                          //   size={20}
+                          //   color={'black'}
+                          // />
+                          <FontAwesome6 name="check" size={20} color="black" solid />
                         ) : null}
                       </View>
                       <Text
@@ -2859,11 +2888,12 @@ class CheckoutScreen extends React.Component {
                         }}
                       >
                         {this.state.scheduleStatus === 'Later' ? (
-                          <IonicIcon
-                            name="checkmark"
-                            size={20}
-                            color={'black'}
-                          />
+                          // <IonicIcon
+                          //   name="checkmark"
+                          //   size={20}
+                          //   color={'black'}
+                          // />
+                          <FontAwesome6 name="check" size={20} color="black" solid />
                         ) : null}
                       </View>
                       <Text
@@ -3100,13 +3130,19 @@ class CheckoutScreen extends React.Component {
                       justifyContent: 'center',
                     }}
                   >
-                    <Ionicons
+                    {/* <Ionicons
                       name="card"
                       size={22}
                       color={
                         this.state.paymentType === 'Card' ? 'white' : '#ffa363'
                       }
-                    />
+                    /> */}
+                    <FontAwesome6
+  name="credit-card"
+  size={22}
+  color={this.state.paymentType === 'Card' ? 'white' : '#ffa363'}
+  solid
+/>
                     <Text
                       style={{
                         fontSize: 16,
@@ -3152,13 +3188,19 @@ class CheckoutScreen extends React.Component {
                       justifyContent: 'center',
                     }}
                   >
-                    <Ionicons
+                    {/* <Ionicons
                       name="cash"
                       size={22}
                       color={
                         this.state.paymentType === 'Cash' ? 'white' : '#ffa363'
                       }
-                    />
+                    /> */}
+                    <FontAwesome6
+  name="money-bill"
+  size={22}
+  color={this.state.paymentType === 'Cash' ? 'white' : '#ffa363'}
+  solid
+/>
                     <Text
                       style={{
                         fontSize: 16,
@@ -3503,11 +3545,12 @@ class CheckoutScreen extends React.Component {
               }}
             >
               <TouchableOpacity onPress={() => this.SRBSheet.close()}>
-                <Ionicons
+                {/* <Ionicons
                   name={'arrow-back-outline'}
                   size={30}
                   color={'black'}
-                />
+                /> */}
+                <FontAwesome6 name="arrow-left" size={30} color="black" solid />
               </TouchableOpacity>
               <Text
                 style={{
@@ -4233,7 +4276,8 @@ class CheckoutScreen extends React.Component {
                   padding: 5,
                 }}
               >
-                <Ionicons name="close" size={22} color="#333" />
+                {/* <Ionicons name="close" size={22} color="#333" /> */}
+                <FontAwesome6 name="xmark" size={22} color="#333" solid />
               </TouchableOpacity>
               <Text
                 style={{

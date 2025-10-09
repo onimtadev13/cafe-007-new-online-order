@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import { NumericFormat } from 'react-number-format';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+// import Ionicons from 'react-native-vector-icons/Ionicons';
 import { APIURL } from '../Data/CloneData';
 import { connect } from 'react-redux';
 import CheckBox from '@react-native-community/checkbox';
@@ -20,6 +20,8 @@ import Star from 'react-native-star-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RadioGroup from 'react-native-radio-buttons-group';
 import FastImage from 'react-native-fast-image';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import { white } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 
 const HEADER_MAX_HEIGHT = 240;
 const HEADER_MIN_HEIGHT = Platform.OS === 'android' ? 64 : 74;
@@ -1286,12 +1288,20 @@ class ItemScreen extends React.PureComponent {
         >
           <View style={{ flex: 1, flexDirection: 'row', left: 20 }}>
             <TouchableOpacity onPress={this.onMinPress.bind(this)}>
-              <Ionicons
+              {/* <Ionicons
                 name="remove-outline"
                 size={30}
                 color="white"
                 style={{ flex: 1, margin: 10 }}
-              />
+              /> */}
+              <FontAwesome6
+  name="minus"
+  size={25}
+  color="white"
+  style={{ flex: 1, margin: 10 }}
+  solid
+/>
+
             </TouchableOpacity>
             <Text
               style={{
@@ -1307,12 +1317,20 @@ class ItemScreen extends React.PureComponent {
               {this.state.itemQty}
             </Text>
             <TouchableOpacity onPress={this.onPlusPress.bind(this)}>
-              <Ionicons
+              {/* <Ionicons
                 name="add-outline"
                 size={30}
                 color="white"
                 style={{ flex: 1, margin: 10 }}
-              />
+              /> */}
+              <FontAwesome6
+  name="plus"
+  size={25}
+  color="white"
+  style={{ flex: 1, margin: 10 }}
+  solid
+/>
+
             </TouchableOpacity>
           </View>
           <TouchableOpacity

@@ -22,7 +22,7 @@ import {
 import {NumericFormat} from 'react-number-format';
 import {APIURL, CancelReason, ORDERVIEW} from '../Data/CloneData';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+// import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import OrderProcess from '../Components/OrderProcess';
@@ -30,6 +30,7 @@ import {firebase} from '@react-native-firebase/messaging';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {CommonActions} from '@react-navigation/native';
 import OrderImageSlider from '../Components/OrderImageSlider';
+import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 
 const HEADER_MAX_HEIGHT = 200;
 const HEADER_MIN_HEIGHT = Platform.OS === 'android' ? 64 : 74;
@@ -1478,7 +1479,8 @@ export default class OrderDetailsScreen extends React.PureComponent {
                 marginBottom: 20,
               }}>
               <TouchableOpacity onPress={() => this.RBSheet.close()}>
-                <Ionicons name={'close-outline'} size={30} color={'black'} />
+                {/* <Ionicons name={'close-outline'} size={30} color={'black'} /> */}
+                <FontAwesome6 name="xmark" size={30} color="black" solid />
               </TouchableOpacity>
               <Text
                 style={{
