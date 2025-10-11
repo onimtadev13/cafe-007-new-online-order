@@ -20,14 +20,10 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-<<<<<<< HEAD
-=======
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	
-	<!-- ADD FONTS FOR react-native-vector-icons -->
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
@@ -49,9 +45,14 @@
 		<string>Octicons.ttf</string>
 		<string>Zocial.ttf</string>
 		<string>Fontisto.ttf</string>
+		<string>AsapBold.ttf</string>
+		<string>AsapMedium.ttf</string>
+		<string>AsapRegular.ttf</string>
+		<string>AsapSemiBold.ttf</string>
+		<string>UberMoveBold.ttf</string>
+		<string>UberMoveMedium.ttf</string>
+		<string>UberMoveRegular.ttf</string>
 	</array>
-	
-	<!-- ADD BRANCH KEY -->
 	<key>branch_key</key>
 	<dict>
 		<key>live</key>
@@ -59,9 +60,6 @@
 		<key>test</key>
 		<string>YOUR_BRANCH_TEST_KEY_HERE</string>
 	</dict>
-	
-	<!-- ADD URL SCHEMES FOR DEEP LINKING -->
->>>>>>> 8babda6d8f34d9131d4248d44a82b0d8c1ae8463
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -74,10 +72,6 @@
 			</array>
 		</dict>
 	</array>
-	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -103,7 +97,7 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIBackgroundModes</key>
@@ -124,13 +118,6 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>branch_key</key>
-	<dict>
-		<key>live</key>
-		<string>YOUR_BRANCH_LIVE_KEY_HERE</string>
-		<key>test</key>
-		<string>YOUR_BRANCH_TEST_KEY_HERE</string>
-	</dict>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:cafe007.app.link</string>

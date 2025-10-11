@@ -1295,13 +1295,12 @@ class ItemScreen extends React.PureComponent {
                 style={{ flex: 1, margin: 10 }}
               /> */}
               <FontAwesome6
-  name="minus"
-  size={25}
-  color="white"
-  style={{ flex: 1, margin: 10 }}
-  solid
-/>
-
+                name="minus"
+                size={25}
+                color="white"
+                style={{ flex: 1, margin: 10 }}
+                solid
+              />
             </TouchableOpacity>
             <Text
               style={{
@@ -1324,13 +1323,12 @@ class ItemScreen extends React.PureComponent {
                 style={{ flex: 1, margin: 10 }}
               /> */}
               <FontAwesome6
-  name="plus"
-  size={25}
-  color="white"
-  style={{ flex: 1, margin: 10 }}
-  solid
-/>
-
+                name="plus"
+                size={25}
+                color="white"
+                style={{ flex: 1, margin: 10 }}
+                solid
+              />
             </TouchableOpacity>
           </View>
           <TouchableOpacity

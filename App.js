@@ -20,18 +20,13 @@ import { AuthStackNavigation } from './Routes/StackNavigation';
 import { createStackNavigator } from '@react-navigation/stack';
 import SplashScreen from 'react-native-splash-screen';
 import { APIURL, OTPAPIURL, SENDTESTNOTIFICTION } from './Data/CloneData';
-// ✅ FIXED FIREBASE IMPORTS
 import messaging from '@react-native-firebase/messaging';
 import { firebase } from '@react-native-firebase/app';
 import { getVersion } from 'react-native-device-info';
-// import dynamicLinks from '@react-native-firebase/dynamic-links';
 import branch from 'react-native-branch';
 import LocalNotificationService from './Services/LocalNotificationService';
 import NotificationModal from './Components/NotificationModal';
 import PromoCard from './Components/PromoCard';
-
-// import { Provider as PaperProvider } from 'react-native-paper';
-// import { Provider as PaperProvider, MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 
 import {
   SafeAreaProvider,
@@ -215,14 +210,12 @@ const App = () => {
     [],
   );
 
-  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
   const registerAppWithFCM = async () => {
     if (Platform.OS === 'ios') {
       await messaging().setAutoInitEnabled(true);
     }
   };
 
-  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
   const checkPermission = () => {
     messaging()
       .hasPermission()
@@ -238,7 +231,6 @@ const App = () => {
       });
   };
 
-  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
   const getToken = async () => {
     return new Promise((resolve, reject) => {
       messaging()
@@ -253,7 +245,7 @@ const App = () => {
             getToken();
           } else {
             AsyncStorage.setItem('fcmToken', fcmToken);
-            console.log(fcmToken);
+            console.log('FCM Token', fcmToken);
             resolve(fcmToken);
           }
         })
@@ -264,7 +256,6 @@ const App = () => {
     });
   };
 
-  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
   const requestPermission = async () => {
     messaging()
       .requestPermission()
@@ -1007,7 +998,7 @@ const App = () => {
   };
 
   const onNotification_Model_Press = ItemCode => {
-    setstate({ isVisible: false });
+    setstate(prevState => ({ ...prevState, isVisible: false }));
     if (ItemCode === 'Menu') {
       navigate('Home', {
         screen: 'HomeScreen',
@@ -1024,7 +1015,6 @@ const App = () => {
     }
   };
 
-  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
   messaging().onNotificationOpenedApp(remoteMessage => {
     console.log(
       '[FCMService] onNotificationOpenedApp Notification caused app to open',
@@ -1040,8 +1030,8 @@ const App = () => {
         });
       } else if (Platform.OS === 'android') {
         if (remoteMessage.notification.android.imageUrl !== '') {
-          setstate({
-            ...state,
+          setstate(prevState => ({
+            ...prevState,
             Type: remoteMessage.data.type,
             Description: remoteMessage.notification.body,
             More_Description: remoteMessage.data.item_description,
@@ -1049,16 +1039,16 @@ const App = () => {
             ItemCode: remoteMessage.data.item_code,
             isVisible: true,
             isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
-          });
+          }));
 
           AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
         } else {
-          setstate({ ...state, isVisible: false });
+          setstate(prevState => ({ ...prevState, isVisible: false }));
         }
       } else {
         if (remoteMessage.data.fcm_options.image !== '') {
-          setstate({
-            ...state,
+          setstate(prevState => ({
+            ...prevState,
             Type: remoteMessage.data.type,
             Description: remoteMessage.notification.body,
             More_Description: remoteMessage.data.item_description,
@@ -1066,17 +1056,16 @@ const App = () => {
             ItemCode: remoteMessage.data.item_code,
             isVisible: true,
             isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
-          });
+          }));
 
           AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
         } else {
-          setstate({ ...state, isVisible: false });
+          setstate(prevState => ({ ...prevState, isVisible: false }));
         }
       }
     }
   });
 
-  // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
   messaging()
     .getInitialNotification()
     .then(remoteMessage => {
@@ -1089,8 +1078,8 @@ const App = () => {
           });
         } else if (Platform.OS === 'android') {
           if (remoteMessage.notification.android.imageUrl !== '') {
-            setstate({
-              ...state,
+            setstate(prevState => ({
+              ...prevState,
               Type: remoteMessage.data.type,
               Description: remoteMessage.notification.body,
               More_Description: remoteMessage.data.item_description,
@@ -1098,17 +1087,17 @@ const App = () => {
               ItemCode: remoteMessage.data.item_code,
               isVisible: true,
               isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
-            });
+            }));
 
             AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
           } else {
-            setstate({ ...state, isVisible: false });
+            setstate(prevState => ({ ...prevState, isVisible: false }));
           }
         } else {
           if (remoteMessage.data.fcm_options.image !== '') {
             setTimeout(() => {
-              setstate({
-                ...state,
+              setstate(prevState => ({
+                ...prevState,
                 Type: remoteMessage.data.type,
                 Description: remoteMessage.notification.body,
                 More_Description: remoteMessage.data.item_description,
@@ -1116,13 +1105,13 @@ const App = () => {
                 ItemCode: remoteMessage.data.item_code,
                 isVisible: true,
                 isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
-              });
+              }));
 
               AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
             }, 1000);
           } else {
             setTimeout(() => {
-              setstate({ ...state, isVisible: false });
+              setstate(prevState => ({ ...prevState, isVisible: false }));
             }, 1000);
           }
         }
@@ -1151,8 +1140,8 @@ const App = () => {
         notification.bigPictureUrl !== '' ||
         notification.data.fcm_options.image !== ''
       ) {
-        setstate({
-          ...state,
+        setstate(prevState => ({
+          ...prevState,
           Type: notification.data.type,
           Description: notification.message,
           More_Description: notification.data.item_description,
@@ -1163,13 +1152,12 @@ const App = () => {
           ItemCode: notification.data.item_code,
           isVisible: true,
           isMenuButtonVisible: notification.data.is_visible_Menu_Button,
-        });
+        }));
       } else {
-        setstate({ ...state, isVisible: false });
+        setstate(prevState => ({ ...prevState, isVisible: false }));
       }
     }
 
-    // ✅ FIXED: Updated to use messaging() instead of firebase.messaging()
     const unsubscribeNotification = messaging().onMessage(
       async remoteMessage => {
         const data = remoteMessage.data;
@@ -1230,7 +1218,7 @@ const App = () => {
   }, []);
 
   function onClosePopUp() {
-    setstate({ isVisible: false });
+    setstate(prevState => ({ ...prevState, isVisible: false }));
   }
 
   return (
@@ -1253,6 +1241,7 @@ const App = () => {
               <RootStack.Navigator>
                 {loginstate.userToken == null ? (
                   <RootStack.Screen
+                    key="auth-screen"
                     name="Auth"
                     options={{ headerShown: false }}
                   >
@@ -1268,6 +1257,7 @@ const App = () => {
                   </RootStack.Screen>
                 ) : (
                   <RootStack.Screen
+                    key="app-screen"
                     name="App"
                     options={{ headerShown: false }}
                     component={BottomTabNavigation}

@@ -1,11 +1,11 @@
 import React from 'react';
-import {Platform, Text, TouchableOpacity, View} from 'react-native';
-import {FlatList} from 'react-native-gesture-handler';
+import { Platform, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 // import IonicIcon from 'react-native-vector-icons/Ionicons';
 // import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import ItemView from '../Components/ItemView';
 
 class ProductListScreen extends React.PureComponent {
@@ -17,7 +17,7 @@ class ProductListScreen extends React.PureComponent {
     };
   }
 
-  onrenderItem = ({item, index}) => {
+  onrenderItem = ({ item, index }) => {
     const countTypes = this.props.cartItems.filter(
       product => product.ProductName === item.Prod_Name,
     );
@@ -37,13 +37,14 @@ class ProductListScreen extends React.PureComponent {
 
   render() {
     return (
-      <View style={{flex: 1}}>
+      <View style={{ flex: 1 }}>
         <View
           style={{
             flexDirection: 'row',
             backgroundColor: 'white',
             alignItems: 'center',
-          }}>
+          }}
+        >
           <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
             {/* <IonicIcon
               name={'arrow-back'}
@@ -57,18 +58,17 @@ class ProductListScreen extends React.PureComponent {
               }}
             /> */}
             <FontAwesome6
-  name="arrow-left"
-  size={25}
-  color="black"
-  style={{
-    marginLeft: 15,
-    marginRight: 15,
-    marginTop: Platform.OS === 'ios' ? 30 : 20,
-    marginBottom: 15,
-  }}
-  solid
-/>
-
+              name="arrow-left"
+              size={25}
+              color="black"
+              style={{
+                marginLeft: 15,
+                marginRight: 15,
+                marginTop: Platform.OS === 'ios' ? 30 : 20,
+                marginBottom: 15,
+              }}
+              solid
+            />
           </TouchableOpacity>
           <Text
             style={{
@@ -77,12 +77,13 @@ class ProductListScreen extends React.PureComponent {
               fontSize: 18,
               marginTop: Platform.OS === 'ios' ? 30 : 20,
               marginBottom: 15,
-            }}>
+            }}
+          >
             {this.state.Title}
           </Text>
         </View>
         <FlatList
-          style={{marginBottom: 10}}
+          style={{ marginBottom: 10 }}
           data={this.state.ItemList}
           renderItem={this.onrenderItem}
           keyExtractor={(item, index) => index.toString()}

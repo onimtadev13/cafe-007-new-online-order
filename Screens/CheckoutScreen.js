@@ -34,7 +34,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { APIURL, PLACEORDERURL } from '../Data/CloneData';
 import moment from 'moment';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { getVersion } from 'react-native-device-info';
 import PayHere from '@payhere/payhere-mobilesdk-reactnative';
 import AlertDialog from '../Components/AlertDialog';
@@ -42,7 +42,6 @@ import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 // import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-
 
 var db = openDatabase({ name: 'UserDatabase.db' });
 
@@ -125,7 +124,7 @@ class CheckoutScreen extends React.Component {
 
     this._unsubscribe = this.props.navigation.addListener('focus', async () => {
       this.GetRegisterdCreditCard();
-    }); 
+    });
     this.GetTaxNetTotal('null');
     this.GetAddress();
     this._retrieveData();
@@ -158,7 +157,6 @@ class CheckoutScreen extends React.Component {
     }
   };
 
- 
   togglePromoModal = (visible, code = '', isCustom = false) => {
     this.setState({
       promoModalVisible: visible,
@@ -1521,12 +1519,10 @@ class CheckoutScreen extends React.Component {
               >
                 Your Items
               </Text>
-            
 
               <TouchableOpacity
                 style={{ flex: 0.5, alignItems: 'flex-end', marginRight: 10 }}
                 onPress={() => this.props.navigation.navigate('HomeScreen')}
-                
               >
                 <Animated.View
                   style={[
@@ -1556,13 +1552,12 @@ class CheckoutScreen extends React.Component {
                   {/* White border + glow */}
                   <MaskedView
                     style={{
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        left: 0,
-                      }
-                    }
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      bottom: 0,
+                      left: 0,
+                    }}
                     maskElement={
                       <View
                         style={{
@@ -1633,7 +1628,7 @@ class CheckoutScreen extends React.Component {
                 }}
               >
                 {/* <IonicIcon name="add-outline" size={20} /> */}
-               <FontAwesome6 name="plus" size={20} solid />
+                <FontAwesome6 name="plus" size={20} solid />
 
                 <Text
                   style={{
@@ -2010,7 +2005,12 @@ class CheckoutScreen extends React.Component {
                     }}
                   >
                     {/* <Ionicons name={'bookmark'} size={18} color={'#ffa363'} /> */}
-                    <FontAwesome6 name="bookmark" size={18} color="#ffa363" solid />
+                    <FontAwesome6
+                      name="bookmark"
+                      size={18}
+                      color="#ffa363"
+                      solid
+                    />
 
                     <Text
                       style={{
@@ -2055,7 +2055,12 @@ class CheckoutScreen extends React.Component {
                     }}
                   >
                     {/* <Ionicons name={'basket'} size={18} color={'#7a7a7a'} /> */}
-                    <FontAwesome6 name="basket-shopping" size={18} color="#7a7a7a" solid />
+                    <FontAwesome6
+                      name="basket-shopping"
+                      size={18}
+                      color="#7a7a7a"
+                      solid
+                    />
 
                     <Text
                       style={{
@@ -2145,7 +2150,12 @@ class CheckoutScreen extends React.Component {
                     }}
                   >
                     {/* <Ionicons name={'beer'} size={18} color={'#7a7a7a'} /> */}
-                    <FontAwesome6 name="beer-mug-empty" size={18} color="#7a7a7a" solid />
+                    <FontAwesome6
+                      name="beer-mug-empty"
+                      size={18}
+                      color="#7a7a7a"
+                      solid
+                    />
 
                     <Text
                       style={{
@@ -2209,7 +2219,6 @@ class CheckoutScreen extends React.Component {
                     </Text>
                     {/* <Ionicons name={'add'} size={18} color={'#7a7a7a'} /> */}
                     <FontAwesome6 name="plus" size={18} color="#7a7a7a" solid />
-
                   </View>
                 </TouchableOpacity>
               </Card>
@@ -2343,7 +2352,7 @@ class CheckoutScreen extends React.Component {
                         this.state.dineType === 'EatIn' ? 'white' : '#ffa363'
                       }
                     /> */}
-    <FontAwesome
+                    <FontAwesome
                       name="cutlery"
                       size={22}
                       color={
@@ -2576,8 +2585,12 @@ class CheckoutScreen extends React.Component {
                           //   size={20}
                           //   color={'black'}
                           // />
-                          <FontAwesome6 name="check" size={20} color="black" solid />
-
+                          <FontAwesome6
+                            name="check"
+                            size={20}
+                            color="black"
+                            solid
+                          />
                         ) : null}
                       </View>
                       <Text
@@ -2636,8 +2649,12 @@ class CheckoutScreen extends React.Component {
                           //   size={20}
                           //   color={'black'}
                           // />
-                          <FontAwesome6 name="check" size={20} color="black" solid />
-
+                          <FontAwesome6
+                            name="check"
+                            size={20}
+                            color="black"
+                            solid
+                          />
                         ) : null}
                       </View>
                       <Text
@@ -2834,7 +2851,12 @@ class CheckoutScreen extends React.Component {
                           //   size={20}
                           //   color={'black'}
                           // />
-                          <FontAwesome6 name="check" size={20} color="black" solid />
+                          <FontAwesome6
+                            name="check"
+                            size={20}
+                            color="black"
+                            solid
+                          />
                         ) : null}
                       </View>
                       <Text
@@ -2893,7 +2915,12 @@ class CheckoutScreen extends React.Component {
                           //   size={20}
                           //   color={'black'}
                           // />
-                          <FontAwesome6 name="check" size={20} color="black" solid />
+                          <FontAwesome6
+                            name="check"
+                            size={20}
+                            color="black"
+                            solid
+                          />
                         ) : null}
                       </View>
                       <Text
@@ -3138,11 +3165,13 @@ class CheckoutScreen extends React.Component {
                       }
                     /> */}
                     <FontAwesome6
-  name="credit-card"
-  size={22}
-  color={this.state.paymentType === 'Card' ? 'white' : '#ffa363'}
-  solid
-/>
+                      name="credit-card"
+                      size={22}
+                      color={
+                        this.state.paymentType === 'Card' ? 'white' : '#ffa363'
+                      }
+                      solid
+                    />
                     <Text
                       style={{
                         fontSize: 16,
@@ -3196,11 +3225,13 @@ class CheckoutScreen extends React.Component {
                       }
                     /> */}
                     <FontAwesome6
-  name="money-bill"
-  size={22}
-  color={this.state.paymentType === 'Cash' ? 'white' : '#ffa363'}
-  solid
-/>
+                      name="money-bill"
+                      size={22}
+                      color={
+                        this.state.paymentType === 'Cash' ? 'white' : '#ffa363'
+                      }
+                      solid
+                    />
                     <Text
                       style={{
                         fontSize: 16,
@@ -4211,10 +4242,10 @@ class CheckoutScreen extends React.Component {
           </View>
         </RBSheet>
 
-        <DateTimePickerModal
+        <DateTimePicker
           isVisible={this.state.isEnableTime}
           mode="time"
-          date={new Date()}
+          value={new Date()} // Changed from 'date' to 'value'
           onConfirm={this.handleConfirm}
           onCancel={this.hideDatePicker}
           display={Platform.OS === 'ios' ? null : 'spinner'}
