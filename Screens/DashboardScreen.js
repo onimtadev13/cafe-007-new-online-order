@@ -752,6 +752,7 @@ class DashboardScreen extends React.PureComponent {
             >
               <View style={{ flex: 0.2 }}>
                 <TouchableOpacity onPress={() => this.LocaSheet.open()}>
+                  {/* <Icons name="options-outline" size={25} /> */}
                   <FontAwesome6 name="sliders" size={25} solid />
                 </TouchableOpacity>
               </View>
