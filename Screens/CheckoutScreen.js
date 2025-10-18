@@ -19,17 +19,13 @@ import {
   View,
   Easing,
 } from 'react-native';
-// import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-// import {Card} from 'react-native-shadow-cards';
 import { Card } from 'react-native-paper';
-// import CardView from 'react-native-cardview';
 import CheckBox from '@react-native-community/checkbox';
 import { NumericFormat } from 'react-number-format';
 import { connect } from 'react-redux';
 import { openDatabase } from 'react-native-sqlite-storage';
 import RadioButton from 'react-native-radio-button';
-// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { APIURL, PLACEORDERURL } from '../Data/CloneData';
@@ -40,7 +36,6 @@ import PayHere from '@payhere/payhere-mobilesdk-reactnative';
 import AlertDialog from '../Components/AlertDialog';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
-// import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 var db = openDatabase({ name: 'UserDatabase.db' });
@@ -2339,7 +2334,6 @@ class CheckoutScreen extends React.Component {
                         this.state.dineType === 'EatIn' ? 'black' : '#F0F0F0',
                       borderColor:
                         this.state.dineType === 'EatIn' ? 'black' : '#dbdbdb',
-                      //  borderWidth: 1.5,
                       borderRadius: 15,
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -2352,11 +2346,11 @@ class CheckoutScreen extends React.Component {
                         this.state.dineType === 'EatIn' ? 'white' : '#ffa363'
                       }
                     /> */}
-                    <FontAwesome
-                      name="cutlery"
+                    <FontAwesome6
+                      name="utensils"
                       size={22}
                       color={
-                        this.state.dineType === 'PickUp' ? 'white' : '#ffa363'
+                        this.state.dineType === 'EatIn' ? 'white' : '#ffa363'
                       }
                     />
                     <Text
@@ -2393,14 +2387,13 @@ class CheckoutScreen extends React.Component {
                         this.state.dineType === 'PickUp' ? 'black' : '#F0F0F0',
                       borderColor:
                         this.state.dineType === 'PickUp' ? 'black' : '#dbdbdb',
-                      // borderWidth: 1.5,
                       borderRadius: 15,
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    <FontAwesome
-                      name="shopping-bag"
+                    <FontAwesome6
+                      name="bag-shopping"
                       size={22}
                       color={
                         this.state.dineType === 'PickUp' ? 'white' : '#ffa363'
@@ -2453,14 +2446,13 @@ class CheckoutScreen extends React.Component {
                         this.state.isDelivery
                           ? 'black'
                           : '#dbdbdb',
-                      // borderWidth: 1.5,
                       borderRadius: 15,
                       alignItems: 'center',
                       justifyContent: 'center',
                       opacity: this.state.isDelivery ? 1 : 0.5,
                     }}
                   >
-                    <FontAwesome
+                    <FontAwesome6
                       name="truck"
                       size={26}
                       color={

@@ -12,10 +12,9 @@ import {
   UIManager,
   View,
 } from 'react-native';
-// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {Rating} from 'react-native-ratings';
-import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 const screenwidth = Dimensions.get('window').width;
 

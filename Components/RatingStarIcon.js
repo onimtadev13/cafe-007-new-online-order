@@ -1,7 +1,7 @@
 import React from 'react';
 import {Platform, Text, View} from 'react-native';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
-import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 export default class RatingStarIcon extends React.PureComponent {
   render() {

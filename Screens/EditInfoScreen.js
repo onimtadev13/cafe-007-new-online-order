@@ -450,7 +450,7 @@ export default class EditInfoScreen extends React.Component {
                 },
               ]}>
               {/* <Icon name="chevron-back" size={35} /> */}
-              <FontAwesome6 name="chevron-left" size={35} solid />
+              <FontAwesome6 name="chevron-left" size={35} color="#000000" />
             </View>
           </TouchableOpacity>
 

@@ -19,7 +19,6 @@ import {
 import { Card } from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
 import Slider from '../Components/Slider';
-// import {Card} from 'react-native-shadow-cards';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { APIURL } from '../Data/CloneData';
 import moment from 'moment';
@@ -751,9 +750,8 @@ class DashboardScreen extends React.PureComponent {
               }}
             >
               <View style={{ flex: 0.2 }}>
-                <TouchableOpacity onPress={() => this.LocaSheet.open()}>
-                  {/* <Icons name="options-outline" size={25} /> */}
-                  <FontAwesome6 name="sliders" size={25} solid />
+                <TouchableOpacity>
+                  <FontAwesome6 name="sliders" size={20} solid />
                 </TouchableOpacity>
               </View>
 

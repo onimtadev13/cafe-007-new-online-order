@@ -11,16 +11,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {APIURL} from '../Data/CloneData';
-import {connect} from 'react-redux';
+import { APIURL } from '../Data/CloneData';
+import { connect } from 'react-redux';
 import Tabbar from '../Components/Tabbar';
 import HeaderView from '../Components/HeaderView';
 import ItemView from '../Components/ItemView';
 import HeaderImage from '../Components/HeaderImage';
-// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 const HEADER_MAX_HEIGHT = Platform.OS == 'ios' ? 320 : 340;
 const HEADER_MIN_HEIGHT = 45;
@@ -79,17 +78,16 @@ class HomeScreen extends React.PureComponent {
     });
 
     this._retrieveData();
-    
+
     this.LoadHeaderImage();
   }
-
 
   _retrieveData = async () => {
     try {
       const value = await AsyncStorage.getItem('LOCA');
       if (value !== null) {
         // We have data!!
-        this.setState({Location: value});
+        this.setState({ Location: value });
       }
 
       console.log('lOADING PRODUCTS');
@@ -135,7 +133,7 @@ class HomeScreen extends React.PureComponent {
     return xFloat;
   };
 
-  singlerenderItem = ({item, index}) => {
+  singlerenderItem = ({ item, index }) => {
     const countTypes = this.props.cartItems.filter(
       product => product.ProductName === item.Prod_Name,
     );
@@ -176,7 +174,7 @@ class HomeScreen extends React.PureComponent {
   };
 
   getItemLayout(data, index) {
-    return {length: 170, offset: 170 * index, index};
+    return { length: 170, offset: 170 * index, index };
   }
 
   // handleViewableItemsChanged(info) {
@@ -276,13 +274,15 @@ class HomeScreen extends React.PureComponent {
             justifyContent: 'center',
             alignItems: 'center',
             marginTop: '50%',
-          }}>
+          }}
+        >
           <Text
             style={{
               fontFamily:
                 Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
               fontSize: 20,
-            }}>
+            }}
+          >
             No Items are available
           </Text>
           <Text
@@ -290,7 +290,8 @@ class HomeScreen extends React.PureComponent {
               fontFamily:
                 Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
               fontSize: 15,
-            }}>
+            }}
+          >
             If product item available it will appear here
           </Text>
         </View>
@@ -307,9 +308,10 @@ class HomeScreen extends React.PureComponent {
             // Bind opacity to animated value
             opacity: this.state.fadeAnim,
           },
-        ]}>
-        <Animated.View style={[{opacity: listOpacity}]}>
-          <View style={{height: Platform.OS === 'android' ? 50 : 60}} />
+        ]}
+      >
+        <Animated.View style={[{ opacity: listOpacity }]}>
+          <View style={{ height: Platform.OS === 'android' ? 50 : 60 }} />
           <Tabbar
             currentIndex={this.state.anchor}
             currentItem={this.state.select}
@@ -332,16 +334,18 @@ class HomeScreen extends React.PureComponent {
         <Animated.View
           style={[
             styles.header,
-            {transform: [{translateY: headerTranslateY}]},
-          ]}>
+            { transform: [{ translateY: headerTranslateY }] },
+          ]}
+        >
           <Animated.View
-            style={[styles.headerBackground, {opacity: imageOpacity}]}>
+            style={[styles.headerBackground, { opacity: imageOpacity }]}
+          >
             {this.state.isLoading ? (
               <>
                 <View
                   style={[
                     StyleSheet.absoluteFillObject,
-                    {backgroundColor: 'rgba(0,0,0,0.3)'},
+                    { backgroundColor: 'rgba(0,0,0,0.3)' },
                   ]}
                 />
               </>
@@ -361,19 +365,22 @@ class HomeScreen extends React.PureComponent {
               },
               {
                 transform: [
-                  {translateY: buttonTranslateY},
-                  {translateX: buttonTranslateX},
+                  { translateY: buttonTranslateY },
+                  { translateX: buttonTranslateX },
                 ],
               },
-            ]}>
+            ]}
+          >
             <TouchableOpacity
-              style={{width: 40}}
-              onPress={() => this.props.navigation.goBack()}>
+              style={{ width: 40 }}
+              onPress={() => this.props.navigation.goBack()}
+            >
               <View
                 style={{
                   alignItems: 'center',
                   justifyContent: 'center',
-                }}>
+                }}
+              >
                 <Animated.View
                   style={[
                     {
@@ -382,7 +389,7 @@ class HomeScreen extends React.PureComponent {
                       borderRadius: 40 / 2,
                       backgroundColor: 'white',
                     },
-                    {opacity: buttonopacity},
+                    { opacity: buttonopacity },
                   ]}
                 />
                 {/* <IonicIcon
@@ -391,12 +398,11 @@ class HomeScreen extends React.PureComponent {
                   style={{position: 'absolute'}}
                 /> */}
                 <FontAwesome6
-  name="chevron-left"
-  size={30}
-  style={{ position: 'absolute' }}
-  solid
-/>
-
+                  name="chevron-left"
+                  size={30}
+                  style={{ position: 'absolute' }}
+                  solid
+                />
               </View>
             </TouchableOpacity>
           </Animated.View>
@@ -409,15 +415,16 @@ class HomeScreen extends React.PureComponent {
               },
               {
                 transform: [
-                  {translateX: titleTranslateX},
-                  {scale: titleScale},
-                  {translateY: titleTranslateY},
+                  { translateX: titleTranslateX },
+                  { scale: titleScale },
+                  { translateY: titleTranslateY },
                 ],
               },
-            ]}>
+            ]}
+          >
             {this.state.Header !== null && this.state.Header !== '' ? (
               <>
-                <View style={{flexDirection: 'row', alignContent: 'center'}}>
+                <View style={{ flexDirection: 'row', alignContent: 'center' }}>
                   <Text
                     style={{
                       color: 'white',
@@ -426,14 +433,15 @@ class HomeScreen extends React.PureComponent {
                           ? 'Asap-Regular_Bold'
                           : 'AsapBold',
                       fontSize: 30,
-                    }}>
+                    }}
+                  >
                     {this.state.Header}
                   </Text>
                   <ActivityIndicator
                     animating={this.state.isLoading}
                     size="small"
                     color="white"
-                    style={{marginLeft: 15, marginTop: 10}}
+                    style={{ marginLeft: 15, marginTop: 10 }}
                   />
                 </View>
 
@@ -448,8 +456,9 @@ class HomeScreen extends React.PureComponent {
                       fontSize: 30,
                       position: 'absolute',
                     },
-                    {opacity: headerTextOpacity},
-                  ]}>
+                    { opacity: headerTextOpacity },
+                  ]}
+                >
                   {this.state.Header}
                 </Animated.Text>
               </>
@@ -464,11 +473,12 @@ class HomeScreen extends React.PureComponent {
               },
               {
                 transform: [
-                  {translateX: titleTranslateX},
-                  {translateY: titleTranslateY},
+                  { translateX: titleTranslateX },
+                  { translateY: titleTranslateY },
                 ],
               },
-            ]}>
+            ]}
+          >
             <Text
               style={{
                 width:
@@ -476,7 +486,8 @@ class HomeScreen extends React.PureComponent {
                     ? '50%'
                     : '60%',
                 color: 'white',
-              }}>
+              }}
+            >
               {this.state.Description}
             </Text>
             {/* <Text style={{ color: 'white' }}>Live, love, eat.</Text> */}
@@ -492,8 +503,9 @@ class HomeScreen extends React.PureComponent {
                 justifyContent: 'center',
                 backgroundColor: 'transparent',
               },
-              {opacity: this.state.fadeAnim},
-            ]}>
+              { opacity: this.state.fadeAnim },
+            ]}
+          >
             <ActivityIndicator
               animating={this.state.isLoading}
               size="large"
@@ -501,18 +513,18 @@ class HomeScreen extends React.PureComponent {
             />
           </Animated.View>
         ) : (
-          <Animated.View style={{opacity: this.state.sliderUp}}>
+          <Animated.View style={{ opacity: this.state.sliderUp }}>
             <Animated.FlatList
               // scrollEnabled={this.state.isEnableScroll}
               overScrollMode={'never'}
               style={[
-                {transform: [{translateY: listTranslateY}]},
-                {marginBottom: 120},
+                { transform: [{ translateY: listTranslateY }] },
+                { marginBottom: 120 },
               ]}
               scrollEventThrottle={16}
               ref={r => (this.ref = r)}
               onScroll={Animated.event(
-                [{nativeEvent: {contentOffset: {y: this.state.scrollY}}}],
+                [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }],
                 {
                   useNativeDriver: true,
                   listener: event => this.onScroll(event),
@@ -589,7 +601,7 @@ class HomeScreen extends React.PureComponent {
    * author shivanka dilshan
    * Loading product data location wice old iid was 75 new iid is 115
    * */
- LoadProducts(Loca) {
+  LoadProducts(Loca) {
     fetch(APIURL, {
       method: 'POST',
       cache: 'no-cache',
@@ -758,7 +770,7 @@ class HomeScreen extends React.PureComponent {
               onPress: () => this.LoadProducts(this.state.Location),
             },
           ],
-          {cancelable: false},
+          { cancelable: false },
         );
       })
       .finally(() => {

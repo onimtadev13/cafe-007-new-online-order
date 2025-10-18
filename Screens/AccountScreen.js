@@ -25,7 +25,7 @@ import {CommonActions} from '@react-navigation/routers';
 import {APIURL} from '../Data/CloneData';
 // import dynamicLinks from '@react-native-firebase/dynamic-links';
 import branch from 'react-native-branch';
-import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 
 const Tab = createMaterialTopTabNavigator();

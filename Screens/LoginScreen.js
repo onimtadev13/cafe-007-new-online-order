@@ -11,6 +11,7 @@ import {
   Linking,
   Modal,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -251,58 +252,89 @@ export default class LoginScreen extends React.PureComponent {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : null}
         style={{flex: 1}}>
-        <View style={[{flex: 1, backgroundColor: '#F3F3F3'}]}>
-          <Animated.View style={[{opacity: this.state.loganim}]}>
-            <Image
-              source={
-                isTablet()
-                  ? require('../assets/login_tablet_background.png')
-                  : require('../assets/login_background.png')
-              }
-              style={[styles.loginlogo, StyleSheet.absoluteFillObject]}
-              resizeMode={'contain'}
-              resizeMethod={'resize'}
-            />
-            <View style={{flexDirection: 'row', marginTop: 29}}>
-              <View style={{marginLeft: 26}}>
-                <Text
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1}}
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
+          showsVerticalScrollIndicator={false}>
+          <View style={[{flex: 1, backgroundColor: '#F3F3F3'}]}>
+            <Animated.View style={[{opacity: this.state.loganim}]}>
+              <Image
+                source={
+                  isTablet()
+                    ? require('../assets/login_tablet_background.png')
+                    : require('../assets/login_background.png')
+                }
+                style={[styles.loginlogo, StyleSheet.absoluteFillObject]}
+                resizeMode={'contain'}
+                resizeMethod={'resize'}
+              />
+              <View style={{flexDirection: 'row', marginTop: 29}}>
+                <View style={{marginLeft: 26}}>
+                  <Text
+                    style={{
+                      fontFamily:
+                        Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                      fontSize: 37,
+                    }}>
+                    LOGIN
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily:
+                        Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                      fontSize: 12,
+                      marginTop: -5,
+                    }}>
+                    Everything tastes good when{'\n'}you're hungry
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  disabled={!this.props.isUpdated}
                   style={{
-                    fontFamily:
-                      Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-                    fontSize: 37,
-                  }}>
-                  LOGIN
-                </Text>
-                <Text
-                  style={{
-                    fontFamily:
-                      Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                    fontSize: 12,
-                    marginTop: -5,
-                  }}>
-                  Everything tastes good when{'\n'}you're hungry
-                </Text>
+                    flex: 1,
+                    alignItems: 'flex-end',
+                    marginRight: 30,
+                    marginTop: 16,
+                  }}
+                  onPress={() => this.context.SkipButton()}>
+                  <Animated.View
+                    style={[
+                      {
+                        width: 80,
+                        height: 40,
+                        borderRadius: 20,
+                        backgroundColor: 'white',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      },
+                      {opacity: this.state.fadeanimate},
+                    ]}>
+                    <Text
+                      style={{
+                        fontFamily:
+                          Platform.OS === 'ios'
+                            ? 'Asap-Regular_Medium'
+                            : 'AsapMedium',
+                        fontSize: 17,
+                      }}>
+                      Skip
+                    </Text>
+                  </Animated.View>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                disabled={!this.props.isUpdated}
-                style={{
-                  flex: 1,
-                  alignItems: 'flex-end',
-                  marginRight: 30,
-                  marginTop: 16,
-                }}
-                onPress={() => this.context.SkipButton()}>
+            </Animated.View>
+
+            <View style={{flex: 1, justifyContent: 'flex-end'}}>
+              <Animated.View
+                style={[
+                  {backgroundColor: 'white'},
+                  {transform: [{translateY: this.state.animated}]},
+                ]}>
                 <Animated.View
                   style={[
-                    {
-                      width: 80,
-                      height: 40,
-                      borderRadius: 20,
-                      backgroundColor: 'white',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    },
-                    {opacity: this.state.fadeanimate},
+                    {backgroundColor: 'white'},
+                    {height: this.state.animatedheight},
                   ]}>
                   <Text
                     style={{
@@ -310,378 +342,318 @@ export default class LoginScreen extends React.PureComponent {
                         Platform.OS === 'ios'
                           ? 'Asap-Regular_Medium'
                           : 'AsapMedium',
-                      fontSize: 17,
+                      marginLeft: 40,
+                      marginTop: 10,
+                      color: 'black',
+                      fontSize: 19,
                     }}>
-                    Skip
+                    Food should be fun
                   </Text>
-                </Animated.View>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
-
-          <View style={{flex: 1, justifyContent: 'flex-end'}}>
-            <Animated.View
-              style={[
-                {backgroundColor: 'white'},
-                {transform: [{translateY: this.state.animated}]},
-              ]}>
-              <Animated.View
-                style={[
-                  {backgroundColor: 'white'},
-                  {height: this.state.animatedheight},
-                ]}>
-                <Text
-                  style={{
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    marginLeft: 40,
-                    marginTop: 10,
-                    color: 'black',
-                    fontSize: 19,
-                  }}>
-                  Food should be fun
-                </Text>
-                <Animated.View
-                  style={[{height: this.state.animatedtextheight}]}>
                   <Animated.View
-                    style={[
-                      {flexDirection: 'row'},
-                      {opacity: this.state.animatedtextopacity},
-                      styles.textView,
-                    ]}>
-                    <TouchableOpacity
-                      style={{flexDirection: 'row', alignItems: 'center'}}
-                      onPress={() => this.onPressFlag()}>
+                    style={[{height: this.state.animatedtextheight}]}>
+                    <Animated.View
+                      style={[
+                        {flexDirection: 'row'},
+                        {opacity: this.state.animatedtextopacity},
+                        styles.textView,
+                      ]}>
+                      <TouchableOpacity
+                        style={{flexDirection: 'row', alignItems: 'center'}}
+                        onPress={() => this.onPressFlag()}>
+                        <Text
+                          style={{
+                            fontSize: 28,
+                            marginLeft: 10,
+                          }}>
+                          {this.state.flag}
+                        </Text>
+                        <FontAwesome6
+                          name="caret-down"
+                          size={18}
+                          style={{marginTop: 5, marginLeft: 5}}
+                        />
+                      </TouchableOpacity>
                       <Text
                         style={{
-                          fontSize: 28,
-                          marginLeft: 10,
+                          fontSize: 19,
+                          fontFamily:
+                            Platform.OS === 'ios'
+                              ? 'Asap-Regular_Medium'
+                              : 'AsapMedium',
+                          marginLeft: 5,
                         }}>
-                        {this.state.flag}
+                        {this.state.code}
                       </Text>
-                      {/* <Icon
-                        name="caret-down-outline"
-                        size={18}
-                        style={{marginTop: 5, marginLeft: 5}}
-                      /> */}
-                      <FontAwesome6
-  name="caret-down"
-  size={18}
-  style={{marginTop: 5, marginLeft: 5}}
-/>
+                      <View
+                        style={{
+                          borderLeftWidth: 1,
+                          height: 20,
+                          backgroundColor: '#ededed',
+                          marginLeft: 10,
+                        }}
+                      />
+                      <TextInput
+                        style={styles.textinput}
+                        placeholder={'Mobile Number'}
+                        placeholderTextColor={'#7a7a7a'}
+                        keyboardType={'numeric'}
+                        maxLength={10}
+                        onChangeText={mobilenumber =>
+                          this.textinputChange(mobilenumber)
+                        }
+                      />
+                    </Animated.View>
+                  </Animated.View>
+                  <TouchableOpacity
+                    disabled={!this.props.isUpdated}
+                    style={{
+                      marginLeft: 20,
+                      marginRight: 20,
+                      marginBottom: 20,
+                      marginTop: 10,
+                    }}
+                    onPress={() => this.loginbuttonPress(this.state.mobile)}>
+                    <View style={styles.buttonview}>
+                      <Text
+                        style={{
+                          fontFamily:
+                            Platform.OS === 'ios'
+                              ? 'Asap-Regular_Medium'
+                              : 'AsapMedium',
+                          textAlign: 'center',
+                          marginLeft: 40,
+                          color: 'white',
+                          fontSize: 19,
+                        }}>
+                        Get Start
+                      </Text>
+                      <ActivityIndicator
+                        style={{marginRight: 20}}
+                        size={20}
+                        animating={this.props.isClick}
+                        color={'white'}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                </Animated.View>
+              </Animated.View>
+            </View>
+
+            <RBSheet
+              animationType={'fade'}
+              ref={ref => {
+                this.myCountryPicker = ref;
+              }}
+              height={400}
+              openDuration={600}
+              closeDuration={600}
+              closeOnDragDown={true}
+              closeOnPressMask={true}
+              customStyles={{
+                draggableIcon: {
+                  backgroundColor: '#000',
+                },
+                container: {
+                  borderTopLeftRadius: 15,
+                  borderTopRightRadius: 15,
+                },
+              }}>
+              <View
+                style={{
+                  flex: 1,
+                  borderTopLeftRadius: 50,
+                  borderTopRightRadius: 50,
+                }}>
+                <Text
+                  style={{
+                    margin: 20,
+                    fontFamily:
+                      Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                    fontSize: 18,
+                    color: 'black',
+                    alignSelf: 'center',
+                  }}>
+                  Select your country
+                </Text>
+                <FlatList
+                  style={{margin: 10}}
+                  scrollEventThrottle={16}
+                  ref={ref => {
+                    this.flatlistref = ref;
+                  }}
+                  data={CountryCodes}
+                  renderItem={this.renderCountry}
+                  keyExtractor={(item, index) => index.toString()}
+                  getItemLayout={this.getItemLayout.bind(this)}
+                />
+              </View>
+            </RBSheet>
+
+            <Modal
+              visible={this.props.isVisible}
+              transparent={true}
+              animated={true}
+              animationType={'fade'}>
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(0,0,0, 0.7)',
+                }}>
+                <Card
+                  style={{backgroundColor: 'white', width: 310, height: 480}}
+                  cardElevation={2}
+                  cardMaxElevation={2}
+                  cornerRadius={10}>
+                  <View style={{alignItems: 'flex-end', marginRight: 10}}>
+                    <TouchableOpacity
+                      style={{position: 'relative', marginTop: 10}}
+                      onPress={() => this.onClosePress()}>
+                      <FontAwesome6 name="circle-xmark" size={35} />
                     </TouchableOpacity>
-                    <Text
+                  </View>
+
+                  <View style={{flex: 1, alignItems: 'center'}}>
+                    <View
                       style={{
-                        fontSize: 19,
+                        margin: 5,
+                        width: 55,
+                        height: 55,
+                        borderRadius: 100 / 2,
+                        backgroundColor: '#F4F4F4',
+                        marginBottom: 30,
+                        marginLeft: 30,
+                        marginRight: 30,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <FontAwesome6
+                        name="lock"
+                        size={25}
+                        color={'black'}
+                      />
+                    </View>
+
+                    <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+                      Enter your code
+                    </Text>
+                    <Text
+                      allowFontScaling={false}
+                      style={{textAlign: 'center', marginTop: 10}}>
+                      To continue please enter{'\n'} the verification code we've
+                      {'\n'} just send for you
+                    </Text>
+
+                    <OTPInputView
+                      style={{ width: '80%', height: 100 }}
+                      pinCount={4} 
+                      code={this.state.otpcode}
+                      autoFocusOnLoad={true}
+                      keyboardType="number-pad"
+                      codeInputFieldStyle={styles.underlineStyleBase}
+                      codeInputHighlightStyle={styles.underlineStyleHighLighted}
+                      onCodeChanged={(code) => this.setState({ otpcode: code })} 
+                      onCodeFilled={(code) => {
+                        console.log('OTP filled:', code); 
+                        clearInterval(this.interval);
+                        this.setState({ isEnable: false, second: 30 }, () => {
+                          this.context.OTPVerification(code, this.state.mobile, this.props.navigation);
+                        });
+                      }}
+                    />
+
+                    <TouchableOpacity
+                      disabled={this.state.isEnable} 
+                      style={{flex: 1}}
+                      onPress={() => {
+                        this.resendbuttonPress(this.state.mobile);
+                      }}>
+                      <View>
+                        <Text
+                          allowFontScaling={false}
+                          style={{
+                            color: this.state.isEnable ? '#d1d1d1' : 'black',
+                          }}>
+                          Resend Code{' '}
+                          {this.state.isEnable ? '00:' + this.state.second : null}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={{
+                        width: 150,
+                        height: 50,
+                        backgroundColor: 'black',
+                        borderRadius: 10,
+                        marginTop: -30,
+                        marginBottom: 15,
+                      }}
+                      onPress={() =>
+                        this.continuebuttonPress(
+                          this.state.otpcode,
+                          this.state.mobile,
+                        )
+                      }
+                      >
+                      <View
+                        style={{
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flex: 1,
+                        }}>
+                        <Text
+                          allowFontScaling={false}
+                          style={{
+                            fontSize: 14,
+                            color: 'white',
+                            fontWeight: 'bold',
+                          }}>
+                          Continue
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      marginLeft: '29%',
+                      marginBottom: 20,
+                    }}>
+                    <Text
+                      allowFontScaling={false}
+                      style={{
+                        fontFamily:
+                          Platform.OS === 'ios'
+                            ? 'Asap-Regular_Bold'
+                            : 'AsapBold',
+                        textAlign: 'center',
+                      }}>
+                      Hotline :
+                    </Text>
+                    <Text
+                      onPress={() => Linking.openURL(`tel:${`0707070007`}`)}
+                      allowFontScaling={false}
+                      style={{
                         fontFamily:
                           Platform.OS === 'ios'
                             ? 'Asap-Regular_Medium'
                             : 'AsapMedium',
                         marginLeft: 5,
-                      }}>
-                      {this.state.code}
-                    </Text>
-                    <View
-                      style={{
-                        borderLeftWidth: 1,
-                        height: 20,
-                        backgroundColor: '#ededed',
-                        marginLeft: 10,
-                      }}
-                    />
-                    <TextInput
-                      style={styles.textinput}
-                      placeholder={'Mobile Number'}
-                      placeholderTextColor={'#7a7a7a'}
-                      keyboardType={'numeric'}
-                      maxLength={10}
-                      onChangeText={mobilenumber =>
-                        this.textinputChange(mobilenumber)
-                      }
-                    />
-                  </Animated.View>
-                </Animated.View>
-                <TouchableOpacity
-                  disabled={!this.props.isUpdated}
-                  style={{
-                    marginLeft: 20,
-                    marginRight: 20,
-                    marginBottom: 20,
-                    marginTop: 10,
-                  }}
-                  onPress={() => this.loginbuttonPress(this.state.mobile)}>
-                  <View style={styles.buttonview}>
-                    <Text
-                      style={{
-                        fontFamily:
-                          Platform.OS === 'ios'
-                            ? 'Asap-Regular_Medium'
-                            : 'AsapMedium',
                         textAlign: 'center',
-                        marginLeft: 40,
-                        color: 'white',
-                        fontSize: 19,
+                        marginRight: 20,
                       }}>
-                      Get Start
+                      0707070007
                     </Text>
-                    <ActivityIndicator
-                      style={{marginRight: 20}}
-                      size={20}
-                      animating={this.props.isClick}
-                      color={'white'}
-                    />
                   </View>
-                </TouchableOpacity>
-              </Animated.View>
-            </Animated.View>
+                </Card>
+              </View>
+            </Modal>
           </View>
-
-          <RBSheet
-            animationType={'fade'}
-            ref={ref => {
-              this.myCountryPicker = ref;
-            }}
-            height={400}
-            openDuration={600}
-            closeDuration={600}
-            closeOnDragDown={true}
-            closeOnPressMask={true}
-            customStyles={{
-              // wrapper: {
-              //     backgroundColor: "transparent"
-              // },
-              draggableIcon: {
-                backgroundColor: '#000',
-              },
-              container: {
-                borderTopLeftRadius: 15,
-                borderTopRightRadius: 15,
-              },
-            }}>
-            <View
-              style={{
-                flex: 1,
-                borderTopLeftRadius: 50,
-                borderTopRightRadius: 50,
-              }}>
-              <Text
-                style={{
-                  margin: 20,
-                  fontFamily:
-                    Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-                  fontSize: 18,
-                  color: 'black',
-                  alignSelf: 'center',
-                }}>
-                Select your country
-              </Text>
-              <FlatList
-                style={{margin: 10}}
-                scrollEventThrottle={16}
-                ref={ref => {
-                  this.flatlistref = ref;
-                }}
-                data={CountryCodes}
-                renderItem={this.renderCountry}
-                keyExtractor={(item, index) => index.toString()}
-                getItemLayout={this.getItemLayout.bind(this)}
-              />
-            </View>
-          </RBSheet>
-
-          <Modal
-            visible={this.props.isVisible}
-            transparent={true}
-            animated={true}
-            animationType={'fade'}>
-            <View
-              style={{
-                flex: 1,
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: 'rgba(0,0,0, 0.7)',
-              }}>
-              <Card
-                style={{backgroundColor: 'white', width: 310, height: 480}}
-                cardElevation={2}
-                cardMaxElevation={2}
-                cornerRadius={10}>
-                <View style={{alignItems: 'flex-end', marginRight: 10}}>
-                  <TouchableOpacity
-                    style={{position: 'relative', marginTop: 10}}
-                    onPress={() => this.onClosePress()}>
-                    {/* <Icon name="close-circle" size={40} /> */}
-                    <FontAwesome6 name="circle-xmark" size={35} />
-                  </TouchableOpacity>
-                </View>
-
-                <View style={{flex: 1, alignItems: 'center'}}>
-                  <View
-                    style={{
-                      margin: 5,
-                      width: 55,
-                      height: 55,
-                      borderRadius: 100 / 2,
-                      backgroundColor: '#F4F4F4',
-                      marginBottom: 30,
-                      marginLeft: 30,
-                      marginRight: 30,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                    {/* <Icon
-                      name="lock-closed-outline"
-                      size={25}
-                      color={'black'}></Icon> */}
-                      <FontAwesome6
-  name="lock"
-  size={25}
-  color={'black'}
-/>
-                  </View>
-
-                  <Text style={{fontSize: 20, fontWeight: 'bold'}}>
-                    Enter your code
-                  </Text>
-                  <Text
-                    allowFontScaling={false}
-                    style={{textAlign: 'center', marginTop: 10}}>
-                    To continue please enter{'\n'} the verification code we've
-                    {'\n'} just send for you
-                  </Text>
-
-                  <OTPInputView
-  style={{ width: '80%', height: 100 }}
-  pinCount={4} 
-  code={this.state.otpcode}
-  autoFocusOnLoad={true}
-  keyboardType="number-pad"
-  codeInputFieldStyle={styles.underlineStyleBase}
-  codeInputHighlightStyle={styles.underlineStyleHighLighted}
-  onCodeChanged={(code) => this.setState({ otpcode: code })} 
-  onCodeFilled={(code) => {
-    console.log('OTP filled:', code); 
-    clearInterval(this.interval);
-    this.setState({ isEnable: false, second: 30 }, () => {
-      this.context.OTPVerification(code, this.state.mobile, this.props.navigation);
-      // reset otpcode here AFTER verification if needed
-    });
-  }}
-
-
-                    // onCodeFilled={code => {
-                    //   this.setState({otpcode: code});
-                    //   console.log('Login Code:', code);
-                    //   console.log(this.state.otpcode);                      
-                    //   if (code === this.state.otpcode) {                       
-                    //     clearInterval(this.interval);
-                    //     this.setState({
-                    //       isEnable: false,
-                    //       second: 30,
-                    //       otpcode: '',
-                    //     });
-                    //     this.props.navigation.replace('Dashboard');
-                    //   } else {
-                    //     Alert.alert(
-                    //       'Warning',
-                    //       'The OTP you entered could not be authenticated. Please try again.',
-                    //     );
-                    //   }
-                    // }}
-                  />
-
-                  <TouchableOpacity
-                    disabled={this.state.isEnable} 
-                    style={{flex: 1}}
-                    onPress={() => {
-                      this.resendbuttonPress(this.state.mobile);
-                    }}>
-                    <View>
-                      <Text
-                        allowFontScaling={false}
-                        style={{
-                          color: this.state.isEnable ? '#d1d1d1' : 'black',
-                        }}>
-                        Resend Code{' '}
-                        {this.state.isEnable ? '00:' + this.state.second : null}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={{
-                      width: 150,
-                      height: 50,
-                      backgroundColor: 'black',
-                      borderRadius: 10,
-                      marginTop: -30,
-                      marginBottom: 15,
-                    }}
-                    onPress={() =>
-                      this.continuebuttonPress(
-                        this.state.otpcode,
-                        this.state.mobile,
-                      )
-                    }
-                    >
-                    <View
-                      style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flex: 1,
-                      }}>
-                      <Text
-                        allowFontScaling={false}
-                        style={{
-                          fontSize: 14,
-                          color: 'white',
-                          fontWeight: 'bold',
-                        }}>
-                        Continue
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    marginLeft: '29%',
-                    marginBottom: 20,
-                  }}>
-                  <Text
-                    allowFontScaling={false}
-                    style={{
-                      fontFamily:
-                        Platform.OS === 'ios'
-                          ? 'Asap-Regular_Bold'
-                          : 'AsapBold',
-                      textAlign: 'center',
-                    }}>
-                    Hotline :
-                  </Text>
-                  <Text
-                    onPress={() => Linking.openURL(`tel:${`0707070007`}`)}
-                    allowFontScaling={false}
-                    style={{
-                      fontFamily:
-                        Platform.OS === 'ios'
-                          ? 'Asap-Regular_Medium'
-                          : 'AsapMedium',
-                      marginLeft: 5,
-                      textAlign: 'center',
-                      marginRight: 20,
-                    }}>
-                    0707070007
-                  </Text>
-                </View>
-              </Card>
-            </View>
-          </Modal>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     );
   }

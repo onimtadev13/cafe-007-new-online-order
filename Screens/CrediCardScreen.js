@@ -4,7 +4,7 @@ import {Alert, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {CreditCardInput} from '@rajeshsmallarc/react-native-creditcard';
 import {openDatabase} from 'react-native-sqlite-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 var db = openDatabase({name: 'UserDatabase.db'});
 

@@ -30,7 +30,7 @@ import {firebase} from '@react-native-firebase/messaging';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {CommonActions} from '@react-navigation/native';
 import OrderImageSlider from '../Components/OrderImageSlider';
-import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 const HEADER_MAX_HEIGHT = 200;
 const HEADER_MIN_HEIGHT = Platform.OS === 'android' ? 64 : 74;

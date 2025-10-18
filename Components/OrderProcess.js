@@ -5,7 +5,7 @@ import {Animated, Platform, Text, View} from 'react-native';
 import {WaveIndicator} from 'react-native-indicators';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 import {APIURL} from '../Data/CloneData';
-import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 export default class OrderProcess extends React.PureComponent {
   constructor(props) {
