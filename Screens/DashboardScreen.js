@@ -751,7 +751,7 @@ class DashboardScreen extends React.PureComponent {
             >
               <View style={{ flex: 0.2 }}>
                 <TouchableOpacity>
-                  <FontAwesome6 name="sliders" size={20} solid />
+                  <FontAwesome6 name="location-dot" size={20} solid />
                 </TouchableOpacity>
               </View>
 

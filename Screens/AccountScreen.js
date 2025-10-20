@@ -142,7 +142,7 @@ class AccountScreen extends React.Component {
             this.setState({fileData: null});
           }
         } else {
-          this.onUploadImage(response.base64);
+          this.onUploadImage(response.assets[0].base64);
         }
       },
     );
@@ -164,7 +164,8 @@ class AccountScreen extends React.Component {
             this.setState({fileData: null});
           }
         } else {
-          this.onUploadImage(response.base64);
+          
+          this.onUploadImage(response.assets[0].base64);
         }
       },
     );

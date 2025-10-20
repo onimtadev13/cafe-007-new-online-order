@@ -22,23 +22,24 @@ import {
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Card } from 'react-native-paper';
 import CheckBox from '@react-native-community/checkbox';
-import { NumericFormat } from 'react-number-format';
-import { connect } from 'react-redux';
-import { openDatabase } from 'react-native-sqlite-storage';
+import {NumericFormat} from 'react-number-format';
+import {connect} from 'react-redux';
+import {openDatabase} from 'react-native-sqlite-storage';
 import RadioButton from 'react-native-radio-button';
+// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import { APIURL, PLACEORDERURL } from '../Data/CloneData';
+import {APIURL, PLACEORDERURL} from '../Data/CloneData';
 import moment from 'moment';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { getVersion } from 'react-native-device-info';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import {getVersion} from 'react-native-device-info';
 import PayHere from '@payhere/payhere-mobilesdk-reactnative';
 import AlertDialog from '../Components/AlertDialog';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
-var db = openDatabase({ name: 'UserDatabase.db' });
+var db = openDatabase({name: 'UserDatabase.db'});
 
 const HEADER_MAX_HEIGHT = 130;
 const HEADER_MIN_HEIGHT = 64;
@@ -115,7 +116,7 @@ class CheckoutScreen extends React.Component {
       });
     });
 
-    this.setState({ isClickList: list });
+    this.setState({isClickList: list});
 
     this._unsubscribe = this.props.navigation.addListener('focus', async () => {
       this.GetRegisterdCreditCard();
@@ -145,7 +146,7 @@ class CheckoutScreen extends React.Component {
 
       if (value !== null) {
         // We have data!!
-        this.setState({ locationPressed: value });
+        this.setState({locationPressed: value});
       }
     } catch (error) {
       console.log(error);
@@ -166,7 +167,7 @@ class CheckoutScreen extends React.Component {
   // };
 
   handleApplyPromo = () => {
-    const { promoCode } = this.state;
+    const {promoCode} = this.state;
     console.log('Applying coupon:', promoCode);
 
     if (promoCode.trim() !== '') {
@@ -198,12 +199,12 @@ class CheckoutScreen extends React.Component {
   };
 
   onCardPress = () => {
-    this.setState({ paymentType: 'Card' });
+    this.setState({paymentType: 'Card'});
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
   onCashPress = () => {
-    this.setState({ paymentType: 'Cash' });
+    this.setState({paymentType: 'Cash'});
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
@@ -214,7 +215,7 @@ class CheckoutScreen extends React.Component {
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
-        this.setState({ cardlist: temp });
+        this.setState({cardlist: temp});
       });
     });
   };
@@ -282,14 +283,14 @@ class CheckoutScreen extends React.Component {
         console.log('GetTaxNetTotal', er);
         Alert.alert(
           'Warning',
-          "The operation couldn't be completed.",
+          "The operation coundn't be completed.",
           [
             {
               text: 'Try Again',
               onPress: () => this.GetTaxNetTotal(),
             },
           ],
-          { cancelable: false },
+          {cancelable: false},
         );
       })
       .finally(() => {
@@ -327,10 +328,10 @@ class CheckoutScreen extends React.Component {
         const Locations = [];
 
         json.CommonResult.Table.forEach(element => {
-          Locations.push({ name: element.location });
+          Locations.push({name: element.location});
         });
 
-        this.setState({ locationList: Locations });
+        this.setState({locationList: Locations});
       })
       .catch(er => {
         console.log('GetLocation', er);
@@ -383,7 +384,7 @@ class CheckoutScreen extends React.Component {
   };
 
   ApplyCoupon = async () => {
-    const { promoCode, subTotal } = this.state;
+    const {promoCode, subTotal} = this.state;
     this.togglePromoModal(false);
 
     console.log('Applying coupon via API:', promoCode);
@@ -504,7 +505,7 @@ class CheckoutScreen extends React.Component {
       .then(json => {
         if (json.strRturnRes) {
           if (json.CommonResult.Table[0].STATUS === 'T') {
-            this.setState({ dineType: 'Delivery' });
+            this.setState({dineType: 'Delivery'});
             this.GetTaxNetTotal('Delivery');
           }
           this.setState({
@@ -563,7 +564,7 @@ class CheckoutScreen extends React.Component {
       if (json.strRturnRes && json.CommonResult.Table.length > 0) {
         console.log('API isDelivery:', json.CommonResult.Table[0].isDelivery);
 
-        this.setState({ isDelivery: json.CommonResult.Table[0].isDelivery });
+        this.setState({isDelivery: json.CommonResult.Table[0].isDelivery});
       }
     } catch (error) {
       console.log('Delivery API Error:', error);
@@ -581,7 +582,7 @@ class CheckoutScreen extends React.Component {
 
   onChageAddress = () => {
     if (this.state.typeaddress != '') {
-      this.setState({ address: this.state.typeaddress });
+      this.setState({address: this.state.typeaddress});
       this.RBSheet.close();
     } else {
       this.RBSheet.close();
@@ -613,7 +614,7 @@ class CheckoutScreen extends React.Component {
       LastName = response[4][1];
       Email = response[5][1];
       City = response[6][1];
-      this.setState({ OrderID: OrderID });
+      this.setState({OrderID: OrderID});
 
       const paymentObject = {
         sandbox: false, // true if using Sandbox Merchant ID
@@ -710,7 +711,7 @@ class CheckoutScreen extends React.Component {
           // }).catch(er => {
           //     console.log("onPlaceorderPress", er);
           //     this.touchableInactive = false;
-          //     Alert.alert("Warning", "The operation couldn't be completed.", [
+          //     Alert.alert("Warning", "The operation coundn't be completed.", [
           //             {
           //                 text: "Try Again"
           //             }
@@ -772,58 +773,26 @@ class CheckoutScreen extends React.Component {
     return OrderID;
   };
 
-  // onClearAsync = async () => {
-  //   const keys = await AsyncStorage.getAllKeys();
-  //   [
-  //     'address',
-  //     'firstname',
-  //     'lastname',
-  //     'email',
-  //     'phonenumber',
-  //     'city',
-  //     'OrderID',
-  //     'EditStatus',
-  //     'fcmToken',
-  //     'LOCA',
-  //     'PUSH',
-  //     'NID',
-  //   ].forEach(p => keys.splice(keys.indexOf(p), 1));
+ onClearAsync = async () => {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const keepKeys = [
+      'address', 'firstname', 'lastname', 'email', 
+      'phonenumber', 'city', 'OrderID', 'EditStatus', 
+      'fcmToken', 'LOCA', 'LOCA_NAME', 'PUSH', 'NID'
+    ];
 
-  //   await AsyncStorage.multiRemove(keys).then(() => {
-  //     this.props.resetCart();
-  //   });
-  // };
-
-  onClearAsync = async () => {
-    try {
-      const keys = await AsyncStorage.getAllKeys();
-      const keepKeys = [
-        'address',
-        'firstname',
-        'lastname',
-        'email',
-        'phonenumber',
-        'city',
-        'OrderID',
-        'EditStatus',
-        'fcmToken',
-        'LOCA',
-        'LOCA_NAME',
-        'PUSH',
-        'NID',
-      ];
-
-      const removeKeys = keys.filter(k => !keepKeys.includes(k));
-      if (removeKeys.length > 0) {
-        await AsyncStorage.multiRemove(removeKeys);
-      }
-
-      this.props.resetCart();
-      console.log('Cart cleared successfully');
-    } catch (error) {
-      console.log('Failed to clear cart:', error);
+    const removeKeys = keys.filter(k => !keepKeys.includes(k));
+    if (removeKeys.length > 0) {
+      await AsyncStorage.multiRemove(removeKeys);
     }
-  };
+
+    this.props.resetCart();
+    console.log('Cart cleared successfully');
+  } catch (error) {
+    console.log('Failed to clear cart:', error);
+  }
+};
 
   onContinuShoppingPress = async () => {
     if (!this.RBSheetTouchableInactive) {
@@ -866,7 +835,7 @@ class CheckoutScreen extends React.Component {
           this.state.tax +
           this.state.subTotal +
           this.state.discount;
-        this.setState({ dineType: 'EatIn' });
+        this.setState({dineType: 'EatIn'});
         // this.setState({ netTotal: netTotal, dineType: "EatIn" });
         this.GetTaxNetTotal('EatIn');
         break;
@@ -876,7 +845,7 @@ class CheckoutScreen extends React.Component {
           this.state.tax +
           this.state.subTotal +
           this.state.discount;
-        this.setState({ dineType: 'PickUp' });
+        this.setState({dineType: 'PickUp'});
         // this.setState({ netTotal: netTotal, dineType: "PickUp" });
         this.GetTaxNetTotal('PickUp');
         break;
@@ -905,7 +874,7 @@ class CheckoutScreen extends React.Component {
         });
         break;
       case 'Later':
-        this.setState({ scheduleStatus: 'Later', scheduleTime: 'Choose Time' });
+        this.setState({scheduleStatus: 'Later', scheduleTime: 'Choose Time'});
         break;
 
       default:
@@ -914,15 +883,17 @@ class CheckoutScreen extends React.Component {
   };
 
   hideDatePicker = () => {
-    this.setState({ isEnableTime: false });
-  };
+  this.setState({ isEnableTime: false });
+};
 
-  handleConfirm = date => {
-    this.setState({
-      scheduleTime: moment(date).format(' hh:mm:ss A '),
-      isEnableTime: false,
-    });
-  };
+  
+handleConfirm = date => {
+  this.setState({
+    scheduleTime: moment(date).format(' hh:mm:ss A '),
+    isEnableTime: false,
+  });
+};
+
 
   onSeeMenu = () => {
     Promise.all([this.props.navigation.goBack()]).then(() =>
@@ -939,7 +910,7 @@ class CheckoutScreen extends React.Component {
   onViewItemsPress = ItemID => {
     const list = this.state.isClickList;
     list[ItemID].Checked = !list[ItemID].Checked;
-    this.setState({ isClickList: list });
+    this.setState({isClickList: list});
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
@@ -970,8 +941,8 @@ class CheckoutScreen extends React.Component {
   renderCartItems = Item => {
     return Item.map((item, index) => {
       return (
-        <View key={index} style={{ flex: 1, margin: 5, marginLeft: 10 }}>
-          <View style={{ flexDirection: 'row' }}>
+        <View key={index} style={{flex: 1, margin: 5, marginLeft: 10}}>
+          <View style={{flexDirection: 'row'}}>
             <View
               style={{
                 width: 25,
@@ -983,8 +954,7 @@ class CheckoutScreen extends React.Component {
                 marginTop: 5,
                 justifyContent: 'center',
                 borderRadius: 6,
-              }}
-            >
+              }}>
               <Text
                 style={{
                   fontFamily:
@@ -993,8 +963,7 @@ class CheckoutScreen extends React.Component {
                       : 'AsapMedium',
                   fontSize: 14,
                   fontWeight: 'bold',
-                }}
-              >
+                }}>
                 {item.Qty}
               </Text>
             </View>
@@ -1006,11 +975,10 @@ class CheckoutScreen extends React.Component {
                 marginLeft: 10,
                 flex: 0.85,
                 fontWeight: '800',
-              }}
-            >
+              }}>
               {item.ProductName}{' '}
             </Text>
-            <View style={{ flexDirection: 'column' }}>
+            <View style={{flexDirection: 'column'}}>
               <NumericFormat
                 value={item.NetTotal}
                 displayType={'text'}
@@ -1028,8 +996,7 @@ class CheckoutScreen extends React.Component {
                           ? 'Asap-Regular_Medium'
                           : 'AsapMedium',
                       fontSize: 18,
-                    }}
-                  >
+                    }}>
                     {formattedValue}
                   </Text>
                 )} // <--- Don't forget this!
@@ -1062,14 +1029,13 @@ class CheckoutScreen extends React.Component {
                       Platform.OS === 'ios'
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
-                  }}
-                >
+                  }}>
                   10% off
                 </Text>
               )}
             </View>
           </View>
-          <View style={{ marginBottom: 5 }}>
+          <View style={{marginBottom: 5}}>
             {item.Addons.length + item.Extra.length > 0 && !item.Checked ? (
               <TouchableOpacity onPress={() => this.onViewItemsPress(index)}>
                 <Text
@@ -1081,22 +1047,18 @@ class CheckoutScreen extends React.Component {
                     fontSize: 15,
                     color: '#969696',
                     marginLeft: 60,
-                  }}
-                >
+                  }}>
                   Show {item.Addons.length + item.Extra.length} more items
                 </Text>
               </TouchableOpacity>
             ) : null}
 
-            <View
-              style={{ height: item.Checked ? null : 0, overflow: 'hidden' }}
-            >
+            <View style={{height: item.Checked ? null : 0, overflow: 'hidden'}}>
               {this.renderAddons(item.Addons)}
               {this.renderExtra(item.Extra)}
               <TouchableOpacity
-                style={{ marginTop: 5 }}
-                onPress={() => this.onViewItemsPress(index)}
-              >
+                style={{marginTop: 5}}
+                onPress={() => this.onViewItemsPress(index)}>
                 <Text
                   style={{
                     fontFamily:
@@ -1106,8 +1068,7 @@ class CheckoutScreen extends React.Component {
                     fontSize: 15,
                     color: 'black',
                     marginLeft: 60,
-                  }}
-                >
+                  }}>
                   Show less items
                 </Text>
               </TouchableOpacity>
@@ -1129,8 +1090,7 @@ class CheckoutScreen extends React.Component {
               marginLeft: 60,
               flexDirection: 'row',
             },
-          ]}
-        >
+          ]}>
           <Text
             style={{
               fontFamily:
@@ -1138,8 +1098,7 @@ class CheckoutScreen extends React.Component {
               fontSize: 17,
               color: '#969696',
               marginRight: 5,
-            }}
-          >
+            }}>
             {item.name}
           </Text>
           <NumericFormat
@@ -1158,8 +1117,7 @@ class CheckoutScreen extends React.Component {
                       : 'AsapMedium',
                   fontSize: 17,
                   color: '#969696',
-                }}
-              >
+                }}>
                 ({formattedValue})
               </Text>
             )} // <--- Don't forget this!
@@ -1174,8 +1132,7 @@ class CheckoutScreen extends React.Component {
       return (
         <View
           key={key}
-          style={{ alignItems: 'center', marginLeft: 60, flexDirection: 'row' }}
-        >
+          style={{alignItems: 'center', marginLeft: 60, flexDirection: 'row'}}>
           <Text
             style={{
               fontFamily:
@@ -1183,8 +1140,7 @@ class CheckoutScreen extends React.Component {
               fontSize: 17,
               color: '#969696',
               marginRight: 5,
-            }}
-          >
+            }}>
             {item.name}
           </Text>
           <NumericFormat
@@ -1203,8 +1159,7 @@ class CheckoutScreen extends React.Component {
                       : 'AsapMedium',
                   fontSize: 17,
                   color: '#969696',
-                }}
-              >
+                }}>
                 ({formattedValue})
               </Text>
             )} // <--- Don't forget this!
@@ -1222,13 +1177,11 @@ class CheckoutScreen extends React.Component {
           cardElevation={this.state.locationPressed === item.name ? 12 : 0}
           cardMaxElevation={12}
           cornerRadius={15}
-          style={{ marginTop: 25, marginRight: 10, marginLeft: 10 }}
-        >
+          style={{marginTop: 25, marginRight: 10, marginLeft: 10}}>
           <TouchableOpacity
             onPress={() => {
-              this.setState({ locationPressed: item.name });
-            }}
-          >
+              this.setState({locationPressed: item.name});
+            }}>
             <View
               style={{
                 flexDirection: 'row',
@@ -1246,8 +1199,7 @@ class CheckoutScreen extends React.Component {
                 borderRadius: 15,
                 alignItems: 'center',
                 justifyContent: 'center',
-              }}
-            >
+              }}>
               {/* <Ionicons name="card" size={22} color={this.state.paymentType === "Card" ? "#FF6900" : "#ffa363"} /> */}
               <Text
                 style={{
@@ -1260,8 +1212,7 @@ class CheckoutScreen extends React.Component {
                     this.state.locationPressed === item.name
                       ? 'white'
                       : '#7a7a7a',
-                }}
-              >
+                }}>
                 {item.name}
               </Text>
             </View>
@@ -1282,7 +1233,7 @@ class CheckoutScreen extends React.Component {
   };
 
   onPress = index => {
-    this.setState({ selectedIndex: index });
+    this.setState({selectedIndex: index});
   };
 
   renderCard() {
@@ -1325,11 +1276,10 @@ class CheckoutScreen extends React.Component {
             alignItems: 'center',
             marginTop: 20,
             marginRight: 20,
-          }}
-        >
+          }}>
           <Image
             source={imageuri}
-            style={{ height: 35 }}
+            style={{height: 35}}
             resizeMode={'contain'}
           />
           <Text
@@ -1341,8 +1291,7 @@ class CheckoutScreen extends React.Component {
                   ? 'Asap-Regular_SemiBold'
                   : 'AsapSemiBold',
               marginLeft: 15,
-            }}
-          >
+            }}>
             {cardtype}
           </Text>
           <RadioButton
@@ -1415,17 +1364,16 @@ class CheckoutScreen extends React.Component {
     });
 
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{flex: 1}}>
         <Animated.ScrollView
           showsVerticalScrollIndicator={false}
-          style={{ backgroundColor: '#F0F0F0' }}
-          contentContainerStyle={{ paddingTop: 140 }}
+          style={{backgroundColor: '#F0F0F0'}}
+          contentContainerStyle={{paddingTop: 140}}
           onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }],
-            { useNativeDriver: true },
-          )}
-        >
-          <View style={{ flex: 1 }}>
+            [{nativeEvent: {contentOffset: {y: this.state.scrollY}}}],
+            {useNativeDriver: true},
+          )}>
+          <View style={{flex: 1}}>
             <Text
               style={{
                 fontFamily:
@@ -1437,8 +1385,7 @@ class CheckoutScreen extends React.Component {
                 marginRight: 30,
                 marginLeft: 30,
                 marginBottom: 10,
-              }}
-            >
+              }}>
               Order verification
             </Text>
             <Text
@@ -1451,8 +1398,7 @@ class CheckoutScreen extends React.Component {
                 textAlign: 'left',
                 marginRight: 30,
                 marginLeft: 30,
-              }}
-            >
+              }}>
               Terms and Conditions
             </Text>
             <View
@@ -1475,8 +1421,7 @@ class CheckoutScreen extends React.Component {
                 margin: 10,
                 textAlign: 'left',
                 marginRight: 30,
-              }}
-            >
+              }}>
               1. The order price might changed.{'\n'}2. Some of the items in the
               order will be out of stock and those items will be not delivered.
               There for total order value will be changed.{' '}
@@ -1500,8 +1445,7 @@ class CheckoutScreen extends React.Component {
                 marginTop: 10,
                 marginBottom: 10,
                 marginRight: 40,
-              }}
-            >
+              }}>
               <Text
                 style={{
                   fontFamily:
@@ -1510,15 +1454,94 @@ class CheckoutScreen extends React.Component {
                       : 'AsapSemiBold',
                   fontSize: 22,
                   flex: 1,
-                }}
-              >
+                }}>
                 Your Items
               </Text>
+              {/* <TouchableOpacity onPress={() => this.onSeeMenu()}>
+                <Text
+                  style={{
+                    marginTop: 2,
+                    fontFamily:
+                      Platform.OS === 'ios'
+                        ? 'Asap-Regular_Medium'
+                        : 'AsapMedium',
+                    color: '#7a7a7a',
+                    fontSize: 16,
+                  }}>
+                  See menu
+                </Text>
+              </TouchableOpacity> */}
+
+              {/* <TouchableOpacity
+                onPress={() => this.onSeeMenu()}
+                style={{
+                  backgroundColor: '#ffa363',
+                  paddingVertical: 12,
+                  paddingHorizontal: 24,
+                  borderRadius: 25,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  shadowColor: '#000',
+                  shadowOffset: {width: 0, height: 3},
+                  shadowOpacity: 0.2,
+                  shadowRadius: 4,
+                  elevation: 4,
+                }}>
+
+                <Text
+                  style={{
+                    fontFamily:
+                      Platform.OS === 'ios'
+                        ? 'Asap-Regular_Medium'
+                        : 'AsapMedium',
+                    color: '#ffffffff',
+                    fontSize: 16,
+                    fontWeight: '600',
+                  }}>
+                  See menu
+                </Text>
+              </TouchableOpacity> */}
+
+              {/* <TouchableOpacity
+                activeOpacity={0.8}
+                style={{flex: 0.5, alignItems: 'flex-end', marginRight: 10}}
+                onPress={() => this.props.navigation.navigate('HomeScreen')}>
+                <LinearGradient
+                  colors={['#ff914d', '#ff5e62']}
+                  style={{
+                    width: 120,
+                    height: 45,
+                    borderRadius: 25,
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    shadowColor: '#000',
+                    shadowOffset: {width: 0, height: 4},
+                    shadowOpacity: 0.25,
+                    shadowRadius: 4,
+                    elevation: 6,
+                  }}>
+                  <Text
+                    allowFontScaling={false}
+                    style={{
+                      fontFamily:
+                        Platform.OS === 'ios'
+                          ? 'Asap-SemiBold'
+                          : 'AsapSemiBold',
+                      fontSize: 16,
+                      textAlign: 'center',
+                      color: '#fff',
+                      letterSpacing: 1,
+                    }}>
+                    See Menu
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity> */}
 
               <TouchableOpacity
-                style={{ flex: 0.5, alignItems: 'flex-end', marginRight: 10 }}
-                onPress={() => this.props.navigation.navigate('HomeScreen')}
-              >
+                style={{flex: 0.5, alignItems: 'flex-end', marginRight: 10}}
+                onPress={() => this.props.navigation.navigate('HomeScreen')}>
                 <Animated.View
                   style={[
                     {
@@ -1529,9 +1552,8 @@ class CheckoutScreen extends React.Component {
                       alignItems: 'center',
                       justifyContent: 'center',
                     },
-                    { transform: [{ scale: this.state.zoomIn }] },
-                  ]}
-                >
+                    {transform: [{scale: this.state.zoomIn}]},
+                  ]}>
                   <Text
                     allowFontScaling={false}
                     style={{
@@ -1540,19 +1562,20 @@ class CheckoutScreen extends React.Component {
                       fontSize: 16,
                       textAlign: 'right',
                       color: 'white',
-                    }}
-                  >
+                    }}>
                     See menu
                   </Text>
                   {/* White border + glow */}
                   <MaskedView
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      right: 0,
-                      bottom: 0,
-                      left: 0,
-                    }}
+                    style={
+                      (style = {
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        left: 0,
+                      })
+                    }
                     maskElement={
                       <View
                         style={{
@@ -1562,8 +1585,7 @@ class CheckoutScreen extends React.Component {
                           borderColor: 'black',
                         }}
                       />
-                    }
-                  >
+                    }>
                     {/* Solid white border */}
                     <View
                       style={{
@@ -1582,14 +1604,13 @@ class CheckoutScreen extends React.Component {
                         right: 0,
                         bottom: 0,
                         left: 0,
-                        transform: [{ translateX }],
-                      }}
-                    >
+                        transform: [{translateX}],
+                      }}>
                       <LinearGradient
                         colors={['transparent', 'gold', 'transparent']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={{ flex: 1 }}
+                        start={{x: 0, y: 0}}
+                        end={{x: 1, y: 0}}
+                        style={{flex: 1}}
                       />
                     </Animated.View>
                   </MaskedView>
@@ -1608,9 +1629,8 @@ class CheckoutScreen extends React.Component {
             />
             <View>{this.renderCartItems(this.state.isClickList)}</View>
             <TouchableOpacity
-              style={{ marginLeft: 30, marginTop: 10, marginBottom: 10 }}
-              onPress={() => this.onAddItems()}
-            >
+              style={{marginLeft: 30, marginTop: 10, marginBottom: 10}}
+              onPress={() => this.onAddItems()}>
               <View
                 style={{
                   flexDirection: 'row',
@@ -1620,11 +1640,9 @@ class CheckoutScreen extends React.Component {
                   borderRadius: 100 / 2,
                   alignItems: 'center',
                   justifyContent: 'center',
-                }}
-              >
+                }}>
                 {/* <IonicIcon name="add-outline" size={20} /> */}
-                <FontAwesome6 name="plus" size={20} solid />
-
+                 <FontAwesome6 name="plus" size={20} solid />
                 <Text
                   style={{
                     fontFamily:
@@ -1634,8 +1652,7 @@ class CheckoutScreen extends React.Component {
                     color: 'black',
                     fontSize: 16,
                     marginLeft: 5,
-                  }}
-                >
+                  }}>
                   Add items
                 </Text>
               </View>
@@ -1656,8 +1673,7 @@ class CheckoutScreen extends React.Component {
                 marginTop: 30,
                 marginLeft: 30,
                 marginRight: 30,
-              }}
-            >
+              }}>
               <Text
                 style={{
                   flex: 1,
@@ -1665,8 +1681,7 @@ class CheckoutScreen extends React.Component {
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
                   color: 'black',
-                }}
-              >
+                }}>
                 Sub Total
               </Text>
               <NumericFormat
@@ -1685,8 +1700,7 @@ class CheckoutScreen extends React.Component {
                       fontSize: 18,
                       textAlign: 'right',
                       color: 'black',
-                    }}
-                  >
+                    }}>
                     {formattedValue}
                   </Text>
                 )} // <--- Don't forget this!
@@ -1700,8 +1714,7 @@ class CheckoutScreen extends React.Component {
                   marginTop: 5,
                   marginLeft: 30,
                   marginRight: 30,
-                }}
-              >
+                }}>
                 <Text
                   style={{
                     flex: 1,
@@ -1709,8 +1722,7 @@ class CheckoutScreen extends React.Component {
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 18,
                     color: 'black',
-                  }}
-                >
+                  }}>
                   Tax
                 </Text>
                 <NumericFormat
@@ -1731,8 +1743,7 @@ class CheckoutScreen extends React.Component {
                         fontSize: 20,
                         textAlign: 'right',
                         color: 'black',
-                      }}
-                    >
+                      }}>
                       {formattedValue}
                     </Text>
                   )} // <--- Don't forget this!
@@ -1747,8 +1758,7 @@ class CheckoutScreen extends React.Component {
                   marginTop: 5,
                   marginLeft: 30,
                   marginRight: 30,
-                }}
-              >
+                }}>
                 <Text
                   style={{
                     flex: 1,
@@ -1756,8 +1766,7 @@ class CheckoutScreen extends React.Component {
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 18,
                     color: 'black',
-                  }}
-                >
+                  }}>
                   Discount
                 </Text>
                 <NumericFormat
@@ -1778,8 +1787,7 @@ class CheckoutScreen extends React.Component {
                         fontSize: 20,
                         textAlign: 'right',
                         color: 'black',
-                      }}
-                    >
+                      }}>
                       {formattedValue}
                     </Text>
                   )} // <--- Don't forget this!
@@ -1794,8 +1802,7 @@ class CheckoutScreen extends React.Component {
                     marginTop: 5,
                     marginLeft: 30,
                     marginRight: 30,
-                  }}
-                >
+                  }}>
                   <Text
                     style={{
                       flex: 1,
@@ -1803,8 +1810,7 @@ class CheckoutScreen extends React.Component {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 18,
                       color: 'black',
-                    }}
-                  >
+                    }}>
                     Delivery Charge
                   </Text>
                   <NumericFormat
@@ -1825,8 +1831,7 @@ class CheckoutScreen extends React.Component {
                           fontSize: 20,
                           textAlign: 'right',
                           color: 'black',
-                        }}
-                      >
+                        }}>
                         {formattedValue}
                       </Text>
                     )} // <--- Don't forget this!
@@ -1843,8 +1848,7 @@ class CheckoutScreen extends React.Component {
                     marginTop: 5,
                     marginLeft: 30,
                     marginRight: 30,
-                  }}
-                >
+                  }}>
                   <Text
                     style={{
                       flex: 1,
@@ -1852,8 +1856,7 @@ class CheckoutScreen extends React.Component {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 18,
                       color: 'black',
-                    }}
-                  >
+                    }}>
                     Service Charge
                   </Text>
                   <NumericFormat
@@ -1874,8 +1877,7 @@ class CheckoutScreen extends React.Component {
                           fontSize: 20,
                           textAlign: 'right',
                           color: 'black',
-                        }}
-                      >
+                        }}>
                         {formattedValue}
                       </Text>
                     )} // <--- Don't forget this!
@@ -1890,8 +1892,7 @@ class CheckoutScreen extends React.Component {
                   marginTop: 5,
                   marginLeft: 30,
                   marginRight: 30,
-                }}
-              >
+                }}>
                 <Text
                   style={{
                     flex: 1,
@@ -1899,8 +1900,7 @@ class CheckoutScreen extends React.Component {
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 18,
                     color: 'black',
-                  }}
-                >
+                  }}>
                   Net Total
                 </Text>
                 <NumericFormat
@@ -1921,8 +1921,7 @@ class CheckoutScreen extends React.Component {
                         fontSize: 18,
                         textAlign: 'right',
                         color: 'black',
-                      }}
-                    >
+                      }}>
                       {formattedValue}
                     </Text>
                   )} // <--- Don't forget this!
@@ -1950,8 +1949,7 @@ class CheckoutScreen extends React.Component {
                 fontSize: 22,
                 marginTop: 15,
                 textAlign: 'center',
-              }}
-            >
+              }}>
               Coupons
             </Text>
             <Text
@@ -1965,25 +1963,23 @@ class CheckoutScreen extends React.Component {
                 color: '#1c6638ff',
                 marginTop: 5,
                 marginBottom: 5,
-              }}
-            >
+              }}>
               1 Promotions Available
             </Text>
 
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 15 }}
-            >
+              contentContainerStyle={{paddingHorizontal: 15}}>
               <Card
                 cardElevation={3}
                 cardMaxElevation={3}
                 cornerRadius={10}
-                style={{ marginHorizontal: 10, marginVertical: 8 }}
-              >
+                style={{marginHorizontal: 10, marginVertical: 8}}>
                 <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, 'SAVE1000', false)}
-                >
+                  onPress={() =>
+                    this.togglePromoModal(true, 'SAVE1000', false)
+                  }>
                   <View
                     style={{
                       borderWidth: 1,
@@ -1997,16 +1993,14 @@ class CheckoutScreen extends React.Component {
                       justifyContent: 'flex-start',
                       minHeight: 50,
                       backgroundColor: '#F0F0F0',
-                    }}
-                  >
+                    }}>
                     {/* <Ionicons name={'bookmark'} size={18} color={'#ffa363'} /> */}
-                    <FontAwesome6
+                     <FontAwesome6
                       name="bookmark"
                       size={18}
                       color="#ffa363"
                       solid
                     />
-
                     <Text
                       style={{
                         color: '#ffa363',
@@ -2017,8 +2011,7 @@ class CheckoutScreen extends React.Component {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular'
                             : 'AsapRegular',
-                      }}
-                    >
+                      }}>
                       Get Rs.1,000 OFF your next order
                     </Text>
                   </View>
@@ -2029,11 +2022,9 @@ class CheckoutScreen extends React.Component {
                 cardElevation={3}
                 cardMaxElevation={3}
                 cornerRadius={10}
-                style={{ marginHorizontal: 10, marginVertical: 8 }}
-              >
+                style={{marginHorizontal: 10, marginVertical: 8}}>
                 <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, 'SAVE101', false)}
-                >
+                  onPress={() => this.togglePromoModal(true, 'SAVE101', false)}>
                   <View
                     style={{
                       borderWidth: 1,
@@ -2047,8 +2038,7 @@ class CheckoutScreen extends React.Component {
                       justifyContent: 'flex-start', // left align with icon
                       minHeight: 50,
                       backgroundColor: '#F0F0F0',
-                    }}
-                  >
+                    }}>
                     {/* <Ionicons name={'basket'} size={18} color={'#7a7a7a'} /> */}
                     <FontAwesome6
                       name="basket-shopping"
@@ -2056,7 +2046,6 @@ class CheckoutScreen extends React.Component {
                       color="#7a7a7a"
                       solid
                     />
-
                     <Text
                       style={{
                         color: '#7a7a7a',
@@ -2067,8 +2056,7 @@ class CheckoutScreen extends React.Component {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular'
                             : 'AsapRegular',
-                      }}
-                    >
+                      }}>
                       Get Rs.750 OFF when you spend above Rs.3,000
                     </Text>
                   </View>
@@ -2079,11 +2067,9 @@ class CheckoutScreen extends React.Component {
                 cardElevation={3}
                 cardMaxElevation={3}
                 cornerRadius={10}
-                style={{ marginHorizontal: 10, marginVertical: 8 }}
-              >
+                style={{marginHorizontal: 10, marginVertical: 8}}>
                 <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, 'SAVE102', false)}
-                >
+                  onPress={() => this.togglePromoModal(true, 'SAVE102', false)}>
                   <View
                     style={{
                       borderWidth: 1,
@@ -2097,11 +2083,9 @@ class CheckoutScreen extends React.Component {
                       justifyContent: 'flex-start',
                       minHeight: 50,
                       backgroundColor: '#F0F0F0',
-                    }}
-                  >
+                    }}>
                     {/* <Ionicons name={'pricetag'} size={18} color={'#7a7a7a'} /> */}
                     <FontAwesome6 name="tag" size={18} color="#7a7a7a" solid />
-
                     <Text
                       style={{
                         color: '#7a7a7a',
@@ -2112,8 +2096,7 @@ class CheckoutScreen extends React.Component {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular'
                             : 'AsapRegular',
-                      }}
-                    >
+                      }}>
                       Get Rs.1,200 OFF on weekend orders
                     </Text>
                   </View>
@@ -2124,11 +2107,9 @@ class CheckoutScreen extends React.Component {
                 cardElevation={3}
                 cardMaxElevation={3}
                 cornerRadius={10}
-                style={{ marginHorizontal: 10, marginVertical: 8 }}
-              >
+                style={{marginHorizontal: 10, marginVertical: 8}}>
                 <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, 'SAVE103', false)}
-                >
+                  onPress={() => this.togglePromoModal(true, 'SAVE103', false)}>
                   <View
                     style={{
                       borderWidth: 1,
@@ -2142,8 +2123,7 @@ class CheckoutScreen extends React.Component {
                       justifyContent: 'flex-start',
                       minHeight: 50,
                       backgroundColor: '#F0F0F0',
-                    }}
-                  >
+                    }}>
                     {/* <Ionicons name={'beer'} size={18} color={'#7a7a7a'} /> */}
                     <FontAwesome6
                       name="beer-mug-empty"
@@ -2151,7 +2131,6 @@ class CheckoutScreen extends React.Component {
                       color="#7a7a7a"
                       solid
                     />
-
                     <Text
                       style={{
                         color: '#7a7a7a',
@@ -2162,8 +2141,7 @@ class CheckoutScreen extends React.Component {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular'
                             : 'AsapRegular',
-                      }}
-                    >
+                      }}>
                       Get Rs.300 OFF on drinks
                     </Text>
                   </View>
@@ -2174,11 +2152,9 @@ class CheckoutScreen extends React.Component {
                 cardElevation={3}
                 cardMaxElevation={3}
                 cornerRadius={10}
-                style={{ marginHorizontal: 10, marginVertical: 8 }}
-              >
+                style={{marginHorizontal: 10, marginVertical: 8}}>
                 <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, '', true)}
-                >
+                  onPress={() => this.togglePromoModal(true, '', true)}>
                   <View
                     style={{
                       borderWidth: 1,
@@ -2192,11 +2168,9 @@ class CheckoutScreen extends React.Component {
                       justifyContent: 'flex-start',
                       minHeight: 50,
                       backgroundColor: '#F0F0F0',
-                    }}
-                  >
+                    }}>
                     {/* <Ionicons name={'pricetag'} size={18} color={'#7a7a7a'} /> */}
                     <FontAwesome6 name="tag" size={18} color="#7a7a7a" solid />
-
                     <Text
                       style={{
                         color: '#7a7a7a',
@@ -2208,8 +2182,7 @@ class CheckoutScreen extends React.Component {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular'
                             : 'AsapRegular',
-                      }}
-                    >
+                      }}>
                       Have a promo code?...
                     </Text>
                     {/* <Ionicons name={'add'} size={18} color={'#7a7a7a'} /> */}
@@ -2231,7 +2204,7 @@ class CheckoutScreen extends React.Component {
           </View>
         )} */}
 
-            <View style={{ marginHorizontal: 20, marginTop: 15 }}>
+            <View style={{marginHorizontal: 20, marginTop: 15}}>
               {this.state.appliedCoupon && (
                 <View
                   style={{
@@ -2243,25 +2216,23 @@ class CheckoutScreen extends React.Component {
                     backgroundColor: '#f2f9ff',
                     borderWidth: 1,
                     borderColor: '#66b3ff',
-                  }}
-                >
-                  <View style={{ flexDirection: 'column' }}>
+                  }}>
+                  <View style={{flexDirection: 'column'}}>
                     <Text
                       style={{
                         color: '#0080ff',
                         fontWeight: 'bold',
                         fontSize: 15,
-                      }}
-                    >
+                      }}>
                       🎉 YAY! You saved Rs.{this.state.savedAmount} !
                     </Text>
-                    <Text style={{ fontSize: 13, marginTop: 3, color: '#333' }}>
+                    <Text style={{fontSize: 13, marginTop: 3, color: '#333'}}>
                       {this.state.appliedCoupon || 'None'} Applied!
                     </Text>
                   </View>
 
                   <TouchableOpacity onPress={this.handleRemoveCoupon}>
-                    <Text style={{ color: '#c62828', fontWeight: 'bold' }}>
+                    <Text style={{color: '#c62828', fontWeight: 'bold'}}>
                       REMOVE
                     </Text>
                   </TouchableOpacity>
@@ -2290,8 +2261,7 @@ class CheckoutScreen extends React.Component {
                 fontSize: 22,
                 marginTop: 15,
                 textAlign: 'center',
-              }}
-            >
+              }}>
               Dining type
             </Text>
             <Text
@@ -2303,8 +2273,7 @@ class CheckoutScreen extends React.Component {
                 marginTop: 5,
                 marginRight: 30,
                 textAlign: 'center',
-              }}
-            >
+              }}>
               Restaurants fall into several industry classifications, based upon
               menu style, preparation methods and pricing, as well as the means
               by which the food is served to the customer.
@@ -2315,17 +2284,14 @@ class CheckoutScreen extends React.Component {
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'center',
-              }}
-            >
+              }}>
               <Card
                 cardElevation={this.state.dineType === 'EatIn' ? 12 : 0}
                 cardMaxElevation={12}
                 cornerRadius={15}
-                style={{ marginTop: 25 }}
-              >
+                style={{marginTop: 25}}>
                 <TouchableOpacity
-                  onPress={() => this.onDineinTypePress('EatIn')}
-                >
+                  onPress={() => this.onDineinTypePress('EatIn')}>
                   <View
                     style={{
                       width: 100,
@@ -2337,8 +2303,7 @@ class CheckoutScreen extends React.Component {
                       borderRadius: 15,
                       alignItems: 'center',
                       justifyContent: 'center',
-                    }}
-                  >
+                    }}>
                     {/* <Ionicons
                       name="restaurant"
                       size={22}
@@ -2363,8 +2328,7 @@ class CheckoutScreen extends React.Component {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular_SemiBold'
                             : 'AsapSemiBold',
-                      }}
-                    >
+                      }}>
                       Eat in
                     </Text>
                   </View>
@@ -2374,11 +2338,9 @@ class CheckoutScreen extends React.Component {
                 cardElevation={this.state.dineType === 'PickUp' ? 12 : 0}
                 cardMaxElevation={12}
                 cornerRadius={15}
-                style={{ marginLeft: 20, marginTop: 25 }}
-              >
+                style={{marginLeft: 20, marginTop: 25}}>
                 <TouchableOpacity
-                  onPress={() => this.onDineinTypePress('PickUp')}
-                >
+                  onPress={() => this.onDineinTypePress('PickUp')}>
                   <View
                     style={{
                       width: 100,
@@ -2390,10 +2352,9 @@ class CheckoutScreen extends React.Component {
                       borderRadius: 15,
                       alignItems: 'center',
                       justifyContent: 'center',
-                    }}
-                  >
-                    <FontAwesome6
-                      name="bag-shopping"
+                    }}>
+                    <FontAwesome
+                      name="shopping-bag"
                       size={22}
                       color={
                         this.state.dineType === 'PickUp' ? 'white' : '#ffa363'
@@ -2411,8 +2372,7 @@ class CheckoutScreen extends React.Component {
                           this.state.dineType === 'PickUp'
                             ? 'white'
                             : '#7a7a7a',
-                      }}
-                    >
+                      }}>
                       Pickup
                     </Text>
                   </View>
@@ -2426,12 +2386,10 @@ class CheckoutScreen extends React.Component {
                 }
                 cardMaxElevation={12}
                 cornerRadius={15}
-                style={{ marginLeft: 20, marginTop: 25 }}
-              >
+                style={{marginLeft: 20, marginTop: 25}}>
                 <TouchableOpacity
                   onPress={() => this.onDineinTypePress('Delivery')}
-                  disabled={!this.state.isDelivery}
-                >
+                  disabled={!this.state.isDelivery}>
                   <View
                     style={{
                       width: 100,
@@ -2450,9 +2408,8 @@ class CheckoutScreen extends React.Component {
                       alignItems: 'center',
                       justifyContent: 'center',
                       opacity: this.state.isDelivery ? 1 : 0.5,
-                    }}
-                  >
-                    <FontAwesome6
+                    }}>
+                    <FontAwesome
                       name="truck"
                       size={26}
                       color={
@@ -2475,8 +2432,7 @@ class CheckoutScreen extends React.Component {
                           this.state.isDelivery
                             ? 'white'
                             : '#7a7a7a',
-                      }}
-                    >
+                      }}>
                       Delivery
                     </Text>
                   </View>
@@ -2494,10 +2450,9 @@ class CheckoutScreen extends React.Component {
                   this.state.dineType === 'PickUp'
                     ? null
                     : 0,
-              }}
-            >
+              }}>
               <View
-                style={{ height: 0.5, marginTop: 30, backgroundColor: 'black' }}
+                style={{height: 0.5, marginTop: 30, backgroundColor: 'black'}}
               />
               <Text
                 style={{
@@ -2509,8 +2464,7 @@ class CheckoutScreen extends React.Component {
                   marginTop: 15,
                   marginBottom: 10,
                   textAlign: 'center',
-                }}
-              >
+                }}>
                 {this.state.dineType === 'EatIn'
                   ? 'EatIn Order Details'
                   : 'PickUp Order Details'}
@@ -2532,8 +2486,7 @@ class CheckoutScreen extends React.Component {
                   fontSize: 18,
                   marginTop: 10,
                   marginBottom: 10,
-                }}
-              >
+                }}>
                 When would you like to place your order?
               </Text>
 
@@ -2542,9 +2495,8 @@ class CheckoutScreen extends React.Component {
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginTop: 10,
-                }}
-              >
-                <View style={{ flex: 1 }}>
+                }}>
+                <View style={{flex: 1}}>
                   <TouchableOpacity onPress={() => this.onSchedulePress('Now')}>
                     <View
                       style={{
@@ -2558,8 +2510,7 @@ class CheckoutScreen extends React.Component {
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginRight: 5,
-                      }}
-                    >
+                      }}>
                       <View
                         style={{
                           width: 20,
@@ -2569,8 +2520,7 @@ class CheckoutScreen extends React.Component {
                           backgroundColor: '#f0f0f0',
                           marginRight: 10,
                           borderRadius: 5,
-                        }}
-                      >
+                        }}>
                         {this.state.scheduleStatus === 'Now' ? (
                           // <IonicIcon
                           //   name="checkmark"
@@ -2599,17 +2549,15 @@ class CheckoutScreen extends React.Component {
                             this.state.scheduleStatus === 'Now'
                               ? 'white'
                               : 'black',
-                        }}
-                      >
+                        }}>
                         Now
                       </Text>
                     </View>
                   </TouchableOpacity>
                 </View>
-                <View style={{ flex: 1 }}>
+                <View style={{flex: 1}}>
                   <TouchableOpacity
-                    onPress={() => this.onSchedulePress('Later')}
-                  >
+                    onPress={() => this.onSchedulePress('Later')}>
                     <View
                       style={{
                         flexDirection: 'row',
@@ -2622,8 +2570,7 @@ class CheckoutScreen extends React.Component {
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginLeft: 5,
-                      }}
-                    >
+                      }}>
                       <View
                         style={{
                           width: 20,
@@ -2633,8 +2580,7 @@ class CheckoutScreen extends React.Component {
                           backgroundColor: '#f0f0f0',
                           marginRight: 10,
                           borderRadius: 5,
-                        }}
-                      >
+                        }}>
                         {this.state.scheduleStatus === 'Later' ? (
                           // <IonicIcon
                           //   name="checkmark"
@@ -2663,8 +2609,7 @@ class CheckoutScreen extends React.Component {
                             this.state.scheduleStatus === 'Later'
                               ? 'white'
                               : 'black',
-                        }}
-                      >
+                        }}>
                         Later
                       </Text>
                     </View>
@@ -2673,15 +2618,14 @@ class CheckoutScreen extends React.Component {
               </View>
 
               {this.state.scheduleStatus === 'Now' ? (
-                <View style={{ marginTop: 20 }}>
+                <View style={{marginTop: 20}}>
                   <Text
                     style={{
                       fontFamily:
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 16,
                       color: 'black',
-                    }}
-                  >
+                    }}>
                     Your order will be ready within 30 mins* from the order
                     confirmation.
                   </Text>
@@ -2691,8 +2635,7 @@ class CheckoutScreen extends React.Component {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 16,
                       color: 'black',
-                    }}
-                  >
+                    }}>
                     Current time Sri Lanka (
                     {moment(new Date()).format(' hh:mm:ss A ')})
                   </Text>
@@ -2706,9 +2649,8 @@ class CheckoutScreen extends React.Component {
                       alignItems: 'center',
                       marginTop: 20,
                       marginLeft: 3,
-                    }}
-                  >
-                    <View style={{ flex: 1 }}>
+                    }}>
+                    <View style={{flex: 1}}>
                       <Text
                         style={{
                           fontFamily:
@@ -2716,16 +2658,14 @@ class CheckoutScreen extends React.Component {
                               ? 'Asap-Regular_SemiBold'
                               : 'AsapSemiBold',
                           fontSize: 18,
-                        }}
-                      >
+                        }}>
                         {this.state.scheduleTime}
                       </Text>
                     </View>
-                    <View style={{ flex: 0.4 }}>
+                    <View style={{flex: 0.4}}>
                       <TouchableOpacity
-                        style={{ alignItems: 'flex-end' }}
-                        onPress={() => this.setState({ isEnableTime: true })}
-                      >
+                        style={{alignItems: 'flex-end'}}
+                        onPress={() => this.setState({isEnableTime: true})}>
                         <View
                           style={{
                             width: 140,
@@ -2734,8 +2674,7 @@ class CheckoutScreen extends React.Component {
                             borderRadius: 100 / 2,
                             alignItems: 'center',
                             justifyContent: 'center',
-                          }}
-                        >
+                          }}>
                           <Text
                             style={{
                               fontFamily:
@@ -2744,8 +2683,7 @@ class CheckoutScreen extends React.Component {
                                   : 'AsapRegular',
                               fontSize: 16,
                               textAlign: 'center',
-                            }}
-                          >
+                            }}>
                             Schedule Time
                           </Text>
                         </View>
@@ -2762,10 +2700,9 @@ class CheckoutScreen extends React.Component {
                 marginRight: 40,
                 overflow: 'hidden',
                 height: this.state.dineType === 'Delivery' ? null : 0,
-              }}
-            >
+              }}>
               <View
-                style={{ height: 0.5, marginTop: 30, backgroundColor: 'black' }}
+                style={{height: 0.5, marginTop: 30, backgroundColor: 'black'}}
               />
               <Text
                 style={{
@@ -2777,8 +2714,7 @@ class CheckoutScreen extends React.Component {
                   marginTop: 15,
                   marginBottom: 10,
                   textAlign: 'center',
-                }}
-              >
+                }}>
                 Delivery Order Details
               </Text>
               <View
@@ -2798,8 +2734,7 @@ class CheckoutScreen extends React.Component {
                   fontSize: 18,
                   marginTop: 10,
                   marginBottom: 10,
-                }}
-              >
+                }}>
                 When would you like to place your order?
               </Text>
 
@@ -2808,9 +2743,8 @@ class CheckoutScreen extends React.Component {
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginTop: 10,
-                }}
-              >
-                <View style={{ flex: 1 }}>
+                }}>
+                <View style={{flex: 1}}>
                   <TouchableOpacity onPress={() => this.onSchedulePress('Now')}>
                     <View
                       style={{
@@ -2824,8 +2758,7 @@ class CheckoutScreen extends React.Component {
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginRight: 5,
-                      }}
-                    >
+                      }}>
                       <View
                         style={{
                           width: 20,
@@ -2835,8 +2768,7 @@ class CheckoutScreen extends React.Component {
                           backgroundColor: '#f0f0f0',
                           marginRight: 10,
                           borderRadius: 5,
-                        }}
-                      >
+                        }}>
                         {this.state.scheduleStatus === 'Now' ? (
                           // <IonicIcon
                           //   name="checkmark"
@@ -2865,17 +2797,15 @@ class CheckoutScreen extends React.Component {
                             this.state.scheduleStatus === 'Now'
                               ? 'white'
                               : 'black',
-                        }}
-                      >
+                        }}>
                         Now
                       </Text>
                     </View>
                   </TouchableOpacity>
                 </View>
-                <View style={{ flex: 1 }}>
+                <View style={{flex: 1}}>
                   <TouchableOpacity
-                    onPress={() => this.onSchedulePress('Later')}
-                  >
+                    onPress={() => this.onSchedulePress('Later')}>
                     <View
                       style={{
                         flexDirection: 'row',
@@ -2888,8 +2818,7 @@ class CheckoutScreen extends React.Component {
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginLeft: 5,
-                      }}
-                    >
+                      }}>
                       <View
                         style={{
                           width: 20,
@@ -2899,8 +2828,7 @@ class CheckoutScreen extends React.Component {
                           backgroundColor: '#f0f0f0',
                           marginRight: 10,
                           borderRadius: 5,
-                        }}
-                      >
+                        }}>
                         {this.state.scheduleStatus === 'Later' ? (
                           // <IonicIcon
                           //   name="checkmark"
@@ -2929,8 +2857,7 @@ class CheckoutScreen extends React.Component {
                             this.state.scheduleStatus === 'Later'
                               ? 'white'
                               : 'black',
-                        }}
-                      >
+                        }}>
                         Later
                       </Text>
                     </View>
@@ -2939,15 +2866,14 @@ class CheckoutScreen extends React.Component {
               </View>
 
               {this.state.scheduleStatus === 'Now' ? (
-                <View style={{ marginTop: 20 }}>
+                <View style={{marginTop: 20}}>
                   <Text
                     style={{
                       fontFamily:
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 16,
                       color: 'black',
-                    }}
-                  >
+                    }}>
                     Your order will be ready within 30 mins* from the order
                     confirmation.
                   </Text>
@@ -2957,8 +2883,7 @@ class CheckoutScreen extends React.Component {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 16,
                       color: 'black',
-                    }}
-                  >
+                    }}>
                     Current time Sri Lanka (
                     {moment(new Date()).format(' hh:mm:ss A ')})
                   </Text>
@@ -2972,9 +2897,8 @@ class CheckoutScreen extends React.Component {
                       alignItems: 'center',
                       marginTop: 20,
                       marginLeft: 3,
-                    }}
-                  >
-                    <View style={{ flex: 1 }}>
+                    }}>
+                    <View style={{flex: 1}}>
                       <Text
                         style={{
                           fontFamily:
@@ -2982,16 +2906,14 @@ class CheckoutScreen extends React.Component {
                               ? 'Asap-Regular_SemiBold'
                               : 'AsapSemiBold',
                           fontSize: 18,
-                        }}
-                      >
+                        }}>
                         {this.state.scheduleTime}
                       </Text>
                     </View>
-                    <View style={{ flex: 0.4 }}>
+                    <View style={{flex: 0.4}}>
                       <TouchableOpacity
-                        style={{ alignItems: 'flex-end' }}
-                        onPress={() => this.setState({ isEnableTime: true })}
-                      >
+                        style={{alignItems: 'flex-end'}}
+                        onPress={() => this.setState({isEnableTime: true})}>
                         <View
                           style={{
                             width: 140,
@@ -3000,8 +2922,7 @@ class CheckoutScreen extends React.Component {
                             borderRadius: 100 / 2,
                             alignItems: 'center',
                             justifyContent: 'center',
-                          }}
-                        >
+                          }}>
                           <Text
                             style={{
                               fontFamily:
@@ -3010,8 +2931,7 @@ class CheckoutScreen extends React.Component {
                                   : 'AsapRegular',
                               fontSize: 16,
                               textAlign: 'center',
-                            }}
-                          >
+                            }}>
                             Schedule Time
                           </Text>
                         </View>
@@ -3022,7 +2942,7 @@ class CheckoutScreen extends React.Component {
               )}
 
               <View
-                style={{ height: 0.5, marginTop: 20, backgroundColor: 'black' }}
+                style={{height: 0.5, marginTop: 20, backgroundColor: 'black'}}
               />
 
               <Text
@@ -3034,28 +2954,25 @@ class CheckoutScreen extends React.Component {
                   fontSize: 18,
                   marginTop: 10,
                   marginBottom: 10,
-                }}
-              >
+                }}>
                 Where would you like your order be delivered to?
               </Text>
 
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={{ flex: 1 }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <View style={{flex: 1}}>
                   <Text
                     style={{
                       fontFamily:
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 16,
-                    }}
-                  >
+                    }}>
                     {this.state.address}
                   </Text>
                 </View>
-                <View style={{ flex: 0.4 }}>
+                <View style={{flex: 0.4}}>
                   <TouchableOpacity
-                    style={{ alignItems: 'flex-end' }}
-                    onPress={() => this.RBSheet.open()}
-                  >
+                    style={{alignItems: 'flex-end'}}
+                    onPress={() => this.RBSheet.open()}>
                     <View
                       style={{
                         width: 80,
@@ -3064,8 +2981,7 @@ class CheckoutScreen extends React.Component {
                         borderRadius: 100 / 2,
                         alignItems: 'center',
                         justifyContent: 'center',
-                      }}
-                    >
+                      }}>
                       <Text
                         style={{
                           fontFamily:
@@ -3074,8 +2990,7 @@ class CheckoutScreen extends React.Component {
                               : 'AsapRegular',
                           fontSize: 16,
                           textAlign: 'right',
-                        }}
-                      >
+                        }}>
                         Change
                       </Text>
                     </View>
@@ -3107,8 +3022,7 @@ class CheckoutScreen extends React.Component {
                 marginBottom: 2,
                 marginRight: 30,
                 textAlign: 'center',
-              }}
-            >
+              }}>
               Payment type
             </Text>
             <Text
@@ -3120,19 +3034,17 @@ class CheckoutScreen extends React.Component {
                 marginTop: 5,
                 marginRight: 30,
                 textAlign: 'center',
-              }}
-            >
+              }}>
               Payment is the transfer of money or goods and services in exchange
               for a product or service.
             </Text>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+            <View style={{flexDirection: 'row', justifyContent: 'center'}}>
               <Card
                 cardElevation={this.state.paymentType === 'Card' ? 12 : 0}
                 cardMaxElevation={12}
                 cornerRadius={15}
-                style={{ marginTop: 25 }}
-              >
+                style={{marginTop: 25}}>
                 <TouchableOpacity onPress={() => this.onCardPress()}>
                   <View
                     style={{
@@ -3143,12 +3055,10 @@ class CheckoutScreen extends React.Component {
                         this.state.paymentType === 'Card' ? 'black' : '#F0F0F0',
                       borderColor:
                         this.state.paymentType === 'Card' ? 'black' : '#dbdbdb',
-                      // borderWidth: 1.5,
                       borderRadius: 15,
                       alignItems: 'center',
                       justifyContent: 'center',
-                    }}
-                  >
+                    }}>
                     {/* <Ionicons
                       name="card"
                       size={22}
@@ -3176,8 +3086,7 @@ class CheckoutScreen extends React.Component {
                           this.state.paymentType === 'Card'
                             ? 'white'
                             : '#7a7a7a',
-                      }}
-                    >
+                      }}>
                       Card
                     </Text>
                   </View>
@@ -3191,8 +3100,7 @@ class CheckoutScreen extends React.Component {
                 cardElevation={this.state.paymentType === 'Cash' ? 12 : 0}
                 cardMaxElevation={12}
                 cornerRadius={15}
-                style={{ marginLeft: 20, marginTop: 25 }}
-              >
+                style={{marginLeft: 20, marginTop: 25}}>
                 <TouchableOpacity onPress={() => this.onCashPress()}>
                   <View
                     style={{
@@ -3203,12 +3111,10 @@ class CheckoutScreen extends React.Component {
                         this.state.paymentType === 'Cash' ? 'black' : '#F0F0F0',
                       borderColor:
                         this.state.paymentType === 'Cash' ? 'black' : '#dbdbdb',
-                      // borderWidth: 1.5,
                       borderRadius: 15,
                       alignItems: 'center',
                       justifyContent: 'center',
-                    }}
-                  >
+                    }}>
                     {/* <Ionicons
                       name="cash"
                       size={22}
@@ -3236,8 +3142,7 @@ class CheckoutScreen extends React.Component {
                           this.state.paymentType === 'Cash'
                             ? 'white'
                             : '#7a7a7a',
-                      }}
-                    >
+                      }}>
                       Cash
                     </Text>
                   </View>
@@ -3328,8 +3233,7 @@ class CheckoutScreen extends React.Component {
             marginRight: 30,
             marginBottom: 20,
           }}
-          onPress={() => this.onPlaceorderPress()}
-        >
+          onPress={() => this.onPlaceorderPress()}>
           <View
             style={{
               width: '100%',
@@ -3338,8 +3242,7 @@ class CheckoutScreen extends React.Component {
               justifyContent: 'center',
               backgroundColor: 'black',
               flexDirection: 'row',
-            }}
-          >
+            }}>
             <Text
               style={{
                 color: 'white',
@@ -3348,8 +3251,7 @@ class CheckoutScreen extends React.Component {
                 fontSize: 18,
                 marginRight: 20,
                 marginLeft: 50,
-              }}
-            >
+              }}>
               Place Order
             </Text>
             <ActivityIndicator
@@ -3363,9 +3265,8 @@ class CheckoutScreen extends React.Component {
         <Animated.View
           style={[
             styles.header,
-            { transform: [{ translateY: headerTranslateY }] },
-          ]}
-        >
+            {transform: [{translateY: headerTranslateY}]},
+          ]}>
           <Animated.View
             style={[
               {
@@ -3374,29 +3275,26 @@ class CheckoutScreen extends React.Component {
               },
               {
                 transform: [
-                  { translateX: titleTranslateX },
-                  { scale: titleScale },
-                  { translateY: titleTranslateY },
+                  {translateX: titleTranslateX},
+                  {scale: titleScale},
+                  {translateY: titleTranslateY},
                 ],
               },
-            ]}
-          >
+            ]}>
             <Text
               style={{
                 fontFamily:
                   Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                 fontSize: 28,
-              }}
-            >
+              }}>
               Checkout
             </Text>
           </Animated.View>
         </Animated.View>
 
         <TouchableOpacity
-          style={{ top: 30, left: 20, position: 'absolute' }}
-          onPress={() => this.props.navigation.goBack()}
-        >
+          style={{top: 30, left: 20, position: 'absolute'}}
+          onPress={() => this.props.navigation.goBack()}>
           <Animated.View
             style={[
               {
@@ -3407,15 +3305,14 @@ class CheckoutScreen extends React.Component {
               },
               {
                 transform: [
-                  { scale: buttonScale },
-                  { translateY: buttonTranslateY },
+                  {scale: buttonScale},
+                  {translateY: buttonTranslateY},
                 ],
               },
-            ]}
-          >
+            ]}>
             <Image
               source={require('../assets/left-arrow.png')}
-              style={{ width: 20, height: 20 }}
+              style={{width: 20, height: 20}}
             />
           </Animated.View>
         </TouchableOpacity>
@@ -3435,9 +3332,8 @@ class CheckoutScreen extends React.Component {
             draggableIcon: {
               backgroundColor: '#000',
             },
-          }}
-        >
-          <View style={{ flex: 1 }}>
+          }}>
+          <View style={{flex: 1}}>
             <Text
               style={{
                 margin: 10,
@@ -3446,8 +3342,7 @@ class CheckoutScreen extends React.Component {
                 fontSize: 18,
                 color: 'black',
                 alignSelf: 'center',
-              }}
-            >
+              }}>
               Change Delivery Address
             </Text>
             <TextInput
@@ -3472,7 +3367,7 @@ class CheckoutScreen extends React.Component {
               blurOnSubmit={true}
               keyboardType={'default'}
               placeholderTextColor={'#7a7a7a'}
-              onChangeText={address => this.setState({ typeaddress: address })}
+              onChangeText={address => this.setState({typeaddress: address})}
             />
             <TextInput
               style={{
@@ -3497,7 +3392,7 @@ class CheckoutScreen extends React.Component {
               keyboardType={'default'}
               placeholder={'City'}
               placeholderTextColor={'#7a7a7a'}
-              onChangeText={address => this.setState({ typeaddress: address })}
+              onChangeText={address => this.setState({typeaddress: address})}
             />
             <TouchableOpacity
               style={{
@@ -3505,8 +3400,7 @@ class CheckoutScreen extends React.Component {
                 justifyContent: 'center',
                 margin: 5,
               }}
-              onPress={() => this.onChageAddress()}
-            >
+              onPress={() => this.onChageAddress()}>
               <View
                 style={{
                   width: '92%',
@@ -3515,8 +3409,7 @@ class CheckoutScreen extends React.Component {
                   justifyContent: 'center',
                   backgroundColor: 'black',
                   borderRadius: 5,
-                }}
-              >
+                }}>
                 <Text
                   style={{
                     color: 'white',
@@ -3525,8 +3418,7 @@ class CheckoutScreen extends React.Component {
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     fontSize: 18,
-                  }}
-                >
+                  }}>
                   Done
                 </Text>
               </View>
@@ -3556,17 +3448,15 @@ class CheckoutScreen extends React.Component {
               borderTopLeftRadius: 15,
               borderTopRightRadius: 15,
             },
-          }}
-        >
-          <View style={{ flex: 1 }}>
+          }}>
+          <View style={{flex: 1}}>
             <View
               style={{
                 flexDirection: 'row',
                 marginLeft: 30,
                 marginTop: 30,
                 marginBottom: 20,
-              }}
-            >
+              }}>
               <TouchableOpacity onPress={() => this.SRBSheet.close()}>
                 {/* <Ionicons
                   name={'arrow-back-outline'}
@@ -3583,8 +3473,7 @@ class CheckoutScreen extends React.Component {
                   fontSize: 24,
                   color: 'black',
                   marginLeft: 30,
-                }}
-              >
+                }}>
                 Summary
               </Text>
             </View>
@@ -3621,8 +3510,7 @@ class CheckoutScreen extends React.Component {
                     Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                   fontSize: 18,
                   marginLeft: 20,
-                }}
-              >
+                }}>
                 BILLING INFORMATION
               </Text>
 
@@ -3642,8 +3530,7 @@ class CheckoutScreen extends React.Component {
                   marginTop: 20,
                   marginLeft: 30,
                   marginRight: 30,
-                }}
-              >
+                }}>
                 <Text
                   style={{
                     flex: 1,
@@ -3651,8 +3538,7 @@ class CheckoutScreen extends React.Component {
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 18,
                     color: 'black',
-                  }}
-                >
+                  }}>
                   Sub Total
                 </Text>
                 <NumericFormat
@@ -3673,8 +3559,7 @@ class CheckoutScreen extends React.Component {
                         fontSize: 18,
                         textAlign: 'right',
                         color: 'black',
-                      }}
-                    >
+                      }}>
                       {formattedValue}
                     </Text>
                   )} // <--- Don't forget this!
@@ -3688,8 +3573,7 @@ class CheckoutScreen extends React.Component {
                     marginTop: 5,
                     marginLeft: 30,
                     marginRight: 30,
-                  }}
-                >
+                  }}>
                   <Text
                     style={{
                       flex: 1,
@@ -3697,8 +3581,7 @@ class CheckoutScreen extends React.Component {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 18,
                       color: 'black',
-                    }}
-                  >
+                    }}>
                     Tax
                   </Text>
                   <NumericFormat
@@ -3719,8 +3602,7 @@ class CheckoutScreen extends React.Component {
                           fontSize: 20,
                           textAlign: 'right',
                           color: 'black',
-                        }}
-                      >
+                        }}>
                         {formattedValue}
                       </Text>
                     )} // <--- Don't forget this!
@@ -3735,8 +3617,7 @@ class CheckoutScreen extends React.Component {
                     marginTop: 5,
                     marginLeft: 30,
                     marginRight: 30,
-                  }}
-                >
+                  }}>
                   <Text
                     style={{
                       flex: 1,
@@ -3744,8 +3625,7 @@ class CheckoutScreen extends React.Component {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 18,
                       color: 'black',
-                    }}
-                  >
+                    }}>
                     Discount
                   </Text>
                   <NumericFormat
@@ -3766,8 +3646,7 @@ class CheckoutScreen extends React.Component {
                           fontSize: 20,
                           textAlign: 'right',
                           color: 'black',
-                        }}
-                      >
+                        }}>
                         {formattedValue}
                       </Text>
                     )} // <--- Don't forget this!
@@ -3782,8 +3661,7 @@ class CheckoutScreen extends React.Component {
                       marginTop: 5,
                       marginLeft: 30,
                       marginRight: 30,
-                    }}
-                  >
+                    }}>
                     <Text
                       style={{
                         flex: 1,
@@ -3793,8 +3671,7 @@ class CheckoutScreen extends React.Component {
                             : 'AsapRegular',
                         fontSize: 18,
                         color: 'black',
-                      }}
-                    >
+                      }}>
                       Delivery Charge
                     </Text>
                     <NumericFormat
@@ -3815,8 +3692,7 @@ class CheckoutScreen extends React.Component {
                             fontSize: 20,
                             textAlign: 'right',
                             color: 'black',
-                          }}
-                        >
+                          }}>
                           {formattedValue}
                         </Text>
                       )} // <--- Don't forget this!
@@ -3833,8 +3709,7 @@ class CheckoutScreen extends React.Component {
                       marginTop: 5,
                       marginLeft: 30,
                       marginRight: 30,
-                    }}
-                  >
+                    }}>
                     <Text
                       style={{
                         flex: 1,
@@ -3844,8 +3719,7 @@ class CheckoutScreen extends React.Component {
                             : 'AsapRegular',
                         fontSize: 18,
                         color: 'black',
-                      }}
-                    >
+                      }}>
                       Service Charge
                     </Text>
                     <NumericFormat
@@ -3866,8 +3740,7 @@ class CheckoutScreen extends React.Component {
                             fontSize: 20,
                             textAlign: 'right',
                             color: 'black',
-                          }}
-                        >
+                          }}>
                           {formattedValue}
                         </Text>
                       )} // <--- Don't forget this!
@@ -3882,8 +3755,7 @@ class CheckoutScreen extends React.Component {
                     marginTop: 5,
                     marginLeft: 30,
                     marginRight: 30,
-                  }}
-                >
+                  }}>
                   <Text
                     style={{
                       flex: 1,
@@ -3891,8 +3763,7 @@ class CheckoutScreen extends React.Component {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 18,
                       color: 'black',
-                    }}
-                  >
+                    }}>
                     Net Total
                   </Text>
                   <NumericFormat
@@ -3913,8 +3784,7 @@ class CheckoutScreen extends React.Component {
                           fontSize: 18,
                           textAlign: 'right',
                           color: 'black',
-                        }}
-                      >
+                        }}>
                         {formattedValue}
                       </Text>
                     )} // <--- Don't forget this!
@@ -3939,8 +3809,7 @@ class CheckoutScreen extends React.Component {
                     Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                   fontSize: 18,
                   marginLeft: 20,
-                }}
-              >
+                }}>
                 ORDER INFORMATION
               </Text>
               <Text
@@ -3952,8 +3821,7 @@ class CheckoutScreen extends React.Component {
                   marginRight: 20,
                   color: '#9c9c9c',
                   marginTop: 5,
-                }}
-              >
+                }}>
                 The information presented here is included on your order like
                 payment type , dine type , delivery address
               </Text>
@@ -3974,16 +3842,14 @@ class CheckoutScreen extends React.Component {
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginLeft: 20,
-                }}
-              >
+                }}>
                 <Text
                   style={{
                     fontFamily:
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 17,
                     color: '#9c9c9c',
-                  }}
-                >
+                  }}>
                   Payment Type :
                 </Text>
                 <Text
@@ -3992,8 +3858,7 @@ class CheckoutScreen extends React.Component {
                       Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                     fontSize: 17,
                     marginLeft: 10,
-                  }}
-                >
+                  }}>
                   {this.state.paymentType === ''
                     ? 'Not Selected'
                     : this.state.paymentType}
@@ -4004,16 +3869,14 @@ class CheckoutScreen extends React.Component {
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginLeft: 20,
-                }}
-              >
+                }}>
                 <Text
                   style={{
                     fontFamily:
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 17,
                     color: '#9c9c9c',
-                  }}
-                >
+                  }}>
                   Location :
                 </Text>
                 <Text
@@ -4022,8 +3885,7 @@ class CheckoutScreen extends React.Component {
                       Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                     fontSize: 17,
                     marginLeft: 10,
-                  }}
-                >
+                  }}>
                   {this.state.locationPressed === ''
                     ? 'Not Selected'
                     : this.state.locationPressed}
@@ -4035,16 +3897,14 @@ class CheckoutScreen extends React.Component {
                   alignItems: 'center',
                   marginTop: 3,
                   marginLeft: 20,
-                }}
-              >
+                }}>
                 <Text
                   style={{
                     fontFamily:
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 17,
                     color: '#9c9c9c',
-                  }}
-                >
+                  }}>
                   Dine Type :
                 </Text>
                 <Text
@@ -4053,8 +3913,7 @@ class CheckoutScreen extends React.Component {
                       Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                     fontSize: 17,
                     marginLeft: 10,
-                  }}
-                >
+                  }}>
                   {this.state.dineType === 'null'
                     ? 'Not Selected'
                     : this.state.dineType}
@@ -4067,16 +3926,14 @@ class CheckoutScreen extends React.Component {
                     marginTop: 3,
                     marginLeft: 20,
                     marginRight: 20,
-                  }}
-                >
+                  }}>
                   <Text
                     style={{
                       fontFamily:
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 17,
                       color: '#9c9c9c',
-                    }}
-                  >
+                    }}>
                     Delivery Address :
                   </Text>
                   <Text
@@ -4088,8 +3945,7 @@ class CheckoutScreen extends React.Component {
                           : 'AsapBold',
                       fontSize: 17,
                       marginLeft: 10,
-                    }}
-                  >
+                    }}>
                     {this.state.address}
                   </Text>
                 </View>
@@ -4114,8 +3970,7 @@ class CheckoutScreen extends React.Component {
                 marginRight: 30,
                 marginBottom: 20,
               }}
-              onPress={() => this.onAgreePress()}
-            >
+              onPress={() => this.onAgreePress()}>
               <View
                 style={{
                   width: '100%',
@@ -4124,8 +3979,7 @@ class CheckoutScreen extends React.Component {
                   justifyContent: 'center',
                   backgroundColor: 'black',
                   flexDirection: 'row',
-                }}
-              >
+                }}>
                 <Text
                   style={{
                     color: 'white',
@@ -4136,8 +3990,7 @@ class CheckoutScreen extends React.Component {
                     fontSize: 18,
                     marginRight: 20,
                     marginLeft: 50,
-                  }}
-                >
+                  }}>
                   I Agree
                 </Text>
                 <ActivityIndicator
@@ -4168,13 +4021,12 @@ class CheckoutScreen extends React.Component {
             draggableIcon: {
               backgroundColor: '#000',
             },
-          }}
-        >
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <View style={{ marginTop: 30, marginBottom: 10 }}>
+          }}>
+          <View style={{flex: 1, alignItems: 'center'}}>
+            <View style={{marginTop: 30, marginBottom: 10}}>
               <Image
                 source={require('../assets/4.png')}
-                style={{ width: 110, height: 110, borderRadius: 110 / 2 }}
+                style={{width: 110, height: 110, borderRadius: 110 / 2}}
               />
             </View>
             <Text
@@ -4183,8 +4035,7 @@ class CheckoutScreen extends React.Component {
                   Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                 fontSize: 24,
                 color: 'black',
-              }}
-            >
+              }}>
               Thank you for your order!
             </Text>
             <Text
@@ -4197,12 +4048,11 @@ class CheckoutScreen extends React.Component {
                 fontSize: 15,
                 color: '#5C5C5C',
                 textAlign: 'center',
-              }}
-            >
+              }}>
               We take pride using only the best ingredients for the food that
               ends up on your table.
             </Text>
-            <View style={{ marginTop: 25 }}>
+            <View style={{marginTop: 25}}>
               <TouchableOpacity onPress={() => this.onContinuShoppingPress()}>
                 <View
                   style={{
@@ -4212,8 +4062,7 @@ class CheckoutScreen extends React.Component {
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexDirection: 'row',
-                  }}
-                >
+                  }}>
                   <Text
                     style={{
                       fontFamily:
@@ -4224,8 +4073,7 @@ class CheckoutScreen extends React.Component {
                       color: 'white',
                       marginRight: 20,
                       marginLeft: 20,
-                    }}
-                  >
+                    }}>
                     Done
                   </Text>
                 </View>
@@ -4234,15 +4082,16 @@ class CheckoutScreen extends React.Component {
           </View>
         </RBSheet>
 
-        <DateTimePicker
-          isVisible={this.state.isEnableTime}
-          mode="time"
-          value={new Date()} // Changed from 'date' to 'value'
-          onConfirm={this.handleConfirm}
-          onCancel={this.hideDatePicker}
-          display={Platform.OS === 'ios' ? null : 'spinner'}
-        />
+        <DateTimePickerModal
+  isVisible={this.state.isEnableTime}
+  mode="time"
+  date={new Date()}
+  onConfirm={this.handleConfirm}
+  onCancel={this.hideDatePicker}
+  display='spinner'
+/>
 
+       
         {this.state.dialogVisible && (
           <View
             style={{
@@ -4255,11 +4104,10 @@ class CheckoutScreen extends React.Component {
               right: 0,
               alignItems: 'center',
               justifyContent: 'center',
-            }}
-          >
+            }}>
             <AlertDialog
               onbuttonPress={() => {
-                this.setState({ dialogVisible: false });
+                this.setState({dialogVisible: false});
               }}
               message={this.state.status_message}
             />
@@ -4272,15 +4120,13 @@ class CheckoutScreen extends React.Component {
           transparent
           visible={this.state.promoModalVisible}
           animationType="slide"
-          onRequestClose={() => this.togglePromoModal(false)}
-        >
+          onRequestClose={() => this.togglePromoModal(false)}>
           <View
             style={{
               flex: 1,
               justifyContent: 'flex-end',
               backgroundColor: 'rgba(0,0,0,0.4)',
-            }}
-          >
+            }}>
             <View
               style={{
                 backgroundColor: '#fff',
@@ -4288,8 +4134,7 @@ class CheckoutScreen extends React.Component {
                 borderTopRightRadius: 12,
                 padding: 20,
                 alignItems: 'center',
-              }}
-            >
+              }}>
               <TouchableOpacity
                 onPress={() => this.togglePromoModal(false)}
                 style={{
@@ -4297,8 +4142,7 @@ class CheckoutScreen extends React.Component {
                   top: 15,
                   right: 15,
                   padding: 5,
-                }}
-              >
+                }}>
                 {/* <Ionicons name="close" size={22} color="#333" /> */}
                 <FontAwesome6 name="xmark" size={22} color="#333" solid />
               </TouchableOpacity>
@@ -4307,8 +4151,7 @@ class CheckoutScreen extends React.Component {
                   fontSize: 18,
                   fontWeight: 'bold',
                   marginBottom: 15,
-                }}
-              >
+                }}>
                 Enter promo code
               </Text>
 
@@ -4327,7 +4170,7 @@ class CheckoutScreen extends React.Component {
                 placeholderTextColor="#aaa"
                 value={this.state.promoCode}
                 editable={this.state.isCustomPromo}
-                onChangeText={text => this.setState({ promoCode: text })}
+                onChangeText={text => this.setState({promoCode: text})}
               />
 
               <TouchableOpacity
@@ -4339,11 +4182,8 @@ class CheckoutScreen extends React.Component {
                   alignItems: 'center',
                   width: '100%',
                 }}
-                onPress={this.ApplyCoupon}
-              >
-                <Text
-                  style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}
-                >
+                onPress={this.ApplyCoupon}>
+                <Text style={{fontSize: 16, fontWeight: 'bold', color: '#000'}}>
                   Apply
                 </Text>
               </TouchableOpacity>
@@ -4385,7 +4225,7 @@ class CheckoutScreen extends React.Component {
 
       // Clear Redux + local state
       this.props.resetCart();
-      this.setState({ list: [], Additionallist: [] });
+      this.setState({list: [], Additionallist: []});
 
       console.log('Cart cleared successfully');
     } catch (error) {
@@ -4401,7 +4241,7 @@ class CheckoutScreen extends React.Component {
     let Mobile = await AsyncStorage.getItem('phonenumber');
     let Address = '';
     const ItemList = this.props.cartItems;
-    this.setState({ OrderID: OrderID });
+    this.setState({OrderID: OrderID});
 
     switch (this.state.dineType) {
       case 'EatIn':
@@ -4464,13 +4304,13 @@ class CheckoutScreen extends React.Component {
         this.touchableInactive = false;
         Alert.alert(
           'Warning',
-          "The operation couldn't be completed.",
+          "The operation coundn't be completed.",
           [
             {
               text: 'Try Again',
             },
           ],
-          { cancelable: false },
+          {cancelable: false},
         );
       });
   }
@@ -4483,7 +4323,7 @@ class CheckoutScreen extends React.Component {
     let Mobile = await AsyncStorage.getItem('phonenumber');
     let Address = '';
     const ItemList = this.props.cartItems;
-    this.setState({ OrderID: OrderID });
+    this.setState({OrderID: OrderID});
 
     switch (this.state.dineType) {
       case 'EatIn':
@@ -4552,13 +4392,13 @@ class CheckoutScreen extends React.Component {
         this.touchableInactive = false;
         Alert.alert(
           'Warning',
-          "The operation couldn't be completed.",
+          "The operation coundn't be completed.",
           [
             {
               text: 'Try Again',
             },
           ],
-          { cancelable: false },
+          {cancelable: false},
         );
       });
   }
@@ -4566,7 +4406,7 @@ class CheckoutScreen extends React.Component {
 
 const mapDispatchToProps = dispatch => {
   return {
-    resetCart: () => dispatch({ type: 'RESET_CART' }),
+    resetCart: () => dispatch({type: 'RESET_CART'}),
   };
 };
 

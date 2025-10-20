@@ -432,89 +432,98 @@ const App = () => {
     );
   };
 
-  const CheckAppVersion = () => {
-    fetch(APIURL, {
-      method: 'POST',
-      cache: 'no-cache',
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'no-cache',
-      },
-      body: JSON.stringify({
-        HasReturnData: 'T',
-        Parameters: [
-          {
-            Para_Data: '92',
-            Para_Direction: 'Input',
-            Para_Lenth: 10,
-            Para_Name: '@Iid',
-            Para_Type: 'int',
-          },
-          {
-            Para_Data: getVersion(),
-            Para_Direction: 'Input',
-            Para_Lenth: 100,
-            Para_Name: '@Text1',
-            Para_Type: 'varchar',
-          },
-          {
-            Para_Data: Platform.OS,
-            Para_Direction: 'Input',
-            Para_Lenth: 100,
-            Para_Name: '@Text2',
-            Para_Type: 'varchar',
-          },
-        ],
-        SpName: 'sp_Android_Common_API',
-        con: '1',
-      }),
-    })
-      .then(res => {
-        return res.json();
-      })
-      .then(json => {
-        const Status = json.CommonResult.Table[0].Status;
-        var AppURL = json.CommonResult.Table[0].AppURL;
 
-        if (Status === 'Exist') {
-          setUpdated(true);
-          CheckUserLogin();
-        } else {
-          setUpdated(false);
+const CheckAppVersion = () => {
+  fetch(APIURL, {
+    method: 'POST',
+    cache: 'no-cache',
+    headers: {
+      'content-type': 'application/json',
+      'cache-control': 'no-cache',
+    },
+    body: JSON.stringify({
+      HasReturnData: 'T',
+      Parameters: [
+        {
+          Para_Data: '92',
+          Para_Direction: 'Input',
+          Para_Lenth: 10,
+          Para_Name: '@Iid',
+          Para_Type: 'int',
+        },
+        {
+          Para_Data: getVersion(),
+          Para_Direction: 'Input',
+          Para_Lenth: 100,
+          Para_Name: '@Text1',
+          Para_Type: 'varchar',
+        },
+        {
+          Para_Data: Platform.OS,
+          Para_Direction: 'Input',
+          Para_Lenth: 100,
+          Para_Name: '@Text2',
+          Para_Type: 'varchar',
+        },
+      ],
+      SpName: 'sp_Android_Common_API',
+      con: '1',
+    }),
+  })
+    .then(res => {
+      return res.json();
+    })
+    .then(json => {
+      const Status = json.CommonResult.Table[0].Status;
+      var AppURL = json.CommonResult.Table[0].AppURL;
+
+      if (Status === 'Exist') {
+        setUpdated(true);
+        CheckUserLogin(); // This now handles auth better
+      } else {
+        setUpdated(false);
+        SplashScreen.hide();
+        Alert.alert(
+          'Update is available',
+          'An update for the application is available',
+          [
+            {
+              text: 'Update',
+              onPress: () => openAppStore(AppURL),
+            },
+          ],
+          { cancelable: false },
+        );
+      }
+    })
+    .catch(er => {
+      console.log('CheckAppVersion', er);
+
+      // On error, still try to log user in if they have credentials
+      AsyncStorage.getItem('phonenumber').then(phone => {
+        if (phone) {
+          dispatch({ Type: 'RETREIVE_TOKEN', Token: phone });
           SplashScreen.hide();
+        } else {
           Alert.alert(
-            'Update is available',
-            'An update for the application is available',
+            'Warning',
+            "The operation couldn't be completed.",
             [
               {
-                text: 'Update',
-                onPress: () => openAppStore(AppURL),
+                text: 'Try Again',
+                onPress: () => CheckAppVersion(),
+              },
+              {
+                text: 'Close',
+                onPress: () => BackHandler.exitApp(),
               },
             ],
             { cancelable: false },
           );
         }
-      })
-      .catch(er => {
-        console.log('CheckAppVersion', er);
-
-        Alert.alert(
-          'Warning',
-          "The operation couldn't be completed.",
-          [
-            {
-              text: 'Try Again',
-              onPress: () => CheckAppVersion(),
-            },
-            {
-              text: 'Close',
-              onPress: () => BackHandler.exitApp(),
-            },
-          ],
-          { cancelable: false },
-        );
       });
-  };
+    });
+};
 
   useEffect(() => {
     if (loginstate.userToken) {
@@ -659,108 +668,152 @@ const App = () => {
     });
   };
 
-  const CheckUserExist = async mobilenumber => {
-    AsyncStorage.getItem('fcmToken').then(FCMToken => {
-      console.log(FCMToken);
 
-      fetch(APIURL, {
-        method: 'POST',
-        cache: 'no-cache',
-        headers: {
-          'content-type': 'application/json',
-          'cache-control': 'no-cache',
-        },
-        body: JSON.stringify({
-          HasReturnData: 'T',
-          Parameters: [
+  const CheckUserExist = async mobilenumber => {
+  // If no mobile number, show login immediately
+  if (!mobilenumber) {
+    dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
+    setTimeout(() => {
+      SplashScreen.hide();
+    }, 1000);
+    return;
+  }
+
+  AsyncStorage.getItem('fcmToken').then(FCMToken => {
+    console.log(FCMToken);
+
+    fetch(APIURL, {
+      method: 'POST',
+      cache: 'no-cache',
+      headers: {
+        'content-type': 'application/json',
+        'cache-control': 'no-cache',
+      },
+      body: JSON.stringify({
+        HasReturnData: 'T',
+        Parameters: [
+          {
+            Para_Data: '87',
+            Para_Direction: 'Input',
+            Para_Lenth: 10,
+            Para_Name: '@Iid',
+            Para_Type: 'int',
+          },
+          {
+            Para_Data: mobilenumber,
+            Para_Direction: 'Input',
+            Para_Lenth: 100,
+            Para_Name: '@Text1',
+            Para_Type: 'varchar',
+          },
+          {
+            Para_Data: FCMToken,
+            Para_Direction: 'Input',
+            Para_Lenth: 50000,
+            Para_Name: '@Text2',
+            Para_Type: 'varchar',
+          },
+          {
+            Para_Data: 'CC',
+            Para_Direction: 'Input',
+            Para_Lenth: 100,
+            Para_Name: '@Text3',
+            Para_Type: 'varchar',
+          },
+        ],
+        SpName: 'sp_Android_Common_API',
+        con: '1',
+      }),
+    })
+      .then(res => {
+        return res.json();
+      })
+      .then(json => {
+        var UserExist = json.CommonResult.Table[0].Message;
+        var UserAddress = json.CommonResult.Table[0].Address;
+        var UserFirstname = json.CommonResult.Table[0].FirstName;
+        var UserLastname = json.CommonResult.Table[0].LastName;
+        var UserEmail = json.CommonResult.Table[0].Email;
+        var UserCity = json.CommonResult.Table[0].City;
+
+        if (UserExist === 'Success') {
+          const items = [
+            ['firstname', UserFirstname],
+            ['lastname', UserLastname],
+            ['email', UserEmail],
+            ['phonenumber', mobilenumber],
+            ['address', UserAddress],
+            ['city', UserCity],
+            ['EditStatus', 'false'],
+          ];
+
+          AsyncStorage.multiSet(items, () => {
+            setRegister(false);
+            // Token already set in CheckUserLogin, just update user data
+            dispatch({ Type: 'LOGIN', Token: mobilenumber });
+          });
+        } else {
+          // Only clear token if user doesn't exist on server
+          dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
+        }
+      })
+      .catch(er => {
+        console.log('Login User Exist Error', er);
+        
+        // On network error, keep user logged in if they have phone number
+        // Don't force logout on network issues
+        if (mobilenumber) {
+          console.log('Network error but keeping user logged in');
+          dispatch({ Type: 'LOGIN', Token: mobilenumber });
+        } else {
+          dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
+        }
+        
+        // Still show alert but don't force logout
+        Alert.alert(
+          'Warning',
+          "The operation couldn't be completed.",
+          [
             {
-              Para_Data: '87',
-              Para_Direction: 'Input',
-              Para_Lenth: 10,
-              Para_Name: '@Iid',
-              Para_Type: 'int',
+              text: 'Try Again',
+              onPress: () => CheckUserExist(mobilenumber),
             },
             {
-              Para_Data: mobilenumber,
-              Para_Direction: 'Input',
-              Para_Lenth: 100,
-              Para_Name: '@Text1',
-              Para_Type: 'varchar',
-            },
-            {
-              Para_Data: FCMToken,
-              Para_Direction: 'Input',
-              Para_Lenth: 50000,
-              Para_Name: '@Text2',
-              Para_Type: 'varchar',
-            },
-            {
-              Para_Data: 'CC',
-              Para_Direction: 'Input',
-              Para_Lenth: 100,
-              Para_Name: '@Text3',
-              Para_Type: 'varchar',
+              text: 'Continue Offline',
+              onPress: () => {},
             },
           ],
-          SpName: 'sp_Android_Common_API',
-          con: '1',
-        }),
+          { cancelable: false },
+        );
       })
-        .then(res => {
-          return res.json();
-        })
-        .then(json => {
-          var UserExist = json.CommonResult.Table[0].Message;
-          var UserAddress = json.CommonResult.Table[0].Address;
-          var UserFirstname = json.CommonResult.Table[0].FirstName;
-          var UserLastname = json.CommonResult.Table[0].LastName;
-          var UserEmail = json.CommonResult.Table[0].Email;
-          var UserCity = json.CommonResult.Table[0].City;
+      .finally(() => {
+        setTimeout(() => {
+          SplashScreen.hide();
+        }, 1000);
+      });
+  });
+};
 
-          if (UserExist === 'Success') {
-            const items = [
-              ['firstname', UserFirstname],
-              ['lastname', UserLastname],
-              ['email', UserEmail],
-              ['phonenumber', mobilenumber],
-              ['address', UserAddress],
-              ['city', UserCity],
-              ['EditStatus', 'false'],
-            ];
-
-            AsyncStorage.multiSet(items, () => {
-              setRegister(false);
-              dispatch({ Type: 'LOGIN', Token: mobilenumber });
-            });
-          } else {
-            dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
-          }
-        })
-        .catch(er => {
-          console.log('Login User Exist Error', er);
-          Alert.alert(
-            'Warning',
-            "The operation couldn't be completed.",
-            [
-              {
-                text: 'Try Again',
-                onPress: () => CheckUserExist(mobilenumber),
-              },
-              {
-                text: 'Close',
-                onPress: () => BackHandler.exitApp(),
-              },
-            ],
-            { cancelable: false },
-          );
-        })
-        .finally(() => {
-          setTimeout(() => {
-            SplashScreen.hide();
-          }, 1000);
-        });
-    });
+useEffect(() => {
+  const initializeAuth = async () => {
+    try {
+      const phonenumber = await AsyncStorage.getItem('phonenumber');
+      
+      if (phonenumber) {
+        // User has logged in before, set token immediately
+        dispatch({ Type: 'RETREIVE_TOKEN', Token: phonenumber });
+      } else {
+        // No stored credentials, show login
+        dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
+      }
+    } catch (error) {
+      console.log('Error initializing auth', error);
+      dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
+    }
   };
+  
+  initializeAuth();
+}, []);
 
   const RegisterUser = async (
     firstname,
@@ -975,13 +1028,18 @@ const App = () => {
   };
 
   const CheckUserLogin = async () => {
-    let mobilenumber;
-    mobilenumber = null;
-    mobilenumber = await AsyncStorage.getItem('phonenumber');
-    getToken().then(fcmToken => {
-      CheckUserExist(mobilenumber);
-    });
-  };
+  let mobilenumber = await AsyncStorage.getItem('phonenumber');
+  
+  // If mobile number exists, set token immediately to prevent login screen flash
+  if (mobilenumber) {
+    dispatch({ Type: 'RETREIVE_TOKEN', Token: mobilenumber });
+  }
+  
+  // Then verify with server in background
+  getToken().then(fcmToken => {
+    CheckUserExist(mobilenumber);
+  });
+};
 
   const handleBranchLink = params => {
     // Branch passes data in params object
