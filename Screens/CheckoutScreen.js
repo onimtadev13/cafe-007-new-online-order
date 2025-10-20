@@ -22,24 +22,24 @@ import {
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Card } from 'react-native-paper';
 import CheckBox from '@react-native-community/checkbox';
-import {NumericFormat} from 'react-number-format';
-import {connect} from 'react-redux';
-import {openDatabase} from 'react-native-sqlite-storage';
+import { NumericFormat } from 'react-number-format';
+import { connect } from 'react-redux';
+import { openDatabase } from 'react-native-sqlite-storage';
 import RadioButton from 'react-native-radio-button';
 // import IonicIcon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import {APIURL, PLACEORDERURL} from '../Data/CloneData';
+import { APIURL, PLACEORDERURL } from '../Data/CloneData';
 import moment from 'moment';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import {getVersion} from 'react-native-device-info';
+
+import { getVersion } from 'react-native-device-info';
 import PayHere from '@payhere/payhere-mobilesdk-reactnative';
 import AlertDialog from '../Components/AlertDialog';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-
-var db = openDatabase({name: 'UserDatabase.db'});
+import DatePicker from 'react-native-date-picker';
+var db = openDatabase({ name: 'UserDatabase.db' });
 
 const HEADER_MAX_HEIGHT = 130;
 const HEADER_MIN_HEIGHT = 64;
@@ -74,6 +74,7 @@ class CheckoutScreen extends React.Component {
       isOrderPlaced: false,
       scheduleStatus: 'Now',
       isEnableTime: false,
+      selectedDate: new Date(), // Add this line
       scheduleTime: moment(new Date()).format(' hh:mm:ss A '),
       locationList: [],
       locationPressed: '',
@@ -116,7 +117,7 @@ class CheckoutScreen extends React.Component {
       });
     });
 
-    this.setState({isClickList: list});
+    this.setState({ isClickList: list });
 
     this._unsubscribe = this.props.navigation.addListener('focus', async () => {
       this.GetRegisterdCreditCard();
@@ -146,7 +147,7 @@ class CheckoutScreen extends React.Component {
 
       if (value !== null) {
         // We have data!!
-        this.setState({locationPressed: value});
+        this.setState({ locationPressed: value });
       }
     } catch (error) {
       console.log(error);
@@ -167,7 +168,7 @@ class CheckoutScreen extends React.Component {
   // };
 
   handleApplyPromo = () => {
-    const {promoCode} = this.state;
+    const { promoCode } = this.state;
     console.log('Applying coupon:', promoCode);
 
     if (promoCode.trim() !== '') {
@@ -199,12 +200,12 @@ class CheckoutScreen extends React.Component {
   };
 
   onCardPress = () => {
-    this.setState({paymentType: 'Card'});
+    this.setState({ paymentType: 'Card' });
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
   onCashPress = () => {
-    this.setState({paymentType: 'Cash'});
+    this.setState({ paymentType: 'Cash' });
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
@@ -215,7 +216,7 @@ class CheckoutScreen extends React.Component {
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
-        this.setState({cardlist: temp});
+        this.setState({ cardlist: temp });
       });
     });
   };
@@ -290,7 +291,7 @@ class CheckoutScreen extends React.Component {
               onPress: () => this.GetTaxNetTotal(),
             },
           ],
-          {cancelable: false},
+          { cancelable: false },
         );
       })
       .finally(() => {
@@ -328,10 +329,10 @@ class CheckoutScreen extends React.Component {
         const Locations = [];
 
         json.CommonResult.Table.forEach(element => {
-          Locations.push({name: element.location});
+          Locations.push({ name: element.location });
         });
 
-        this.setState({locationList: Locations});
+        this.setState({ locationList: Locations });
       })
       .catch(er => {
         console.log('GetLocation', er);
@@ -384,7 +385,7 @@ class CheckoutScreen extends React.Component {
   };
 
   ApplyCoupon = async () => {
-    const {promoCode, subTotal} = this.state;
+    const { promoCode, subTotal } = this.state;
     this.togglePromoModal(false);
 
     console.log('Applying coupon via API:', promoCode);
@@ -505,7 +506,7 @@ class CheckoutScreen extends React.Component {
       .then(json => {
         if (json.strRturnRes) {
           if (json.CommonResult.Table[0].STATUS === 'T') {
-            this.setState({dineType: 'Delivery'});
+            this.setState({ dineType: 'Delivery' });
             this.GetTaxNetTotal('Delivery');
           }
           this.setState({
@@ -564,7 +565,7 @@ class CheckoutScreen extends React.Component {
       if (json.strRturnRes && json.CommonResult.Table.length > 0) {
         console.log('API isDelivery:', json.CommonResult.Table[0].isDelivery);
 
-        this.setState({isDelivery: json.CommonResult.Table[0].isDelivery});
+        this.setState({ isDelivery: json.CommonResult.Table[0].isDelivery });
       }
     } catch (error) {
       console.log('Delivery API Error:', error);
@@ -582,7 +583,7 @@ class CheckoutScreen extends React.Component {
 
   onChageAddress = () => {
     if (this.state.typeaddress != '') {
-      this.setState({address: this.state.typeaddress});
+      this.setState({ address: this.state.typeaddress });
       this.RBSheet.close();
     } else {
       this.RBSheet.close();
@@ -614,7 +615,7 @@ class CheckoutScreen extends React.Component {
       LastName = response[4][1];
       Email = response[5][1];
       City = response[6][1];
-      this.setState({OrderID: OrderID});
+      this.setState({ OrderID: OrderID });
 
       const paymentObject = {
         sandbox: false, // true if using Sandbox Merchant ID
@@ -773,26 +774,36 @@ class CheckoutScreen extends React.Component {
     return OrderID;
   };
 
- onClearAsync = async () => {
-  try {
-    const keys = await AsyncStorage.getAllKeys();
-    const keepKeys = [
-      'address', 'firstname', 'lastname', 'email', 
-      'phonenumber', 'city', 'OrderID', 'EditStatus', 
-      'fcmToken', 'LOCA', 'LOCA_NAME', 'PUSH', 'NID'
-    ];
+  onClearAsync = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const keepKeys = [
+        'address',
+        'firstname',
+        'lastname',
+        'email',
+        'phonenumber',
+        'city',
+        'OrderID',
+        'EditStatus',
+        'fcmToken',
+        'LOCA',
+        'LOCA_NAME',
+        'PUSH',
+        'NID',
+      ];
 
-    const removeKeys = keys.filter(k => !keepKeys.includes(k));
-    if (removeKeys.length > 0) {
-      await AsyncStorage.multiRemove(removeKeys);
+      const removeKeys = keys.filter(k => !keepKeys.includes(k));
+      if (removeKeys.length > 0) {
+        await AsyncStorage.multiRemove(removeKeys);
+      }
+
+      this.props.resetCart();
+      console.log('Cart cleared successfully');
+    } catch (error) {
+      console.log('Failed to clear cart:', error);
     }
-
-    this.props.resetCart();
-    console.log('Cart cleared successfully');
-  } catch (error) {
-    console.log('Failed to clear cart:', error);
-  }
-};
+  };
 
   onContinuShoppingPress = async () => {
     if (!this.RBSheetTouchableInactive) {
@@ -835,7 +846,7 @@ class CheckoutScreen extends React.Component {
           this.state.tax +
           this.state.subTotal +
           this.state.discount;
-        this.setState({dineType: 'EatIn'});
+        this.setState({ dineType: 'EatIn' });
         // this.setState({ netTotal: netTotal, dineType: "EatIn" });
         this.GetTaxNetTotal('EatIn');
         break;
@@ -845,7 +856,7 @@ class CheckoutScreen extends React.Component {
           this.state.tax +
           this.state.subTotal +
           this.state.discount;
-        this.setState({dineType: 'PickUp'});
+        this.setState({ dineType: 'PickUp' });
         // this.setState({ netTotal: netTotal, dineType: "PickUp" });
         this.GetTaxNetTotal('PickUp');
         break;
@@ -874,7 +885,7 @@ class CheckoutScreen extends React.Component {
         });
         break;
       case 'Later':
-        this.setState({scheduleStatus: 'Later', scheduleTime: 'Choose Time'});
+        this.setState({ scheduleStatus: 'Later', scheduleTime: 'Choose Time' });
         break;
 
       default:
@@ -883,17 +894,16 @@ class CheckoutScreen extends React.Component {
   };
 
   hideDatePicker = () => {
-  this.setState({ isEnableTime: false });
-};
+    this.setState({ isEnableTime: false });
+  };
 
-  
-handleConfirm = date => {
-  this.setState({
-    scheduleTime: moment(date).format(' hh:mm:ss A '),
-    isEnableTime: false,
-  });
-};
-
+  handleConfirm = date => {
+    this.setState({
+      scheduleTime: moment(date).format(' hh:mm:ss A '),
+      isEnableTime: false,
+      selectedDate: date, // Add this line
+    });
+  };
 
   onSeeMenu = () => {
     Promise.all([this.props.navigation.goBack()]).then(() =>
@@ -910,7 +920,7 @@ handleConfirm = date => {
   onViewItemsPress = ItemID => {
     const list = this.state.isClickList;
     list[ItemID].Checked = !list[ItemID].Checked;
-    this.setState({isClickList: list});
+    this.setState({ isClickList: list });
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
@@ -941,8 +951,8 @@ handleConfirm = date => {
   renderCartItems = Item => {
     return Item.map((item, index) => {
       return (
-        <View key={index} style={{flex: 1, margin: 5, marginLeft: 10}}>
-          <View style={{flexDirection: 'row'}}>
+        <View key={index} style={{ flex: 1, margin: 5, marginLeft: 10 }}>
+          <View style={{ flexDirection: 'row' }}>
             <View
               style={{
                 width: 25,
@@ -954,7 +964,8 @@ handleConfirm = date => {
                 marginTop: 5,
                 justifyContent: 'center',
                 borderRadius: 6,
-              }}>
+              }}
+            >
               <Text
                 style={{
                   fontFamily:
@@ -963,7 +974,8 @@ handleConfirm = date => {
                       : 'AsapMedium',
                   fontSize: 14,
                   fontWeight: 'bold',
-                }}>
+                }}
+              >
                 {item.Qty}
               </Text>
             </View>
@@ -975,10 +987,11 @@ handleConfirm = date => {
                 marginLeft: 10,
                 flex: 0.85,
                 fontWeight: '800',
-              }}>
+              }}
+            >
               {item.ProductName}{' '}
             </Text>
-            <View style={{flexDirection: 'column'}}>
+            <View style={{ flexDirection: 'column' }}>
               <NumericFormat
                 value={item.NetTotal}
                 displayType={'text'}
@@ -996,7 +1009,8 @@ handleConfirm = date => {
                           ? 'Asap-Regular_Medium'
                           : 'AsapMedium',
                       fontSize: 18,
-                    }}>
+                    }}
+                  >
                     {formattedValue}
                   </Text>
                 )} // <--- Don't forget this!
@@ -1029,13 +1043,14 @@ handleConfirm = date => {
                       Platform.OS === 'ios'
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
-                  }}>
+                  }}
+                >
                   10% off
                 </Text>
               )}
             </View>
           </View>
-          <View style={{marginBottom: 5}}>
+          <View style={{ marginBottom: 5 }}>
             {item.Addons.length + item.Extra.length > 0 && !item.Checked ? (
               <TouchableOpacity onPress={() => this.onViewItemsPress(index)}>
                 <Text
@@ -1047,18 +1062,22 @@ handleConfirm = date => {
                     fontSize: 15,
                     color: '#969696',
                     marginLeft: 60,
-                  }}>
+                  }}
+                >
                   Show {item.Addons.length + item.Extra.length} more items
                 </Text>
               </TouchableOpacity>
             ) : null}
 
-            <View style={{height: item.Checked ? null : 0, overflow: 'hidden'}}>
+            <View
+              style={{ height: item.Checked ? null : 0, overflow: 'hidden' }}
+            >
               {this.renderAddons(item.Addons)}
               {this.renderExtra(item.Extra)}
               <TouchableOpacity
-                style={{marginTop: 5}}
-                onPress={() => this.onViewItemsPress(index)}>
+                style={{ marginTop: 5 }}
+                onPress={() => this.onViewItemsPress(index)}
+              >
                 <Text
                   style={{
                     fontFamily:
@@ -1068,7 +1087,8 @@ handleConfirm = date => {
                     fontSize: 15,
                     color: 'black',
                     marginLeft: 60,
-                  }}>
+                  }}
+                >
                   Show less items
                 </Text>
               </TouchableOpacity>
@@ -1090,7 +1110,8 @@ handleConfirm = date => {
               marginLeft: 60,
               flexDirection: 'row',
             },
-          ]}>
+          ]}
+        >
           <Text
             style={{
               fontFamily:
@@ -1098,7 +1119,8 @@ handleConfirm = date => {
               fontSize: 17,
               color: '#969696',
               marginRight: 5,
-            }}>
+            }}
+          >
             {item.name}
           </Text>
           <NumericFormat
@@ -1117,7 +1139,8 @@ handleConfirm = date => {
                       : 'AsapMedium',
                   fontSize: 17,
                   color: '#969696',
-                }}>
+                }}
+              >
                 ({formattedValue})
               </Text>
             )} // <--- Don't forget this!
@@ -1132,7 +1155,8 @@ handleConfirm = date => {
       return (
         <View
           key={key}
-          style={{alignItems: 'center', marginLeft: 60, flexDirection: 'row'}}>
+          style={{ alignItems: 'center', marginLeft: 60, flexDirection: 'row' }}
+        >
           <Text
             style={{
               fontFamily:
@@ -1140,7 +1164,8 @@ handleConfirm = date => {
               fontSize: 17,
               color: '#969696',
               marginRight: 5,
-            }}>
+            }}
+          >
             {item.name}
           </Text>
           <NumericFormat
@@ -1159,7 +1184,8 @@ handleConfirm = date => {
                       : 'AsapMedium',
                   fontSize: 17,
                   color: '#969696',
-                }}>
+                }}
+              >
                 ({formattedValue})
               </Text>
             )} // <--- Don't forget this!
@@ -1177,11 +1203,13 @@ handleConfirm = date => {
           cardElevation={this.state.locationPressed === item.name ? 12 : 0}
           cardMaxElevation={12}
           cornerRadius={15}
-          style={{marginTop: 25, marginRight: 10, marginLeft: 10}}>
+          style={{ marginTop: 25, marginRight: 10, marginLeft: 10 }}
+        >
           <TouchableOpacity
             onPress={() => {
-              this.setState({locationPressed: item.name});
-            }}>
+              this.setState({ locationPressed: item.name });
+            }}
+          >
             <View
               style={{
                 flexDirection: 'row',
@@ -1199,7 +1227,8 @@ handleConfirm = date => {
                 borderRadius: 15,
                 alignItems: 'center',
                 justifyContent: 'center',
-              }}>
+              }}
+            >
               {/* <Ionicons name="card" size={22} color={this.state.paymentType === "Card" ? "#FF6900" : "#ffa363"} /> */}
               <Text
                 style={{
@@ -1212,7 +1241,8 @@ handleConfirm = date => {
                     this.state.locationPressed === item.name
                       ? 'white'
                       : '#7a7a7a',
-                }}>
+                }}
+              >
                 {item.name}
               </Text>
             </View>
@@ -1233,7 +1263,7 @@ handleConfirm = date => {
   };
 
   onPress = index => {
-    this.setState({selectedIndex: index});
+    this.setState({ selectedIndex: index });
   };
 
   renderCard() {
@@ -1276,10 +1306,11 @@ handleConfirm = date => {
             alignItems: 'center',
             marginTop: 20,
             marginRight: 20,
-          }}>
+          }}
+        >
           <Image
             source={imageuri}
-            style={{height: 35}}
+            style={{ height: 35 }}
             resizeMode={'contain'}
           />
           <Text
@@ -1291,7 +1322,8 @@ handleConfirm = date => {
                   ? 'Asap-Regular_SemiBold'
                   : 'AsapSemiBold',
               marginLeft: 15,
-            }}>
+            }}
+          >
             {cardtype}
           </Text>
           <RadioButton
@@ -1364,16 +1396,17 @@ handleConfirm = date => {
     });
 
     return (
-      <View style={{flex: 1}}>
+      <View style={{ flex: 1 }}>
         <Animated.ScrollView
           showsVerticalScrollIndicator={false}
-          style={{backgroundColor: '#F0F0F0'}}
-          contentContainerStyle={{paddingTop: 140}}
+          style={{ backgroundColor: '#F0F0F0' }}
+          contentContainerStyle={{ paddingTop: 140 }}
           onScroll={Animated.event(
-            [{nativeEvent: {contentOffset: {y: this.state.scrollY}}}],
-            {useNativeDriver: true},
-          )}>
-          <View style={{flex: 1}}>
+            [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }],
+            { useNativeDriver: true },
+          )}
+        >
+          <View style={{ flex: 1 }}>
             <Text
               style={{
                 fontFamily:
@@ -1385,7 +1418,8 @@ handleConfirm = date => {
                 marginRight: 30,
                 marginLeft: 30,
                 marginBottom: 10,
-              }}>
+              }}
+            >
               Order verification
             </Text>
             <Text
@@ -1398,7 +1432,8 @@ handleConfirm = date => {
                 textAlign: 'left',
                 marginRight: 30,
                 marginLeft: 30,
-              }}>
+              }}
+            >
               Terms and Conditions
             </Text>
             <View
@@ -1421,7 +1456,8 @@ handleConfirm = date => {
                 margin: 10,
                 textAlign: 'left',
                 marginRight: 30,
-              }}>
+              }}
+            >
               1. The order price might changed.{'\n'}2. Some of the items in the
               order will be out of stock and those items will be not delivered.
               There for total order value will be changed.{' '}
@@ -1445,7 +1481,8 @@ handleConfirm = date => {
                 marginTop: 10,
                 marginBottom: 10,
                 marginRight: 40,
-              }}>
+              }}
+            >
               <Text
                 style={{
                   fontFamily:
@@ -1454,7 +1491,8 @@ handleConfirm = date => {
                       : 'AsapSemiBold',
                   fontSize: 22,
                   flex: 1,
-                }}>
+                }}
+              >
                 Your Items
               </Text>
               {/* <TouchableOpacity onPress={() => this.onSeeMenu()}>
@@ -1540,8 +1578,9 @@ handleConfirm = date => {
               </TouchableOpacity> */}
 
               <TouchableOpacity
-                style={{flex: 0.5, alignItems: 'flex-end', marginRight: 10}}
-                onPress={() => this.props.navigation.navigate('HomeScreen')}>
+                style={{ flex: 0.5, alignItems: 'flex-end', marginRight: 10 }}
+                onPress={() => this.props.navigation.navigate('HomeScreen')}
+              >
                 <Animated.View
                   style={[
                     {
@@ -1552,8 +1591,9 @@ handleConfirm = date => {
                       alignItems: 'center',
                       justifyContent: 'center',
                     },
-                    {transform: [{scale: this.state.zoomIn}]},
-                  ]}>
+                    { transform: [{ scale: this.state.zoomIn }] },
+                  ]}
+                >
                   <Text
                     allowFontScaling={false}
                     style={{
@@ -1562,7 +1602,8 @@ handleConfirm = date => {
                       fontSize: 16,
                       textAlign: 'right',
                       color: 'white',
-                    }}>
+                    }}
+                  >
                     See menu
                   </Text>
                   {/* White border + glow */}
@@ -1585,7 +1626,8 @@ handleConfirm = date => {
                           borderColor: 'black',
                         }}
                       />
-                    }>
+                    }
+                  >
                     {/* Solid white border */}
                     <View
                       style={{
@@ -1604,13 +1646,14 @@ handleConfirm = date => {
                         right: 0,
                         bottom: 0,
                         left: 0,
-                        transform: [{translateX}],
-                      }}>
+                        transform: [{ translateX }],
+                      }}
+                    >
                       <LinearGradient
                         colors={['transparent', 'gold', 'transparent']}
-                        start={{x: 0, y: 0}}
-                        end={{x: 1, y: 0}}
-                        style={{flex: 1}}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={{ flex: 1 }}
                       />
                     </Animated.View>
                   </MaskedView>
@@ -1629,8 +1672,9 @@ handleConfirm = date => {
             />
             <View>{this.renderCartItems(this.state.isClickList)}</View>
             <TouchableOpacity
-              style={{marginLeft: 30, marginTop: 10, marginBottom: 10}}
-              onPress={() => this.onAddItems()}>
+              style={{ marginLeft: 30, marginTop: 10, marginBottom: 10 }}
+              onPress={() => this.onAddItems()}
+            >
               <View
                 style={{
                   flexDirection: 'row',
@@ -1640,9 +1684,10 @@ handleConfirm = date => {
                   borderRadius: 100 / 2,
                   alignItems: 'center',
                   justifyContent: 'center',
-                }}>
+                }}
+              >
                 {/* <IonicIcon name="add-outline" size={20} /> */}
-                 <FontAwesome6 name="plus" size={20} solid />
+                <FontAwesome6 name="plus" size={20} solid />
                 <Text
                   style={{
                     fontFamily:
@@ -1652,7 +1697,8 @@ handleConfirm = date => {
                     color: 'black',
                     fontSize: 16,
                     marginLeft: 5,
-                  }}>
+                  }}
+                >
                   Add items
                 </Text>
               </View>
@@ -1673,7 +1719,8 @@ handleConfirm = date => {
                 marginTop: 30,
                 marginLeft: 30,
                 marginRight: 30,
-              }}>
+              }}
+            >
               <Text
                 style={{
                   flex: 1,
@@ -1681,7 +1728,8 @@ handleConfirm = date => {
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
                   color: 'black',
-                }}>
+                }}
+              >
                 Sub Total
               </Text>
               <NumericFormat
@@ -1700,7 +1748,8 @@ handleConfirm = date => {
                       fontSize: 18,
                       textAlign: 'right',
                       color: 'black',
-                    }}>
+                    }}
+                  >
                     {formattedValue}
                   </Text>
                 )} // <--- Don't forget this!
@@ -1714,7 +1763,8 @@ handleConfirm = date => {
                   marginTop: 5,
                   marginLeft: 30,
                   marginRight: 30,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     flex: 1,
@@ -1722,7 +1772,8 @@ handleConfirm = date => {
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 18,
                     color: 'black',
-                  }}>
+                  }}
+                >
                   Tax
                 </Text>
                 <NumericFormat
@@ -1743,7 +1794,8 @@ handleConfirm = date => {
                         fontSize: 20,
                         textAlign: 'right',
                         color: 'black',
-                      }}>
+                      }}
+                    >
                       {formattedValue}
                     </Text>
                   )} // <--- Don't forget this!
@@ -1758,7 +1810,8 @@ handleConfirm = date => {
                   marginTop: 5,
                   marginLeft: 30,
                   marginRight: 30,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     flex: 1,
@@ -1766,7 +1819,8 @@ handleConfirm = date => {
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 18,
                     color: 'black',
-                  }}>
+                  }}
+                >
                   Discount
                 </Text>
                 <NumericFormat
@@ -1787,7 +1841,8 @@ handleConfirm = date => {
                         fontSize: 20,
                         textAlign: 'right',
                         color: 'black',
-                      }}>
+                      }}
+                    >
                       {formattedValue}
                     </Text>
                   )} // <--- Don't forget this!
@@ -1802,7 +1857,8 @@ handleConfirm = date => {
                     marginTop: 5,
                     marginLeft: 30,
                     marginRight: 30,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       flex: 1,
@@ -1810,7 +1866,8 @@ handleConfirm = date => {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 18,
                       color: 'black',
-                    }}>
+                    }}
+                  >
                     Delivery Charge
                   </Text>
                   <NumericFormat
@@ -1831,7 +1888,8 @@ handleConfirm = date => {
                           fontSize: 20,
                           textAlign: 'right',
                           color: 'black',
-                        }}>
+                        }}
+                      >
                         {formattedValue}
                       </Text>
                     )} // <--- Don't forget this!
@@ -1848,7 +1906,8 @@ handleConfirm = date => {
                     marginTop: 5,
                     marginLeft: 30,
                     marginRight: 30,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       flex: 1,
@@ -1856,7 +1915,8 @@ handleConfirm = date => {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 18,
                       color: 'black',
-                    }}>
+                    }}
+                  >
                     Service Charge
                   </Text>
                   <NumericFormat
@@ -1877,7 +1937,8 @@ handleConfirm = date => {
                           fontSize: 20,
                           textAlign: 'right',
                           color: 'black',
-                        }}>
+                        }}
+                      >
                         {formattedValue}
                       </Text>
                     )} // <--- Don't forget this!
@@ -1892,7 +1953,8 @@ handleConfirm = date => {
                   marginTop: 5,
                   marginLeft: 30,
                   marginRight: 30,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     flex: 1,
@@ -1900,7 +1962,8 @@ handleConfirm = date => {
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 18,
                     color: 'black',
-                  }}>
+                  }}
+                >
                   Net Total
                 </Text>
                 <NumericFormat
@@ -1921,7 +1984,8 @@ handleConfirm = date => {
                         fontSize: 18,
                         textAlign: 'right',
                         color: 'black',
-                      }}>
+                      }}
+                    >
                       {formattedValue}
                     </Text>
                   )} // <--- Don't forget this!
@@ -1949,7 +2013,8 @@ handleConfirm = date => {
                 fontSize: 22,
                 marginTop: 15,
                 textAlign: 'center',
-              }}>
+              }}
+            >
               Coupons
             </Text>
             <Text
@@ -1963,23 +2028,25 @@ handleConfirm = date => {
                 color: '#1c6638ff',
                 marginTop: 5,
                 marginBottom: 5,
-              }}>
+              }}
+            >
               1 Promotions Available
             </Text>
 
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{paddingHorizontal: 15}}>
+              contentContainerStyle={{ paddingHorizontal: 15 }}
+            >
               <Card
                 cardElevation={3}
                 cardMaxElevation={3}
                 cornerRadius={10}
-                style={{marginHorizontal: 10, marginVertical: 8}}>
+                style={{ marginHorizontal: 10, marginVertical: 8 }}
+              >
                 <TouchableOpacity
-                  onPress={() =>
-                    this.togglePromoModal(true, 'SAVE1000', false)
-                  }>
+                  onPress={() => this.togglePromoModal(true, 'SAVE1000', false)}
+                >
                   <View
                     style={{
                       borderWidth: 1,
@@ -1993,9 +2060,10 @@ handleConfirm = date => {
                       justifyContent: 'flex-start',
                       minHeight: 50,
                       backgroundColor: '#F0F0F0',
-                    }}>
+                    }}
+                  >
                     {/* <Ionicons name={'bookmark'} size={18} color={'#ffa363'} /> */}
-                     <FontAwesome6
+                    <FontAwesome6
                       name="bookmark"
                       size={18}
                       color="#ffa363"
@@ -2011,7 +2079,8 @@ handleConfirm = date => {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular'
                             : 'AsapRegular',
-                      }}>
+                      }}
+                    >
                       Get Rs.1,000 OFF your next order
                     </Text>
                   </View>
@@ -2022,9 +2091,11 @@ handleConfirm = date => {
                 cardElevation={3}
                 cardMaxElevation={3}
                 cornerRadius={10}
-                style={{marginHorizontal: 10, marginVertical: 8}}>
+                style={{ marginHorizontal: 10, marginVertical: 8 }}
+              >
                 <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, 'SAVE101', false)}>
+                  onPress={() => this.togglePromoModal(true, 'SAVE101', false)}
+                >
                   <View
                     style={{
                       borderWidth: 1,
@@ -2038,7 +2109,8 @@ handleConfirm = date => {
                       justifyContent: 'flex-start', // left align with icon
                       minHeight: 50,
                       backgroundColor: '#F0F0F0',
-                    }}>
+                    }}
+                  >
                     {/* <Ionicons name={'basket'} size={18} color={'#7a7a7a'} /> */}
                     <FontAwesome6
                       name="basket-shopping"
@@ -2056,7 +2128,8 @@ handleConfirm = date => {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular'
                             : 'AsapRegular',
-                      }}>
+                      }}
+                    >
                       Get Rs.750 OFF when you spend above Rs.3,000
                     </Text>
                   </View>
@@ -2067,9 +2140,11 @@ handleConfirm = date => {
                 cardElevation={3}
                 cardMaxElevation={3}
                 cornerRadius={10}
-                style={{marginHorizontal: 10, marginVertical: 8}}>
+                style={{ marginHorizontal: 10, marginVertical: 8 }}
+              >
                 <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, 'SAVE102', false)}>
+                  onPress={() => this.togglePromoModal(true, 'SAVE102', false)}
+                >
                   <View
                     style={{
                       borderWidth: 1,
@@ -2083,7 +2158,8 @@ handleConfirm = date => {
                       justifyContent: 'flex-start',
                       minHeight: 50,
                       backgroundColor: '#F0F0F0',
-                    }}>
+                    }}
+                  >
                     {/* <Ionicons name={'pricetag'} size={18} color={'#7a7a7a'} /> */}
                     <FontAwesome6 name="tag" size={18} color="#7a7a7a" solid />
                     <Text
@@ -2096,7 +2172,8 @@ handleConfirm = date => {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular'
                             : 'AsapRegular',
-                      }}>
+                      }}
+                    >
                       Get Rs.1,200 OFF on weekend orders
                     </Text>
                   </View>
@@ -2107,9 +2184,11 @@ handleConfirm = date => {
                 cardElevation={3}
                 cardMaxElevation={3}
                 cornerRadius={10}
-                style={{marginHorizontal: 10, marginVertical: 8}}>
+                style={{ marginHorizontal: 10, marginVertical: 8 }}
+              >
                 <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, 'SAVE103', false)}>
+                  onPress={() => this.togglePromoModal(true, 'SAVE103', false)}
+                >
                   <View
                     style={{
                       borderWidth: 1,
@@ -2123,7 +2202,8 @@ handleConfirm = date => {
                       justifyContent: 'flex-start',
                       minHeight: 50,
                       backgroundColor: '#F0F0F0',
-                    }}>
+                    }}
+                  >
                     {/* <Ionicons name={'beer'} size={18} color={'#7a7a7a'} /> */}
                     <FontAwesome6
                       name="beer-mug-empty"
@@ -2141,7 +2221,8 @@ handleConfirm = date => {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular'
                             : 'AsapRegular',
-                      }}>
+                      }}
+                    >
                       Get Rs.300 OFF on drinks
                     </Text>
                   </View>
@@ -2152,9 +2233,11 @@ handleConfirm = date => {
                 cardElevation={3}
                 cardMaxElevation={3}
                 cornerRadius={10}
-                style={{marginHorizontal: 10, marginVertical: 8}}>
+                style={{ marginHorizontal: 10, marginVertical: 8 }}
+              >
                 <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, '', true)}>
+                  onPress={() => this.togglePromoModal(true, '', true)}
+                >
                   <View
                     style={{
                       borderWidth: 1,
@@ -2168,7 +2251,8 @@ handleConfirm = date => {
                       justifyContent: 'flex-start',
                       minHeight: 50,
                       backgroundColor: '#F0F0F0',
-                    }}>
+                    }}
+                  >
                     {/* <Ionicons name={'pricetag'} size={18} color={'#7a7a7a'} /> */}
                     <FontAwesome6 name="tag" size={18} color="#7a7a7a" solid />
                     <Text
@@ -2182,7 +2266,8 @@ handleConfirm = date => {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular'
                             : 'AsapRegular',
-                      }}>
+                      }}
+                    >
                       Have a promo code?...
                     </Text>
                     {/* <Ionicons name={'add'} size={18} color={'#7a7a7a'} /> */}
@@ -2204,7 +2289,7 @@ handleConfirm = date => {
           </View>
         )} */}
 
-            <View style={{marginHorizontal: 20, marginTop: 15}}>
+            <View style={{ marginHorizontal: 20, marginTop: 15 }}>
               {this.state.appliedCoupon && (
                 <View
                   style={{
@@ -2216,23 +2301,25 @@ handleConfirm = date => {
                     backgroundColor: '#f2f9ff',
                     borderWidth: 1,
                     borderColor: '#66b3ff',
-                  }}>
-                  <View style={{flexDirection: 'column'}}>
+                  }}
+                >
+                  <View style={{ flexDirection: 'column' }}>
                     <Text
                       style={{
                         color: '#0080ff',
                         fontWeight: 'bold',
                         fontSize: 15,
-                      }}>
+                      }}
+                    >
                       🎉 YAY! You saved Rs.{this.state.savedAmount} !
                     </Text>
-                    <Text style={{fontSize: 13, marginTop: 3, color: '#333'}}>
+                    <Text style={{ fontSize: 13, marginTop: 3, color: '#333' }}>
                       {this.state.appliedCoupon || 'None'} Applied!
                     </Text>
                   </View>
 
                   <TouchableOpacity onPress={this.handleRemoveCoupon}>
-                    <Text style={{color: '#c62828', fontWeight: 'bold'}}>
+                    <Text style={{ color: '#c62828', fontWeight: 'bold' }}>
                       REMOVE
                     </Text>
                   </TouchableOpacity>
@@ -2261,7 +2348,8 @@ handleConfirm = date => {
                 fontSize: 22,
                 marginTop: 15,
                 textAlign: 'center',
-              }}>
+              }}
+            >
               Dining type
             </Text>
             <Text
@@ -2273,7 +2361,8 @@ handleConfirm = date => {
                 marginTop: 5,
                 marginRight: 30,
                 textAlign: 'center',
-              }}>
+              }}
+            >
               Restaurants fall into several industry classifications, based upon
               menu style, preparation methods and pricing, as well as the means
               by which the food is served to the customer.
@@ -2284,14 +2373,17 @@ handleConfirm = date => {
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'center',
-              }}>
+              }}
+            >
               <Card
                 cardElevation={this.state.dineType === 'EatIn' ? 12 : 0}
                 cardMaxElevation={12}
                 cornerRadius={15}
-                style={{marginTop: 25}}>
+                style={{ marginTop: 25 }}
+              >
                 <TouchableOpacity
-                  onPress={() => this.onDineinTypePress('EatIn')}>
+                  onPress={() => this.onDineinTypePress('EatIn')}
+                >
                   <View
                     style={{
                       width: 100,
@@ -2303,7 +2395,8 @@ handleConfirm = date => {
                       borderRadius: 15,
                       alignItems: 'center',
                       justifyContent: 'center',
-                    }}>
+                    }}
+                  >
                     {/* <Ionicons
                       name="restaurant"
                       size={22}
@@ -2328,7 +2421,8 @@ handleConfirm = date => {
                           Platform.OS === 'ios'
                             ? 'Asap-Regular_SemiBold'
                             : 'AsapSemiBold',
-                      }}>
+                      }}
+                    >
                       Eat in
                     </Text>
                   </View>
@@ -2338,9 +2432,11 @@ handleConfirm = date => {
                 cardElevation={this.state.dineType === 'PickUp' ? 12 : 0}
                 cardMaxElevation={12}
                 cornerRadius={15}
-                style={{marginLeft: 20, marginTop: 25}}>
+                style={{ marginLeft: 20, marginTop: 25 }}
+              >
                 <TouchableOpacity
-                  onPress={() => this.onDineinTypePress('PickUp')}>
+                  onPress={() => this.onDineinTypePress('PickUp')}
+                >
                   <View
                     style={{
                       width: 100,
@@ -2352,9 +2448,10 @@ handleConfirm = date => {
                       borderRadius: 15,
                       alignItems: 'center',
                       justifyContent: 'center',
-                    }}>
-                    <FontAwesome
-                      name="shopping-bag"
+                    }}
+                  >
+                    <FontAwesome6
+                      name="bag-shopping"
                       size={22}
                       color={
                         this.state.dineType === 'PickUp' ? 'white' : '#ffa363'
@@ -2372,7 +2469,8 @@ handleConfirm = date => {
                           this.state.dineType === 'PickUp'
                             ? 'white'
                             : '#7a7a7a',
-                      }}>
+                      }}
+                    >
                       Pickup
                     </Text>
                   </View>
@@ -2386,10 +2484,12 @@ handleConfirm = date => {
                 }
                 cardMaxElevation={12}
                 cornerRadius={15}
-                style={{marginLeft: 20, marginTop: 25}}>
+                style={{ marginLeft: 20, marginTop: 25 }}
+              >
                 <TouchableOpacity
                   onPress={() => this.onDineinTypePress('Delivery')}
-                  disabled={!this.state.isDelivery}>
+                  disabled={!this.state.isDelivery}
+                >
                   <View
                     style={{
                       width: 100,
@@ -2408,8 +2508,9 @@ handleConfirm = date => {
                       alignItems: 'center',
                       justifyContent: 'center',
                       opacity: this.state.isDelivery ? 1 : 0.5,
-                    }}>
-                    <FontAwesome
+                    }}
+                  >
+                    <FontAwesome6
                       name="truck"
                       size={26}
                       color={
@@ -2432,7 +2533,8 @@ handleConfirm = date => {
                           this.state.isDelivery
                             ? 'white'
                             : '#7a7a7a',
-                      }}>
+                      }}
+                    >
                       Delivery
                     </Text>
                   </View>
@@ -2450,9 +2552,10 @@ handleConfirm = date => {
                   this.state.dineType === 'PickUp'
                     ? null
                     : 0,
-              }}>
+              }}
+            >
               <View
-                style={{height: 0.5, marginTop: 30, backgroundColor: 'black'}}
+                style={{ height: 0.5, marginTop: 30, backgroundColor: 'black' }}
               />
               <Text
                 style={{
@@ -2464,7 +2567,8 @@ handleConfirm = date => {
                   marginTop: 15,
                   marginBottom: 10,
                   textAlign: 'center',
-                }}>
+                }}
+              >
                 {this.state.dineType === 'EatIn'
                   ? 'EatIn Order Details'
                   : 'PickUp Order Details'}
@@ -2486,7 +2590,8 @@ handleConfirm = date => {
                   fontSize: 18,
                   marginTop: 10,
                   marginBottom: 10,
-                }}>
+                }}
+              >
                 When would you like to place your order?
               </Text>
 
@@ -2495,8 +2600,9 @@ handleConfirm = date => {
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginTop: 10,
-                }}>
-                <View style={{flex: 1}}>
+                }}
+              >
+                <View style={{ flex: 1 }}>
                   <TouchableOpacity onPress={() => this.onSchedulePress('Now')}>
                     <View
                       style={{
@@ -2510,7 +2616,8 @@ handleConfirm = date => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginRight: 5,
-                      }}>
+                      }}
+                    >
                       <View
                         style={{
                           width: 20,
@@ -2520,7 +2627,8 @@ handleConfirm = date => {
                           backgroundColor: '#f0f0f0',
                           marginRight: 10,
                           borderRadius: 5,
-                        }}>
+                        }}
+                      >
                         {this.state.scheduleStatus === 'Now' ? (
                           // <IonicIcon
                           //   name="checkmark"
@@ -2549,15 +2657,17 @@ handleConfirm = date => {
                             this.state.scheduleStatus === 'Now'
                               ? 'white'
                               : 'black',
-                        }}>
+                        }}
+                      >
                         Now
                       </Text>
                     </View>
                   </TouchableOpacity>
                 </View>
-                <View style={{flex: 1}}>
+                <View style={{ flex: 1 }}>
                   <TouchableOpacity
-                    onPress={() => this.onSchedulePress('Later')}>
+                    onPress={() => this.onSchedulePress('Later')}
+                  >
                     <View
                       style={{
                         flexDirection: 'row',
@@ -2570,7 +2680,8 @@ handleConfirm = date => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginLeft: 5,
-                      }}>
+                      }}
+                    >
                       <View
                         style={{
                           width: 20,
@@ -2580,7 +2691,8 @@ handleConfirm = date => {
                           backgroundColor: '#f0f0f0',
                           marginRight: 10,
                           borderRadius: 5,
-                        }}>
+                        }}
+                      >
                         {this.state.scheduleStatus === 'Later' ? (
                           // <IonicIcon
                           //   name="checkmark"
@@ -2609,7 +2721,8 @@ handleConfirm = date => {
                             this.state.scheduleStatus === 'Later'
                               ? 'white'
                               : 'black',
-                        }}>
+                        }}
+                      >
                         Later
                       </Text>
                     </View>
@@ -2618,14 +2731,15 @@ handleConfirm = date => {
               </View>
 
               {this.state.scheduleStatus === 'Now' ? (
-                <View style={{marginTop: 20}}>
+                <View style={{ marginTop: 20 }}>
                   <Text
                     style={{
                       fontFamily:
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 16,
                       color: 'black',
-                    }}>
+                    }}
+                  >
                     Your order will be ready within 30 mins* from the order
                     confirmation.
                   </Text>
@@ -2635,7 +2749,8 @@ handleConfirm = date => {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 16,
                       color: 'black',
-                    }}>
+                    }}
+                  >
                     Current time Sri Lanka (
                     {moment(new Date()).format(' hh:mm:ss A ')})
                   </Text>
@@ -2649,8 +2764,9 @@ handleConfirm = date => {
                       alignItems: 'center',
                       marginTop: 20,
                       marginLeft: 3,
-                    }}>
-                    <View style={{flex: 1}}>
+                    }}
+                  >
+                    <View style={{ flex: 1 }}>
                       <Text
                         style={{
                           fontFamily:
@@ -2658,14 +2774,16 @@ handleConfirm = date => {
                               ? 'Asap-Regular_SemiBold'
                               : 'AsapSemiBold',
                           fontSize: 18,
-                        }}>
+                        }}
+                      >
                         {this.state.scheduleTime}
                       </Text>
                     </View>
-                    <View style={{flex: 0.4}}>
+                    <View style={{ flex: 0.4 }}>
                       <TouchableOpacity
-                        style={{alignItems: 'flex-end'}}
-                        onPress={() => this.setState({isEnableTime: true})}>
+                        style={{ alignItems: 'flex-end' }}
+                        onPress={() => this.setState({ isEnableTime: true })}
+                      >
                         <View
                           style={{
                             width: 140,
@@ -2674,7 +2792,8 @@ handleConfirm = date => {
                             borderRadius: 100 / 2,
                             alignItems: 'center',
                             justifyContent: 'center',
-                          }}>
+                          }}
+                        >
                           <Text
                             style={{
                               fontFamily:
@@ -2683,7 +2802,8 @@ handleConfirm = date => {
                                   : 'AsapRegular',
                               fontSize: 16,
                               textAlign: 'center',
-                            }}>
+                            }}
+                          >
                             Schedule Time
                           </Text>
                         </View>
@@ -2700,9 +2820,10 @@ handleConfirm = date => {
                 marginRight: 40,
                 overflow: 'hidden',
                 height: this.state.dineType === 'Delivery' ? null : 0,
-              }}>
+              }}
+            >
               <View
-                style={{height: 0.5, marginTop: 30, backgroundColor: 'black'}}
+                style={{ height: 0.5, marginTop: 30, backgroundColor: 'black' }}
               />
               <Text
                 style={{
@@ -2714,7 +2835,8 @@ handleConfirm = date => {
                   marginTop: 15,
                   marginBottom: 10,
                   textAlign: 'center',
-                }}>
+                }}
+              >
                 Delivery Order Details
               </Text>
               <View
@@ -2734,7 +2856,8 @@ handleConfirm = date => {
                   fontSize: 18,
                   marginTop: 10,
                   marginBottom: 10,
-                }}>
+                }}
+              >
                 When would you like to place your order?
               </Text>
 
@@ -2743,8 +2866,9 @@ handleConfirm = date => {
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginTop: 10,
-                }}>
-                <View style={{flex: 1}}>
+                }}
+              >
+                <View style={{ flex: 1 }}>
                   <TouchableOpacity onPress={() => this.onSchedulePress('Now')}>
                     <View
                       style={{
@@ -2758,7 +2882,8 @@ handleConfirm = date => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginRight: 5,
-                      }}>
+                      }}
+                    >
                       <View
                         style={{
                           width: 20,
@@ -2768,7 +2893,8 @@ handleConfirm = date => {
                           backgroundColor: '#f0f0f0',
                           marginRight: 10,
                           borderRadius: 5,
-                        }}>
+                        }}
+                      >
                         {this.state.scheduleStatus === 'Now' ? (
                           // <IonicIcon
                           //   name="checkmark"
@@ -2797,15 +2923,17 @@ handleConfirm = date => {
                             this.state.scheduleStatus === 'Now'
                               ? 'white'
                               : 'black',
-                        }}>
+                        }}
+                      >
                         Now
                       </Text>
                     </View>
                   </TouchableOpacity>
                 </View>
-                <View style={{flex: 1}}>
+                <View style={{ flex: 1 }}>
                   <TouchableOpacity
-                    onPress={() => this.onSchedulePress('Later')}>
+                    onPress={() => this.onSchedulePress('Later')}
+                  >
                     <View
                       style={{
                         flexDirection: 'row',
@@ -2818,7 +2946,8 @@ handleConfirm = date => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginLeft: 5,
-                      }}>
+                      }}
+                    >
                       <View
                         style={{
                           width: 20,
@@ -2828,7 +2957,8 @@ handleConfirm = date => {
                           backgroundColor: '#f0f0f0',
                           marginRight: 10,
                           borderRadius: 5,
-                        }}>
+                        }}
+                      >
                         {this.state.scheduleStatus === 'Later' ? (
                           // <IonicIcon
                           //   name="checkmark"
@@ -2857,7 +2987,8 @@ handleConfirm = date => {
                             this.state.scheduleStatus === 'Later'
                               ? 'white'
                               : 'black',
-                        }}>
+                        }}
+                      >
                         Later
                       </Text>
                     </View>
@@ -2866,14 +2997,15 @@ handleConfirm = date => {
               </View>
 
               {this.state.scheduleStatus === 'Now' ? (
-                <View style={{marginTop: 20}}>
+                <View style={{ marginTop: 20 }}>
                   <Text
                     style={{
                       fontFamily:
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 16,
                       color: 'black',
-                    }}>
+                    }}
+                  >
                     Your order will be ready within 30 mins* from the order
                     confirmation.
                   </Text>
@@ -2883,7 +3015,8 @@ handleConfirm = date => {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 16,
                       color: 'black',
-                    }}>
+                    }}
+                  >
                     Current time Sri Lanka (
                     {moment(new Date()).format(' hh:mm:ss A ')})
                   </Text>
@@ -2897,8 +3030,9 @@ handleConfirm = date => {
                       alignItems: 'center',
                       marginTop: 20,
                       marginLeft: 3,
-                    }}>
-                    <View style={{flex: 1}}>
+                    }}
+                  >
+                    <View style={{ flex: 1 }}>
                       <Text
                         style={{
                           fontFamily:
@@ -2906,14 +3040,16 @@ handleConfirm = date => {
                               ? 'Asap-Regular_SemiBold'
                               : 'AsapSemiBold',
                           fontSize: 18,
-                        }}>
+                        }}
+                      >
                         {this.state.scheduleTime}
                       </Text>
                     </View>
-                    <View style={{flex: 0.4}}>
+                    <View style={{ flex: 0.4 }}>
                       <TouchableOpacity
-                        style={{alignItems: 'flex-end'}}
-                        onPress={() => this.setState({isEnableTime: true})}>
+                        style={{ alignItems: 'flex-end' }}
+                        onPress={() => this.setState({ isEnableTime: true })}
+                      >
                         <View
                           style={{
                             width: 140,
@@ -2922,7 +3058,8 @@ handleConfirm = date => {
                             borderRadius: 100 / 2,
                             alignItems: 'center',
                             justifyContent: 'center',
-                          }}>
+                          }}
+                        >
                           <Text
                             style={{
                               fontFamily:
@@ -2931,7 +3068,8 @@ handleConfirm = date => {
                                   : 'AsapRegular',
                               fontSize: 16,
                               textAlign: 'center',
-                            }}>
+                            }}
+                          >
                             Schedule Time
                           </Text>
                         </View>
@@ -2942,7 +3080,7 @@ handleConfirm = date => {
               )}
 
               <View
-                style={{height: 0.5, marginTop: 20, backgroundColor: 'black'}}
+                style={{ height: 0.5, marginTop: 20, backgroundColor: 'black' }}
               />
 
               <Text
@@ -2954,25 +3092,28 @@ handleConfirm = date => {
                   fontSize: 18,
                   marginTop: 10,
                   marginBottom: 10,
-                }}>
+                }}
+              >
                 Where would you like your order be delivered to?
               </Text>
 
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <View style={{flex: 1}}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flex: 1 }}>
                   <Text
                     style={{
                       fontFamily:
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 16,
-                    }}>
+                    }}
+                  >
                     {this.state.address}
                   </Text>
                 </View>
-                <View style={{flex: 0.4}}>
+                <View style={{ flex: 0.4 }}>
                   <TouchableOpacity
-                    style={{alignItems: 'flex-end'}}
-                    onPress={() => this.RBSheet.open()}>
+                    style={{ alignItems: 'flex-end' }}
+                    onPress={() => this.RBSheet.open()}
+                  >
                     <View
                       style={{
                         width: 80,
@@ -2981,7 +3122,8 @@ handleConfirm = date => {
                         borderRadius: 100 / 2,
                         alignItems: 'center',
                         justifyContent: 'center',
-                      }}>
+                      }}
+                    >
                       <Text
                         style={{
                           fontFamily:
@@ -2990,7 +3132,8 @@ handleConfirm = date => {
                               : 'AsapRegular',
                           fontSize: 16,
                           textAlign: 'right',
-                        }}>
+                        }}
+                      >
                         Change
                       </Text>
                     </View>
@@ -3022,7 +3165,8 @@ handleConfirm = date => {
                 marginBottom: 2,
                 marginRight: 30,
                 textAlign: 'center',
-              }}>
+              }}
+            >
               Payment type
             </Text>
             <Text
@@ -3034,17 +3178,19 @@ handleConfirm = date => {
                 marginTop: 5,
                 marginRight: 30,
                 textAlign: 'center',
-              }}>
+              }}
+            >
               Payment is the transfer of money or goods and services in exchange
               for a product or service.
             </Text>
 
-            <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
               <Card
                 cardElevation={this.state.paymentType === 'Card' ? 12 : 0}
                 cardMaxElevation={12}
                 cornerRadius={15}
-                style={{marginTop: 25}}>
+                style={{ marginTop: 25 }}
+              >
                 <TouchableOpacity onPress={() => this.onCardPress()}>
                   <View
                     style={{
@@ -3058,7 +3204,8 @@ handleConfirm = date => {
                       borderRadius: 15,
                       alignItems: 'center',
                       justifyContent: 'center',
-                    }}>
+                    }}
+                  >
                     {/* <Ionicons
                       name="card"
                       size={22}
@@ -3086,7 +3233,8 @@ handleConfirm = date => {
                           this.state.paymentType === 'Card'
                             ? 'white'
                             : '#7a7a7a',
-                      }}>
+                      }}
+                    >
                       Card
                     </Text>
                   </View>
@@ -3100,7 +3248,8 @@ handleConfirm = date => {
                 cardElevation={this.state.paymentType === 'Cash' ? 12 : 0}
                 cardMaxElevation={12}
                 cornerRadius={15}
-                style={{marginLeft: 20, marginTop: 25}}>
+                style={{ marginLeft: 20, marginTop: 25 }}
+              >
                 <TouchableOpacity onPress={() => this.onCashPress()}>
                   <View
                     style={{
@@ -3114,7 +3263,8 @@ handleConfirm = date => {
                       borderRadius: 15,
                       alignItems: 'center',
                       justifyContent: 'center',
-                    }}>
+                    }}
+                  >
                     {/* <Ionicons
                       name="cash"
                       size={22}
@@ -3142,7 +3292,8 @@ handleConfirm = date => {
                           this.state.paymentType === 'Cash'
                             ? 'white'
                             : '#7a7a7a',
-                      }}>
+                      }}
+                    >
                       Cash
                     </Text>
                   </View>
@@ -3233,7 +3384,8 @@ handleConfirm = date => {
             marginRight: 30,
             marginBottom: 20,
           }}
-          onPress={() => this.onPlaceorderPress()}>
+          onPress={() => this.onPlaceorderPress()}
+        >
           <View
             style={{
               width: '100%',
@@ -3242,7 +3394,8 @@ handleConfirm = date => {
               justifyContent: 'center',
               backgroundColor: 'black',
               flexDirection: 'row',
-            }}>
+            }}
+          >
             <Text
               style={{
                 color: 'white',
@@ -3251,7 +3404,8 @@ handleConfirm = date => {
                 fontSize: 18,
                 marginRight: 20,
                 marginLeft: 50,
-              }}>
+              }}
+            >
               Place Order
             </Text>
             <ActivityIndicator
@@ -3265,8 +3419,9 @@ handleConfirm = date => {
         <Animated.View
           style={[
             styles.header,
-            {transform: [{translateY: headerTranslateY}]},
-          ]}>
+            { transform: [{ translateY: headerTranslateY }] },
+          ]}
+        >
           <Animated.View
             style={[
               {
@@ -3275,26 +3430,29 @@ handleConfirm = date => {
               },
               {
                 transform: [
-                  {translateX: titleTranslateX},
-                  {scale: titleScale},
-                  {translateY: titleTranslateY},
+                  { translateX: titleTranslateX },
+                  { scale: titleScale },
+                  { translateY: titleTranslateY },
                 ],
               },
-            ]}>
+            ]}
+          >
             <Text
               style={{
                 fontFamily:
                   Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                 fontSize: 28,
-              }}>
+              }}
+            >
               Checkout
             </Text>
           </Animated.View>
         </Animated.View>
 
         <TouchableOpacity
-          style={{top: 30, left: 20, position: 'absolute'}}
-          onPress={() => this.props.navigation.goBack()}>
+          style={{ top: 30, left: 20, position: 'absolute' }}
+          onPress={() => this.props.navigation.goBack()}
+        >
           <Animated.View
             style={[
               {
@@ -3305,14 +3463,15 @@ handleConfirm = date => {
               },
               {
                 transform: [
-                  {scale: buttonScale},
-                  {translateY: buttonTranslateY},
+                  { scale: buttonScale },
+                  { translateY: buttonTranslateY },
                 ],
               },
-            ]}>
+            ]}
+          >
             <Image
               source={require('../assets/left-arrow.png')}
-              style={{width: 20, height: 20}}
+              style={{ width: 20, height: 20 }}
             />
           </Animated.View>
         </TouchableOpacity>
@@ -3332,8 +3491,9 @@ handleConfirm = date => {
             draggableIcon: {
               backgroundColor: '#000',
             },
-          }}>
-          <View style={{flex: 1}}>
+          }}
+        >
+          <View style={{ flex: 1 }}>
             <Text
               style={{
                 margin: 10,
@@ -3342,7 +3502,8 @@ handleConfirm = date => {
                 fontSize: 18,
                 color: 'black',
                 alignSelf: 'center',
-              }}>
+              }}
+            >
               Change Delivery Address
             </Text>
             <TextInput
@@ -3367,7 +3528,7 @@ handleConfirm = date => {
               blurOnSubmit={true}
               keyboardType={'default'}
               placeholderTextColor={'#7a7a7a'}
-              onChangeText={address => this.setState({typeaddress: address})}
+              onChangeText={address => this.setState({ typeaddress: address })}
             />
             <TextInput
               style={{
@@ -3392,7 +3553,7 @@ handleConfirm = date => {
               keyboardType={'default'}
               placeholder={'City'}
               placeholderTextColor={'#7a7a7a'}
-              onChangeText={address => this.setState({typeaddress: address})}
+              onChangeText={address => this.setState({ typeaddress: address })}
             />
             <TouchableOpacity
               style={{
@@ -3400,7 +3561,8 @@ handleConfirm = date => {
                 justifyContent: 'center',
                 margin: 5,
               }}
-              onPress={() => this.onChageAddress()}>
+              onPress={() => this.onChageAddress()}
+            >
               <View
                 style={{
                   width: '92%',
@@ -3409,7 +3571,8 @@ handleConfirm = date => {
                   justifyContent: 'center',
                   backgroundColor: 'black',
                   borderRadius: 5,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     color: 'white',
@@ -3418,7 +3581,8 @@ handleConfirm = date => {
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     fontSize: 18,
-                  }}>
+                  }}
+                >
                   Done
                 </Text>
               </View>
@@ -3448,15 +3612,17 @@ handleConfirm = date => {
               borderTopLeftRadius: 15,
               borderTopRightRadius: 15,
             },
-          }}>
-          <View style={{flex: 1}}>
+          }}
+        >
+          <View style={{ flex: 1 }}>
             <View
               style={{
                 flexDirection: 'row',
                 marginLeft: 30,
                 marginTop: 30,
                 marginBottom: 20,
-              }}>
+              }}
+            >
               <TouchableOpacity onPress={() => this.SRBSheet.close()}>
                 {/* <Ionicons
                   name={'arrow-back-outline'}
@@ -3473,7 +3639,8 @@ handleConfirm = date => {
                   fontSize: 24,
                   color: 'black',
                   marginLeft: 30,
-                }}>
+                }}
+              >
                 Summary
               </Text>
             </View>
@@ -3510,7 +3677,8 @@ handleConfirm = date => {
                     Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                   fontSize: 18,
                   marginLeft: 20,
-                }}>
+                }}
+              >
                 BILLING INFORMATION
               </Text>
 
@@ -3530,7 +3698,8 @@ handleConfirm = date => {
                   marginTop: 20,
                   marginLeft: 30,
                   marginRight: 30,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     flex: 1,
@@ -3538,7 +3707,8 @@ handleConfirm = date => {
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 18,
                     color: 'black',
-                  }}>
+                  }}
+                >
                   Sub Total
                 </Text>
                 <NumericFormat
@@ -3559,7 +3729,8 @@ handleConfirm = date => {
                         fontSize: 18,
                         textAlign: 'right',
                         color: 'black',
-                      }}>
+                      }}
+                    >
                       {formattedValue}
                     </Text>
                   )} // <--- Don't forget this!
@@ -3573,7 +3744,8 @@ handleConfirm = date => {
                     marginTop: 5,
                     marginLeft: 30,
                     marginRight: 30,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       flex: 1,
@@ -3581,7 +3753,8 @@ handleConfirm = date => {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 18,
                       color: 'black',
-                    }}>
+                    }}
+                  >
                     Tax
                   </Text>
                   <NumericFormat
@@ -3602,7 +3775,8 @@ handleConfirm = date => {
                           fontSize: 20,
                           textAlign: 'right',
                           color: 'black',
-                        }}>
+                        }}
+                      >
                         {formattedValue}
                       </Text>
                     )} // <--- Don't forget this!
@@ -3617,7 +3791,8 @@ handleConfirm = date => {
                     marginTop: 5,
                     marginLeft: 30,
                     marginRight: 30,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       flex: 1,
@@ -3625,7 +3800,8 @@ handleConfirm = date => {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 18,
                       color: 'black',
-                    }}>
+                    }}
+                  >
                     Discount
                   </Text>
                   <NumericFormat
@@ -3646,7 +3822,8 @@ handleConfirm = date => {
                           fontSize: 20,
                           textAlign: 'right',
                           color: 'black',
-                        }}>
+                        }}
+                      >
                         {formattedValue}
                       </Text>
                     )} // <--- Don't forget this!
@@ -3661,7 +3838,8 @@ handleConfirm = date => {
                       marginTop: 5,
                       marginLeft: 30,
                       marginRight: 30,
-                    }}>
+                    }}
+                  >
                     <Text
                       style={{
                         flex: 1,
@@ -3671,7 +3849,8 @@ handleConfirm = date => {
                             : 'AsapRegular',
                         fontSize: 18,
                         color: 'black',
-                      }}>
+                      }}
+                    >
                       Delivery Charge
                     </Text>
                     <NumericFormat
@@ -3692,7 +3871,8 @@ handleConfirm = date => {
                             fontSize: 20,
                             textAlign: 'right',
                             color: 'black',
-                          }}>
+                          }}
+                        >
                           {formattedValue}
                         </Text>
                       )} // <--- Don't forget this!
@@ -3709,7 +3889,8 @@ handleConfirm = date => {
                       marginTop: 5,
                       marginLeft: 30,
                       marginRight: 30,
-                    }}>
+                    }}
+                  >
                     <Text
                       style={{
                         flex: 1,
@@ -3719,7 +3900,8 @@ handleConfirm = date => {
                             : 'AsapRegular',
                         fontSize: 18,
                         color: 'black',
-                      }}>
+                      }}
+                    >
                       Service Charge
                     </Text>
                     <NumericFormat
@@ -3740,7 +3922,8 @@ handleConfirm = date => {
                             fontSize: 20,
                             textAlign: 'right',
                             color: 'black',
-                          }}>
+                          }}
+                        >
                           {formattedValue}
                         </Text>
                       )} // <--- Don't forget this!
@@ -3755,7 +3938,8 @@ handleConfirm = date => {
                     marginTop: 5,
                     marginLeft: 30,
                     marginRight: 30,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       flex: 1,
@@ -3763,7 +3947,8 @@ handleConfirm = date => {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 18,
                       color: 'black',
-                    }}>
+                    }}
+                  >
                     Net Total
                   </Text>
                   <NumericFormat
@@ -3784,7 +3969,8 @@ handleConfirm = date => {
                           fontSize: 18,
                           textAlign: 'right',
                           color: 'black',
-                        }}>
+                        }}
+                      >
                         {formattedValue}
                       </Text>
                     )} // <--- Don't forget this!
@@ -3809,7 +3995,8 @@ handleConfirm = date => {
                     Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                   fontSize: 18,
                   marginLeft: 20,
-                }}>
+                }}
+              >
                 ORDER INFORMATION
               </Text>
               <Text
@@ -3821,7 +4008,8 @@ handleConfirm = date => {
                   marginRight: 20,
                   color: '#9c9c9c',
                   marginTop: 5,
-                }}>
+                }}
+              >
                 The information presented here is included on your order like
                 payment type , dine type , delivery address
               </Text>
@@ -3842,14 +4030,16 @@ handleConfirm = date => {
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginLeft: 20,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontFamily:
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 17,
                     color: '#9c9c9c',
-                  }}>
+                  }}
+                >
                   Payment Type :
                 </Text>
                 <Text
@@ -3858,7 +4048,8 @@ handleConfirm = date => {
                       Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                     fontSize: 17,
                     marginLeft: 10,
-                  }}>
+                  }}
+                >
                   {this.state.paymentType === ''
                     ? 'Not Selected'
                     : this.state.paymentType}
@@ -3869,14 +4060,16 @@ handleConfirm = date => {
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginLeft: 20,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontFamily:
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 17,
                     color: '#9c9c9c',
-                  }}>
+                  }}
+                >
                   Location :
                 </Text>
                 <Text
@@ -3885,7 +4078,8 @@ handleConfirm = date => {
                       Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                     fontSize: 17,
                     marginLeft: 10,
-                  }}>
+                  }}
+                >
                   {this.state.locationPressed === ''
                     ? 'Not Selected'
                     : this.state.locationPressed}
@@ -3897,14 +4091,16 @@ handleConfirm = date => {
                   alignItems: 'center',
                   marginTop: 3,
                   marginLeft: 20,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontFamily:
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 17,
                     color: '#9c9c9c',
-                  }}>
+                  }}
+                >
                   Dine Type :
                 </Text>
                 <Text
@@ -3913,7 +4109,8 @@ handleConfirm = date => {
                       Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                     fontSize: 17,
                     marginLeft: 10,
-                  }}>
+                  }}
+                >
                   {this.state.dineType === 'null'
                     ? 'Not Selected'
                     : this.state.dineType}
@@ -3926,14 +4123,16 @@ handleConfirm = date => {
                     marginTop: 3,
                     marginLeft: 20,
                     marginRight: 20,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       fontFamily:
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 17,
                       color: '#9c9c9c',
-                    }}>
+                    }}
+                  >
                     Delivery Address :
                   </Text>
                   <Text
@@ -3945,7 +4144,8 @@ handleConfirm = date => {
                           : 'AsapBold',
                       fontSize: 17,
                       marginLeft: 10,
-                    }}>
+                    }}
+                  >
                     {this.state.address}
                   </Text>
                 </View>
@@ -3970,7 +4170,8 @@ handleConfirm = date => {
                 marginRight: 30,
                 marginBottom: 20,
               }}
-              onPress={() => this.onAgreePress()}>
+              onPress={() => this.onAgreePress()}
+            >
               <View
                 style={{
                   width: '100%',
@@ -3979,7 +4180,8 @@ handleConfirm = date => {
                   justifyContent: 'center',
                   backgroundColor: 'black',
                   flexDirection: 'row',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     color: 'white',
@@ -3990,7 +4192,8 @@ handleConfirm = date => {
                     fontSize: 18,
                     marginRight: 20,
                     marginLeft: 50,
-                  }}>
+                  }}
+                >
                   I Agree
                 </Text>
                 <ActivityIndicator
@@ -4021,12 +4224,13 @@ handleConfirm = date => {
             draggableIcon: {
               backgroundColor: '#000',
             },
-          }}>
-          <View style={{flex: 1, alignItems: 'center'}}>
-            <View style={{marginTop: 30, marginBottom: 10}}>
+          }}
+        >
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            <View style={{ marginTop: 30, marginBottom: 10 }}>
               <Image
                 source={require('../assets/4.png')}
-                style={{width: 110, height: 110, borderRadius: 110 / 2}}
+                style={{ width: 110, height: 110, borderRadius: 110 / 2 }}
               />
             </View>
             <Text
@@ -4035,7 +4239,8 @@ handleConfirm = date => {
                   Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                 fontSize: 24,
                 color: 'black',
-              }}>
+              }}
+            >
               Thank you for your order!
             </Text>
             <Text
@@ -4048,11 +4253,12 @@ handleConfirm = date => {
                 fontSize: 15,
                 color: '#5C5C5C',
                 textAlign: 'center',
-              }}>
+              }}
+            >
               We take pride using only the best ingredients for the food that
               ends up on your table.
             </Text>
-            <View style={{marginTop: 25}}>
+            <View style={{ marginTop: 25 }}>
               <TouchableOpacity onPress={() => this.onContinuShoppingPress()}>
                 <View
                   style={{
@@ -4062,7 +4268,8 @@ handleConfirm = date => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexDirection: 'row',
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       fontFamily:
@@ -4073,7 +4280,8 @@ handleConfirm = date => {
                       color: 'white',
                       marginRight: 20,
                       marginLeft: 20,
-                    }}>
+                    }}
+                  >
                     Done
                   </Text>
                 </View>
@@ -4082,16 +4290,18 @@ handleConfirm = date => {
           </View>
         </RBSheet>
 
-        <DateTimePickerModal
-  isVisible={this.state.isEnableTime}
-  mode="time"
-  date={new Date()}
-  onConfirm={this.handleConfirm}
-  onCancel={this.hideDatePicker}
-  display='spinner'
-/>
-
-       
+        <DatePicker
+          modal
+          open={this.state.isEnableTime}
+          date={this.state.selectedDate}
+          mode="time"
+          onConfirm={this.handleConfirm}
+          onCancel={this.hideDatePicker}
+          theme="light"
+          title="Select Time"
+          confirmText="Confirm"
+          cancelText="Cancel"
+        />
         {this.state.dialogVisible && (
           <View
             style={{
@@ -4104,10 +4314,11 @@ handleConfirm = date => {
               right: 0,
               alignItems: 'center',
               justifyContent: 'center',
-            }}>
+            }}
+          >
             <AlertDialog
               onbuttonPress={() => {
-                this.setState({dialogVisible: false});
+                this.setState({ dialogVisible: false });
               }}
               message={this.state.status_message}
             />
@@ -4120,13 +4331,15 @@ handleConfirm = date => {
           transparent
           visible={this.state.promoModalVisible}
           animationType="slide"
-          onRequestClose={() => this.togglePromoModal(false)}>
+          onRequestClose={() => this.togglePromoModal(false)}
+        >
           <View
             style={{
               flex: 1,
               justifyContent: 'flex-end',
               backgroundColor: 'rgba(0,0,0,0.4)',
-            }}>
+            }}
+          >
             <View
               style={{
                 backgroundColor: '#fff',
@@ -4134,7 +4347,8 @@ handleConfirm = date => {
                 borderTopRightRadius: 12,
                 padding: 20,
                 alignItems: 'center',
-              }}>
+              }}
+            >
               <TouchableOpacity
                 onPress={() => this.togglePromoModal(false)}
                 style={{
@@ -4142,7 +4356,8 @@ handleConfirm = date => {
                   top: 15,
                   right: 15,
                   padding: 5,
-                }}>
+                }}
+              >
                 {/* <Ionicons name="close" size={22} color="#333" /> */}
                 <FontAwesome6 name="xmark" size={22} color="#333" solid />
               </TouchableOpacity>
@@ -4151,7 +4366,8 @@ handleConfirm = date => {
                   fontSize: 18,
                   fontWeight: 'bold',
                   marginBottom: 15,
-                }}>
+                }}
+              >
                 Enter promo code
               </Text>
 
@@ -4170,7 +4386,7 @@ handleConfirm = date => {
                 placeholderTextColor="#aaa"
                 value={this.state.promoCode}
                 editable={this.state.isCustomPromo}
-                onChangeText={text => this.setState({promoCode: text})}
+                onChangeText={text => this.setState({ promoCode: text })}
               />
 
               <TouchableOpacity
@@ -4182,8 +4398,11 @@ handleConfirm = date => {
                   alignItems: 'center',
                   width: '100%',
                 }}
-                onPress={this.ApplyCoupon}>
-                <Text style={{fontSize: 16, fontWeight: 'bold', color: '#000'}}>
+                onPress={this.ApplyCoupon}
+              >
+                <Text
+                  style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}
+                >
                   Apply
                 </Text>
               </TouchableOpacity>
@@ -4225,7 +4444,7 @@ handleConfirm = date => {
 
       // Clear Redux + local state
       this.props.resetCart();
-      this.setState({list: [], Additionallist: []});
+      this.setState({ list: [], Additionallist: [] });
 
       console.log('Cart cleared successfully');
     } catch (error) {
@@ -4241,7 +4460,7 @@ handleConfirm = date => {
     let Mobile = await AsyncStorage.getItem('phonenumber');
     let Address = '';
     const ItemList = this.props.cartItems;
-    this.setState({OrderID: OrderID});
+    this.setState({ OrderID: OrderID });
 
     switch (this.state.dineType) {
       case 'EatIn':
@@ -4310,7 +4529,7 @@ handleConfirm = date => {
               text: 'Try Again',
             },
           ],
-          {cancelable: false},
+          { cancelable: false },
         );
       });
   }
@@ -4323,7 +4542,7 @@ handleConfirm = date => {
     let Mobile = await AsyncStorage.getItem('phonenumber');
     let Address = '';
     const ItemList = this.props.cartItems;
-    this.setState({OrderID: OrderID});
+    this.setState({ OrderID: OrderID });
 
     switch (this.state.dineType) {
       case 'EatIn':
@@ -4398,7 +4617,7 @@ handleConfirm = date => {
               text: 'Try Again',
             },
           ],
-          {cancelable: false},
+          { cancelable: false },
         );
       });
   }
@@ -4406,7 +4625,7 @@ handleConfirm = date => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    resetCart: () => dispatch({type: 'RESET_CART'}),
+    resetCart: () => dispatch({ type: 'RESET_CART' }),
   };
 };
 
