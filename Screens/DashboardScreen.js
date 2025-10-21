@@ -749,11 +749,11 @@ class DashboardScreen extends React.PureComponent {
                 marginTop: 10,
               }}
             >
-              <View style={{ flex: 0.2 }}>
+              {/* <View style={{ flex: 0.2 }}>
                 <TouchableOpacity>
                   <FontAwesome6 name="location-dot" size={20} solid />
                 </TouchableOpacity>
-              </View>
+              </View> */}
 
               <Text
                 style={{

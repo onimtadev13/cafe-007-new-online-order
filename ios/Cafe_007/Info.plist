@@ -75,6 +75,10 @@
 	<string>This app may use the microphone for audio notes or voice commands.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to your photo library to upload profile images.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+    <string>We need permission to save photos to your library.</string>
+	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
+	<true/>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

@@ -885,7 +885,7 @@ class CheckoutScreen extends React.Component {
         });
         break;
       case 'Later':
-        this.setState({ scheduleStatus: 'Later', scheduleTime: 'Choose Time' });
+        this.setState({ scheduleStatus: 'Later', scheduleTime: 'Choose Time'});
         break;
 
       default:
