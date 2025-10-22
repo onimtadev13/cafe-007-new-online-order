@@ -2823,6 +2823,34 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - RNPermissions (5.4.2):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - RNReanimated (3.19.1):
     - boost
     - DoubleConversion
@@ -3229,6 +3257,7 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
@@ -3456,6 +3485,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/messaging"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNPermissions:
+    :path: "../node_modules/react-native-permissions"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -3583,6 +3614,7 @@ SPEC CHECKSUMS:
   RNFBApp: ce17786209faec576eb18071638d0b31ecf75f37
   RNFBMessaging: 2f9d5e45532b8390cc61be145d85495843308048
   RNGestureHandler: 4f7cc97a71d4fe0fcba38c94acdd969f5f17c91c
+  RNPermissions: d8e8115a8b557c630fcd45ec37f2ce71c96ddd38
   RNReanimated: d3ecb5fd98f70b736cb8880cc95776298ff761c7
   RNScreens: 74985ca8e102294a60cec7513fa84c936fa0b20b
   RNSVG: eca4f6bb09bcaf582c4f082f3989a6b8513b3e93
@@ -3592,6 +3624,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 922d794dce2af9c437f864bf4093abfa7a131adb
 
-PODFILE CHECKSUM: 40a519fc5e7e5c266edb2b81d2bf04dcd0159065
+PODFILE CHECKSUM: 7cb0d75034a93e22be1abd4099d8478911e1f70a
 
 COCOAPODS: 1.16.2

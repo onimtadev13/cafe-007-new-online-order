@@ -19,20 +19,18 @@ import {
   View,
 } from 'react-native';
 
-import {Card} from 'react-native-shadow-cards';
+import { Card } from 'react-native-shadow-cards';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import {isTablet} from 'react-native-device-info';
+import { isTablet } from 'react-native-device-info';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import {CountryCodes} from '../Data/CountryCodes';
+import { CountryCodes } from '../Data/CountryCodes';
 import AppContext from '../Components/Context';
-import {keyboardType} from 'react-native/Libraries/DeprecatedPropTypes/DeprecatedTextInputPropTypes';
-
+import { keyboardType } from 'react-native/Libraries/DeprecatedPropTypes/DeprecatedTextInputPropTypes';
 
 const screenWidth = Dimensions.get('screen').width;
 const screenHeight = Dimensions.get('screen').height;
-
 
 export default class LoginScreen extends React.PureComponent {
   static contextType = AppContext;
@@ -80,11 +78,11 @@ export default class LoginScreen extends React.PureComponent {
   }
 
   textinputChange = mobilenumber => {
-    this.setState({mobile: mobilenumber.replace(/^0+/, '')});
+    this.setState({ mobile: mobilenumber.replace(/^0+/, '') });
   };
 
   otpinputChange = OTP => {
-    this.setState({otpcode: OTP});
+    this.setState({ otpcode: OTP });
   };
 
   onClosePress = () => {
@@ -121,26 +119,26 @@ export default class LoginScreen extends React.PureComponent {
       ]).start();
 
       setTimeout(() => {
-        this.setState({isVisible: true});
+        this.setState({ isVisible: true });
       }, 500);
     }
   };
 
   resendbuttonPress = mobilenumber => {
     let s = this.state.second;
-    this.setState({isEnable: true, otpcode: ''});
+    this.setState({ isEnable: true, otpcode: '' });
 
     this.interval = setInterval(() => {
       s = s - 1;
 
       if (s < 10) {
-        this.setState({second: '0' + s});
+        this.setState({ second: '0' + s });
       } else {
-        this.setState({second: s});
+        this.setState({ second: s });
       }
 
       if (s === 0) {
-        this.setState({isEnable: false, second: 30});
+        this.setState({ isEnable: false, second: 30 });
         clearInterval(this.interval);
       }
     }, 1000);
@@ -151,18 +149,18 @@ export default class LoginScreen extends React.PureComponent {
 
   enableResendOTP = () => {
     let s = this.state.second;
-    this.setState({isEnable: true});
+    this.setState({ isEnable: true });
     this.interval = setInterval(() => {
       s = s - 1;
 
       if (s < 10) {
-        this.setState({second: '0' + s});
+        this.setState({ second: '0' + s });
       } else {
-        this.setState({second: s});
+        this.setState({ second: s });
       }
 
       if (s === 0) {
-        this.setState({isEnable: false, second: 30});
+        this.setState({ isEnable: false, second: 30 });
         clearInterval(this.interval);
       }
     }, 1000);
@@ -170,10 +168,9 @@ export default class LoginScreen extends React.PureComponent {
 
   continuebuttonPress = (OTP, mobilenumber) => {
     clearInterval(this.interval);
-    this.setState({isEnable: false, second: 30, otpcode: ''});
+    this.setState({ isEnable: false, second: 30, otpcode: '' });
     this.context.OTPVerification(OTP, mobilenumber, this.props.navigation);
   };
-
 
   onPressFlag = () => {
     const index = CountryCodes.findIndex((_, i) => i === this.state.position);
@@ -189,7 +186,7 @@ export default class LoginScreen extends React.PureComponent {
     });
   };
 
-  renderCountry = ({item, index}) => {
+  renderCountry = ({ item, index }) => {
     return (
       <TouchableOpacity
         key={index}
@@ -201,7 +198,8 @@ export default class LoginScreen extends React.PureComponent {
           });
           this.myCountryPicker.close();
           console.log(index);
-        }}>
+        }}
+      >
         <View
           style={{
             flexDirection: 'row',
@@ -209,8 +207,9 @@ export default class LoginScreen extends React.PureComponent {
             height: 64,
             backgroundColor:
               this.state.position === index ? '#dbdbdb' : 'white',
-          }}>
-          <Text style={{flex: 0.5, fontSize: 28, marginLeft: 10}}>
+          }}
+        >
+          <Text style={{ flex: 0.5, fontSize: 28, marginLeft: 10 }}>
             {item.flag}
           </Text>
           <Text
@@ -222,7 +221,8 @@ export default class LoginScreen extends React.PureComponent {
               fontSize: 18,
               color: 'black',
               alignSelf: 'center',
-            }}>
+            }}
+          >
             {item.name}
           </Text>
           <Text
@@ -235,7 +235,8 @@ export default class LoginScreen extends React.PureComponent {
               fontSize: 18,
               color: 'black',
               alignSelf: 'center',
-            }}>
+            }}
+          >
             {item.dial_code}
           </Text>
         </View>
@@ -244,21 +245,23 @@ export default class LoginScreen extends React.PureComponent {
   };
 
   getItemLayout(data, index) {
-    return {length: 64, offset: 64 * index, index};
+    return { length: 64, offset: 64 * index, index };
   }
 
   render() {
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : null}
-        style={{flex: 1}}>
+        style={{ flex: 1, paddingBottom: Platform.OS === 'ios' ? 60 : 20 }}
+      >
         <ScrollView
-          contentContainerStyle={{flexGrow: 1}}
+          contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           bounces={false}
-          showsVerticalScrollIndicator={false}>
-          <View style={[{flex: 1, backgroundColor: '#F3F3F3'}]}>
-            <Animated.View style={[{opacity: this.state.loganim}]}>
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[{ flex: 1, backgroundColor: '#F3F3F3' }]}>
+            <Animated.View style={[{ opacity: this.state.loganim }]}>
               <Image
                 source={
                   isTablet()
@@ -269,14 +272,17 @@ export default class LoginScreen extends React.PureComponent {
                 resizeMode={'contain'}
                 resizeMethod={'resize'}
               />
-              <View style={{flexDirection: 'row', marginTop: 29}}>
-                <View style={{marginLeft: 26}}>
+              <View style={{ flexDirection: 'row', marginTop: 29 }}>
+                <View style={{ marginLeft: 26 }}>
                   <Text
                     style={{
                       fontFamily:
-                        Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                        Platform.OS === 'ios'
+                          ? 'Asap-Regular_Bold'
+                          : 'AsapBold',
                       fontSize: 37,
-                    }}>
+                    }}
+                  >
                     LOGIN
                   </Text>
                   <Text
@@ -285,7 +291,8 @@ export default class LoginScreen extends React.PureComponent {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 12,
                       marginTop: -5,
-                    }}>
+                    }}
+                  >
                     Everything tastes good when{'\n'}you're hungry
                   </Text>
                 </View>
@@ -297,7 +304,8 @@ export default class LoginScreen extends React.PureComponent {
                     marginRight: 30,
                     marginTop: 16,
                   }}
-                  onPress={() => this.context.SkipButton()}>
+                  onPress={() => this.context.SkipButton()}
+                >
                   <Animated.View
                     style={[
                       {
@@ -308,8 +316,9 @@ export default class LoginScreen extends React.PureComponent {
                         alignItems: 'center',
                         justifyContent: 'center',
                       },
-                      {opacity: this.state.fadeanimate},
-                    ]}>
+                      { opacity: this.state.fadeanimate },
+                    ]}
+                  >
                     <Text
                       style={{
                         fontFamily:
@@ -317,7 +326,8 @@ export default class LoginScreen extends React.PureComponent {
                             ? 'Asap-Regular_Medium'
                             : 'AsapMedium',
                         fontSize: 17,
-                      }}>
+                      }}
+                    >
                       Skip
                     </Text>
                   </Animated.View>
@@ -325,17 +335,19 @@ export default class LoginScreen extends React.PureComponent {
               </View>
             </Animated.View>
 
-            <View style={{flex: 1, justifyContent: 'flex-end'}}>
+            <View style={{ flex: 1, justifyContent: 'flex-end' }}>
               <Animated.View
                 style={[
-                  {backgroundColor: 'white'},
-                  {transform: [{translateY: this.state.animated}]},
-                ]}>
+                  { backgroundColor: 'white' },
+                  { transform: [{ translateY: this.state.animated }] },
+                ]}
+              >
                 <Animated.View
                   style={[
-                    {backgroundColor: 'white'},
-                    {height: this.state.animatedheight},
-                  ]}>
+                    { backgroundColor: 'white' },
+                    { height: this.state.animatedheight },
+                  ]}
+                >
                   <Text
                     style={{
                       fontFamily:
@@ -346,31 +358,36 @@ export default class LoginScreen extends React.PureComponent {
                       marginTop: 10,
                       color: 'black',
                       fontSize: 19,
-                    }}>
+                    }}
+                  >
                     Food should be fun
                   </Text>
                   <Animated.View
-                    style={[{height: this.state.animatedtextheight}]}>
+                    style={[{ height: this.state.animatedtextheight }]}
+                  >
                     <Animated.View
                       style={[
-                        {flexDirection: 'row'},
-                        {opacity: this.state.animatedtextopacity},
+                        { flexDirection: 'row' },
+                        { opacity: this.state.animatedtextopacity },
                         styles.textView,
-                      ]}>
+                      ]}
+                    >
                       <TouchableOpacity
-                        style={{flexDirection: 'row', alignItems: 'center'}}
-                        onPress={() => this.onPressFlag()}>
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                        onPress={() => this.onPressFlag()}
+                      >
                         <Text
                           style={{
                             fontSize: 28,
                             marginLeft: 10,
-                          }}>
+                          }}
+                        >
                           {this.state.flag}
                         </Text>
                         <FontAwesome6
                           name="caret-down"
                           size={18}
-                          style={{marginTop: 5, marginLeft: 5}}
+                          style={{ marginTop: 5, marginLeft: 5 }}
                         />
                       </TouchableOpacity>
                       <Text
@@ -381,7 +398,8 @@ export default class LoginScreen extends React.PureComponent {
                               ? 'Asap-Regular_Medium'
                               : 'AsapMedium',
                           marginLeft: 5,
-                        }}>
+                        }}
+                      >
                         {this.state.code}
                       </Text>
                       <View
@@ -412,7 +430,8 @@ export default class LoginScreen extends React.PureComponent {
                       marginBottom: 20,
                       marginTop: 10,
                     }}
-                    onPress={() => this.loginbuttonPress(this.state.mobile)}>
+                    onPress={() => this.loginbuttonPress(this.state.mobile)}
+                  >
                     <View style={styles.buttonview}>
                       <Text
                         style={{
@@ -424,11 +443,12 @@ export default class LoginScreen extends React.PureComponent {
                           marginLeft: 40,
                           color: 'white',
                           fontSize: 19,
-                        }}>
+                        }}
+                      >
                         Get Start
                       </Text>
                       <ActivityIndicator
-                        style={{marginRight: 20}}
+                        style={{ marginRight: 20 }}
                         size={20}
                         animating={this.props.isClick}
                         color={'white'}
@@ -457,13 +477,15 @@ export default class LoginScreen extends React.PureComponent {
                   borderTopLeftRadius: 15,
                   borderTopRightRadius: 15,
                 },
-              }}>
+              }}
+            >
               <View
                 style={{
                   flex: 1,
                   borderTopLeftRadius: 50,
                   borderTopRightRadius: 50,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     margin: 20,
@@ -472,11 +494,12 @@ export default class LoginScreen extends React.PureComponent {
                     fontSize: 18,
                     color: 'black',
                     alignSelf: 'center',
-                  }}>
+                  }}
+                >
                   Select your country
                 </Text>
                 <FlatList
-                  style={{margin: 10}}
+                  style={{ margin: 10 }}
                   scrollEventThrottle={16}
                   ref={ref => {
                     this.flatlistref = ref;
@@ -493,7 +516,8 @@ export default class LoginScreen extends React.PureComponent {
               visible={this.props.isVisible}
               transparent={true}
               animated={true}
-              animationType={'fade'}>
+              animationType={'fade'}
+            >
               <View
                 style={{
                   flex: 1,
@@ -501,21 +525,24 @@ export default class LoginScreen extends React.PureComponent {
                   justifyContent: 'center',
                   alignItems: 'center',
                   backgroundColor: 'rgba(0,0,0, 0.7)',
-                }}>
+                }}
+              >
                 <Card
-                  style={{backgroundColor: 'white', width: 310, height: 480}}
+                  style={{ backgroundColor: 'white', width: 310, height: 480 }}
                   cardElevation={2}
                   cardMaxElevation={2}
-                  cornerRadius={10}>
-                  <View style={{alignItems: 'flex-end', marginRight: 10}}>
+                  cornerRadius={10}
+                >
+                  <View style={{ alignItems: 'flex-end', marginRight: 10 }}>
                     <TouchableOpacity
-                      style={{position: 'relative', marginTop: 10}}
-                      onPress={() => this.onClosePress()}>
+                      style={{ position: 'relative', marginTop: 10 }}
+                      onPress={() => this.onClosePress()}
+                    >
                       <FontAwesome6 name="circle-xmark" size={35} />
                     </TouchableOpacity>
                   </View>
 
-                  <View style={{flex: 1, alignItems: 'center'}}>
+                  <View style={{ flex: 1, alignItems: 'center' }}>
                     <View
                       style={{
                         margin: 5,
@@ -528,56 +555,62 @@ export default class LoginScreen extends React.PureComponent {
                         marginRight: 30,
                         alignItems: 'center',
                         justifyContent: 'center',
-                      }}>
-                      <FontAwesome6
-                        name="lock"
-                        size={25}
-                        color={'black'}
-                      />
+                      }}
+                    >
+                      <FontAwesome6 name="lock" size={25} color={'black'} />
                     </View>
 
-                    <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+                    <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
                       Enter your code
                     </Text>
                     <Text
                       allowFontScaling={false}
-                      style={{textAlign: 'center', marginTop: 10}}>
+                      style={{ textAlign: 'center', marginTop: 10 }}
+                    >
                       To continue please enter{'\n'} the verification code we've
                       {'\n'} just send for you
                     </Text>
 
                     <OTPInputView
                       style={{ width: '80%', height: 100 }}
-                      pinCount={4} 
+                      pinCount={4}
                       code={this.state.otpcode}
                       autoFocusOnLoad={true}
                       keyboardType="number-pad"
                       codeInputFieldStyle={styles.underlineStyleBase}
                       codeInputHighlightStyle={styles.underlineStyleHighLighted}
-                      onCodeChanged={(code) => this.setState({ otpcode: code })} 
-                      onCodeFilled={(code) => {
-                        console.log('OTP filled:', code); 
+                      onCodeChanged={code => this.setState({ otpcode: code })}
+                      onCodeFilled={code => {
+                        console.log('OTP filled:', code);
                         clearInterval(this.interval);
                         this.setState({ isEnable: false, second: 30 }, () => {
-                          this.context.OTPVerification(code, this.state.mobile, this.props.navigation);
+                          this.context.OTPVerification(
+                            code,
+                            this.state.mobile,
+                            this.props.navigation,
+                          );
                         });
                       }}
                     />
 
                     <TouchableOpacity
-                      disabled={this.state.isEnable} 
-                      style={{flex: 1}}
+                      disabled={this.state.isEnable}
+                      style={{ flex: 1 }}
                       onPress={() => {
                         this.resendbuttonPress(this.state.mobile);
-                      }}>
+                      }}
+                    >
                       <View>
                         <Text
                           allowFontScaling={false}
                           style={{
                             color: this.state.isEnable ? '#d1d1d1' : 'black',
-                          }}>
+                          }}
+                        >
                           Resend Code{' '}
-                          {this.state.isEnable ? '00:' + this.state.second : null}
+                          {this.state.isEnable
+                            ? '00:' + this.state.second
+                            : null}
                         </Text>
                       </View>
                     </TouchableOpacity>
@@ -597,20 +630,22 @@ export default class LoginScreen extends React.PureComponent {
                           this.state.mobile,
                         )
                       }
-                      >
+                    >
                       <View
                         style={{
                           alignItems: 'center',
                           justifyContent: 'center',
                           flex: 1,
-                        }}>
+                        }}
+                      >
                         <Text
                           allowFontScaling={false}
                           style={{
                             fontSize: 14,
                             color: 'white',
                             fontWeight: 'bold',
-                          }}>
+                          }}
+                        >
                           Continue
                         </Text>
                       </View>
@@ -622,7 +657,8 @@ export default class LoginScreen extends React.PureComponent {
                       flexDirection: 'row',
                       marginLeft: '29%',
                       marginBottom: 20,
-                    }}>
+                    }}
+                  >
                     <Text
                       allowFontScaling={false}
                       style={{
@@ -631,7 +667,8 @@ export default class LoginScreen extends React.PureComponent {
                             ? 'Asap-Regular_Bold'
                             : 'AsapBold',
                         textAlign: 'center',
-                      }}>
+                      }}
+                    >
                       Hotline :
                     </Text>
                     <Text
@@ -645,7 +682,8 @@ export default class LoginScreen extends React.PureComponent {
                         marginLeft: 5,
                         textAlign: 'center',
                         marginRight: 20,
-                      }}>
+                      }}
+                    >
                       0707070007
                     </Text>
                   </View>

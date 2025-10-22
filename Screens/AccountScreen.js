@@ -13,23 +13,22 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as ImagePicker from 'react-native-image-picker';
 // import IonicIcon from 'react-native-vector-icons/Ionicons';
-import {openDatabase} from 'react-native-sqlite-storage';
+import { openDatabase } from 'react-native-sqlite-storage';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppContext from '../Components/Context';
-import {connect} from 'react-redux';
-import {CommonActions} from '@react-navigation/routers';
-import {APIURL} from '../Data/CloneData';
+import { connect } from 'react-redux';
+import { CommonActions } from '@react-navigation/routers';
+import { APIURL } from '../Data/CloneData';
 // import dynamicLinks from '@react-native-firebase/dynamic-links';
 import branch from 'react-native-branch';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
-
 const Tab = createMaterialTopTabNavigator();
-var db = openDatabase({name: 'UserDatabase.db'});
+var db = openDatabase({ name: 'UserDatabase.db' });
 
 class AccountScreen extends React.Component {
   static contextType = AppContext;
@@ -72,13 +71,16 @@ class AccountScreen extends React.Component {
     this.CheckUserLog();
     // this.unsubscribe = dynamicLinks().onLink(this.handleDynamicLink);
     this.branchUnsubscribe = branch.subscribe(this.handleBranchLink);
+    if (Platform.OS === 'ios') {
+      console.log('iOS Platform detected');
+    }
   }
 
   componentWillUnmount() {
     // this.unsubscribe();
     if (this.branchUnsubscribe) {
-    this.branchUnsubscribe();
-  }
+      this.branchUnsubscribe();
+    }
   }
 
   fadeIn = () => {
@@ -107,70 +109,230 @@ class AccountScreen extends React.Component {
   //   }
   // };
 
-  handleBranchLink = (params) => {
-  console.log('Branch link params:', params);
-  
-  // Check if this is a clicked branch link
-  if (params && params['+clicked_branch_link']) {
-    // Handle your specific email verification link
-    if (params.$canonical_url === 'https://cafe007.lk/embilipitiya-cafe007/' || 
-        params.$desktop_url === 'https://cafe007.lk/embilipitiya-cafe007/' ||
-        params.custom_url === 'https://cafe007.lk/embilipitiya-cafe007/') {
-      this.CheckUserLog();
-    }
-    
-    // You can add more link handling logic here
-    // For example: navigate to specific screens based on link parameters
-    if (params.action === 'profile_update') {
-      this.CheckUserLog();
-    }
-  }
-};
+  handleBranchLink = params => {
+    console.log('Branch link params:', params);
 
-  chooseImage = () => {
-    this.RBSheet.close();
-    ImagePicker.launchImageLibrary(
-      {
-        mediaType: 'photo',
-        includeBase64: true,
-        maxHeight: 200,
-        maxWidth: 200,
-      },
-      response => {
-        if (response.didCancel) {
-          if (this.state.fileData === null) {
-            this.setState({fileData: null});
-          }
-        } else {
-          this.onUploadImage(response.assets[0].base64);
-        }
-      },
-    );
+    // Check if this is a clicked branch link
+    if (params && params['+clicked_branch_link']) {
+      // Handle your specific email verification link
+      if (
+        params.$canonical_url === 'https://cafe007.lk/embilipitiya-cafe007/' ||
+        params.$desktop_url === 'https://cafe007.lk/embilipitiya-cafe007/' ||
+        params.custom_url === 'https://cafe007.lk/embilipitiya-cafe007/'
+      ) {
+        this.CheckUserLog();
+      }
+
+      // You can add more link handling logic here
+      // For example: navigate to specific screens based on link parameters
+      if (params.action === 'profile_update') {
+        this.CheckUserLog();
+      }
+    }
   };
 
+  // chooseImage = () => {
+  //   this.RBSheet.close();
+  //   ImagePicker.launchImageLibrary(
+  //     {
+  //       mediaType: 'photo',
+  //       includeBase64: true,
+  //       maxHeight: 200,
+  //       maxWidth: 200,
+  //     },
+  //     response => {
+  //       if (response.didCancel) {
+  //         if (this.state.fileData === null) {
+  //           this.setState({ fileData: null });
+  //         }
+  //       } else {
+  //         this.onUploadImage(response.assets[0].base64);
+  //       }
+  //     },
+  //   );
+  // };
+
   takePhoto = () => {
+    // Close bottom sheet first
     this.RBSheet.close();
-    ImagePicker.launchCamera(
-      {
+
+    // Add a delay before opening camera (important for iOS)
+    setTimeout(() => {
+      const options = {
         cameraType: 'front',
         mediaType: 'photo',
         includeBase64: true,
         maxHeight: 200,
         maxWidth: 200,
-      },
-      response => {
+        quality: 0.8,
+        saveToPhotos: false,
+        presentationStyle: 'fullScreen', // Important for iOS
+      };
+
+      ImagePicker.launchCamera(options, response => {
+        console.log('Camera Response:', response);
+
+        // Handle cancellation
         if (response.didCancel) {
-          if (this.state.fileData === null) {
-            this.setState({fileData: null});
-          }
-        } else {
-          
-          this.onUploadImage(response.assets[0].base64);
+          console.log('User cancelled camera');
+          // Force re-render to unfreeze UI
+          this.setState({ isLoading: false });
+          return;
         }
-      },
-    );
+
+        // Handle errors
+        if (response.errorCode) {
+          console.log('Camera Error:', response.errorCode);
+
+          // Force re-render to unfreeze UI
+          this.setState({ isLoading: false });
+
+          let errorMessage = 'Failed to take photo';
+          if (response.errorCode === 'permission') {
+            errorMessage = 'Please grant camera access in Settings';
+            Alert.alert(
+              'Camera Permission Required',
+              'Go to Settings > Cafe_007 > Camera and enable access',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Open Settings',
+                  onPress: () => Linking.openSettings(),
+                },
+              ],
+            );
+          } else if (response.errorCode === 'camera_unavailable') {
+            errorMessage = 'Camera is not available';
+            Alert.alert('Error', errorMessage);
+          } else {
+            Alert.alert('Error', response.errorMessage || errorMessage);
+          }
+          return;
+        }
+
+        // Handle success
+        if (response.assets && response.assets.length > 0) {
+          const asset = response.assets[0];
+          if (asset.base64) {
+            this.setState({ isLoading: false });
+            this.onUploadImage(asset.base64);
+          } else {
+            this.setState({ isLoading: false });
+            Alert.alert('Error', 'Failed to process photo');
+          }
+        }
+      });
+    }, 500); // 500ms delay is crucial for iOS
   };
 
+  chooseImage = () => {
+    // Close bottom sheet first
+    this.RBSheet.close();
+
+    // Add a delay before opening gallery
+    setTimeout(() => {
+      const options = {
+        mediaType: 'photo',
+        includeBase64: true,
+        maxHeight: 200,
+        maxWidth: 200,
+        quality: 0.8,
+        selectionLimit: 1,
+        presentationStyle: 'fullScreen', // Important for iOS
+      };
+
+      ImagePicker.launchImageLibrary(options, response => {
+        console.log('Gallery Response:', response);
+
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+          this.setState({ isLoading: false });
+          return;
+        }
+
+        if (response.errorCode) {
+          console.log('Gallery Error:', response.errorCode);
+          this.setState({ isLoading: false });
+
+          if (response.errorCode === 'permission') {
+            Alert.alert(
+              'Photo Library Permission Required',
+              'Go to Settings > Cafe_007 > Photos and enable access',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Open Settings',
+                  onPress: () => Linking.openSettings(),
+                },
+              ],
+            );
+          } else {
+            Alert.alert(
+              'Error',
+              response.errorMessage || 'Failed to pick image',
+            );
+          }
+          return;
+        }
+
+        if (response.assets && response.assets.length > 0) {
+          const asset = response.assets[0];
+          if (asset.base64) {
+            this.setState({ isLoading: false });
+            this.onUploadImage(asset.base64);
+          } else {
+            this.setState({ isLoading: false });
+            Alert.alert('Error', 'Failed to process image');
+          }
+        }
+      });
+    }, 500); // 500ms delay
+  };
+  checkCameraPermission = async () => {
+    const {
+      check,
+      request,
+      PERMISSIONS,
+      RESULTS,
+    } = require('react-native-permissions');
+
+    const cameraPermission =
+      Platform.OS === 'ios'
+        ? PERMISSIONS.IOS.CAMERA
+        : PERMISSIONS.ANDROID.CAMERA;
+
+    const result = await check(cameraPermission);
+
+    if (result === RESULTS.DENIED) {
+      const requestResult = await request(cameraPermission);
+      return requestResult === RESULTS.GRANTED;
+    }
+
+    return result === RESULTS.GRANTED;
+  };
+
+  checkPhotoLibraryPermission = async () => {
+    const {
+      check,
+      request,
+      PERMISSIONS,
+      RESULTS,
+    } = require('react-native-permissions');
+
+    const photoPermission =
+      Platform.OS === 'ios'
+        ? PERMISSIONS.IOS.PHOTO_LIBRARY
+        : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+
+    const result = await check(photoPermission);
+
+    if (result === RESULTS.DENIED) {
+      const requestResult = await request(photoPermission);
+      return requestResult === RESULTS.GRANTED;
+    }
+
+    return result === RESULTS.GRANTED;
+  };
   onUploadImage = Image => {
     fetch(APIURL, {
       method: 'POST',
@@ -213,18 +375,18 @@ class AccountScreen extends React.Component {
       })
       .then(json => {
         if (json.strRturnRes) {
-          this.setState({fileData: Image});
+          this.setState({ fileData: Image });
         }
       });
   };
 
   onEditablePress = () => {
-    let {Firstname, Lastname, phonenumber, email} = this.state;
+    let { Firstname, Lastname, phonenumber, email } = this.state;
     if (this.state.editable) {
-      this.setState({editable: false});
+      this.setState({ editable: false });
       console.log(Firstname, Lastname, phonenumber, email);
     } else {
-      this.setState({editable: true});
+      this.setState({ editable: true });
     }
   };
 
@@ -239,7 +401,7 @@ class AccountScreen extends React.Component {
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
           }
-          this.setState({cardlist: temp});
+          this.setState({ cardlist: temp });
         },
       );
     });
@@ -274,9 +436,9 @@ class AccountScreen extends React.Component {
     let number = null;
     number = await AsyncStorage.getItem('phonenumber');
     if (number === null) {
-      this.setState({userlog: number, isLoading: false});
+      this.setState({ userlog: number, isLoading: false });
     } else {
-      this.setState({userlog: number}, () => {
+      this.setState({ userlog: number }, () => {
         this.GetPersonalInfo();
       });
     }
@@ -372,10 +534,11 @@ class AccountScreen extends React.Component {
             alignItems: 'center',
             marginTop: 20,
             marginRight: 20,
-          }}>
+          }}
+        >
           <Image
             source={imageuri}
-            style={{height: 35}}
+            style={{ height: 35 }}
             resizeMode={'contain'}
           />
           <Text
@@ -387,14 +550,15 @@ class AccountScreen extends React.Component {
                   ? 'Asap-Regular_SemiBold'
                   : 'AsapSemiBold',
               marginLeft: 15,
-            }}>
+            }}
+          >
             {cardtype}
           </Text>
           <TouchableOpacity
-            onPress={() => this.onDeleteCardPress(item.card_number)}>
+            onPress={() => this.onDeleteCardPress(item.card_number)}
+          >
             {/* <IonicIcon name="trash-outline" size={25} /> */}
             <FontAwesome6 name="trash" size={25} solid />
-
           </TouchableOpacity>
         </View>
       );
@@ -436,8 +600,8 @@ class AccountScreen extends React.Component {
   render() {
     const HomeScreen = () => {
       return (
-        <ScrollView style={{flex: 1}}>
-          <View style={{marginLeft: 30, marginRight: 30, marginTop: 10}}>
+        <ScrollView style={{ flex: 1 }}>
+          <View style={{ marginLeft: 30, marginRight: 30, marginTop: 10 }}>
             {/* <Button title="Sign out" onPress={() => this.logout()} /> */}
             <Text
               style={{
@@ -445,14 +609,16 @@ class AccountScreen extends React.Component {
                   Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
                 fontSize: 19,
                 margin: 10,
-              }}>
+              }}
+            >
               First name
             </Text>
             <TouchableOpacity
-              style={{flex: 1}}
+              style={{ flex: 1 }}
               onPress={() =>
                 this.onTextInputPress(this.state.Firstname, 'First name')
-              }>
+              }
+            >
               <View
                 style={{
                   flex: 1,
@@ -461,7 +627,8 @@ class AccountScreen extends React.Component {
                   borderColor: '#dbdbdb',
                   borderWidth: 1,
                   justifyContent: 'center',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontSize: 18,
@@ -472,28 +639,31 @@ class AccountScreen extends React.Component {
                     color: 'black',
                     margin: 10,
                     paddingLeft: 5,
-                  }}>
+                  }}
+                >
                   {this.state.Firstname}
                 </Text>
               </View>
             </TouchableOpacity>
           </View>
 
-          <View style={{marginLeft: 30, marginRight: 30}}>
+          <View style={{ marginLeft: 30, marginRight: 30 }}>
             <Text
               style={{
                 fontFamily:
                   Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
                 fontSize: 19,
                 margin: 10,
-              }}>
+              }}
+            >
               Last name
             </Text>
             <TouchableOpacity
-              style={{flex: 1}}
+              style={{ flex: 1 }}
               onPress={() =>
                 this.onTextInputPress(this.state.Lastname, 'Last name')
-              }>
+              }
+            >
               <View
                 style={{
                   flex: 1,
@@ -502,7 +672,8 @@ class AccountScreen extends React.Component {
                   borderColor: '#dbdbdb',
                   borderWidth: 1,
                   justifyContent: 'center',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontSize: 18,
@@ -513,21 +684,23 @@ class AccountScreen extends React.Component {
                     color: 'black',
                     margin: 10,
                     paddingLeft: 5,
-                  }}>
+                  }}
+                >
                   {this.state.Lastname}
                 </Text>
               </View>
             </TouchableOpacity>
           </View>
 
-          <View style={{marginLeft: 30, marginTop: 15, marginRight: 30}}>
+          <View style={{ marginLeft: 30, marginTop: 15, marginRight: 30 }}>
             <Text
               style={{
                 fontFamily:
                   Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
                 fontSize: 19,
                 margin: 10,
-              }}>
+              }}
+            >
               Phone Number
             </Text>
             <View
@@ -538,7 +711,8 @@ class AccountScreen extends React.Component {
                 borderColor: '#dbdbdb',
                 borderWidth: 1,
                 alignItems: 'center',
-              }}>
+              }}
+            >
               <Text
                 style={{
                   fontFamily:
@@ -547,7 +721,8 @@ class AccountScreen extends React.Component {
                       : 'AsapSemiBold',
                   fontSize: 19,
                   marginLeft: 15,
-                }}>
+                }}
+              >
                 +94
               </Text>
               <View
@@ -559,10 +734,11 @@ class AccountScreen extends React.Component {
                 }}
               />
               <TouchableOpacity
-                style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}
+                style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
                 onPress={() =>
                   this.onTextInputPress(this.state.phonenumber, 'Phone Number')
-                }>
+                }
+              >
                 <Text
                   style={{
                     flex: 1,
@@ -573,7 +749,8 @@ class AccountScreen extends React.Component {
                         : 'AsapMedium',
                     margin: 10,
                     color: 'black',
-                  }}>
+                  }}
+                >
                   {this.state.phonenumber}
                 </Text>
 
@@ -585,15 +762,16 @@ class AccountScreen extends React.Component {
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     color: this.state.number_verified ? '#4dd91e' : '#FF6900',
-                  }}>
+                  }}
+                >
                   {this.state.number_verified ? 'Verified' : 'Unverified'}
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          <View style={{marginLeft: 30, marginTop: 15, marginRight: 30}}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ marginLeft: 30, marginTop: 15, marginRight: 30 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text
                 style={{
                   flex: 1,
@@ -604,7 +782,8 @@ class AccountScreen extends React.Component {
                   fontSize: 19,
                   margin: 10,
                   paddingLeft: 5,
-                }}>
+                }}
+              >
                 Email
               </Text>
               {this.state.email_verified !== '' ? (
@@ -616,7 +795,8 @@ class AccountScreen extends React.Component {
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     color: this.state.email_verified ? '#4dd91e' : '#FF6900',
-                  }}>
+                  }}
+                >
                   {this.state.email_verified ? 'Verified' : 'Unverified'}
                 </Text>
               ) : null}
@@ -630,12 +810,12 @@ class AccountScreen extends React.Component {
                 borderColor: '#dbdbdb',
                 borderWidth: 1,
                 alignItems: 'center',
-              }}>
+              }}
+            >
               <TouchableOpacity
-                style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}
-                onPress={() =>
-                  this.onTextInputPress(this.state.email, 'Email')
-                }>
+                style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
+                onPress={() => this.onTextInputPress(this.state.email, 'Email')}
+              >
                 <Text
                   style={{
                     flex: 1,
@@ -646,14 +826,15 @@ class AccountScreen extends React.Component {
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     color: 'black',
-                  }}>
+                  }}
+                >
                   {this.state.email}
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          <View style={{marginLeft: 30, marginTop: 15, marginRight: 30}}>
+          <View style={{ marginLeft: 30, marginTop: 15, marginRight: 30 }}>
             <Text
               style={{
                 fontFamily:
@@ -661,14 +842,16 @@ class AccountScreen extends React.Component {
                 fontSize: 19,
                 margin: 10,
                 paddingLeft: 5,
-              }}>
+              }}
+            >
               Address
             </Text>
             <TouchableOpacity
-              style={{flex: 1}}
+              style={{ flex: 1 }}
               onPress={() =>
                 this.onTextInputPress(this.state.address, 'Address')
-              }>
+              }
+            >
               <View
                 style={{
                   flex: 1,
@@ -677,7 +860,8 @@ class AccountScreen extends React.Component {
                   borderColor: '#dbdbdb',
                   borderWidth: 1,
                   justifyContent: 'center',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontSize: 18,
@@ -687,26 +871,29 @@ class AccountScreen extends React.Component {
                         : 'AsapMedium',
                     color: 'black',
                     margin: 10,
-                  }}>
+                  }}
+                >
                   {this.state.address}
                 </Text>
               </View>
             </TouchableOpacity>
           </View>
 
-          <View style={{marginLeft: 30, marginRight: 30, marginTop: 15}}>
+          <View style={{ marginLeft: 30, marginRight: 30, marginTop: 15 }}>
             <Text
               style={{
                 fontFamily:
                   Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
                 fontSize: 19,
                 margin: 10,
-              }}>
+              }}
+            >
               City
             </Text>
             <TouchableOpacity
-              style={{flex: 1}}
-              onPress={() => this.onTextInputPress(this.state.city, 'City')}>
+              style={{ flex: 1 }}
+              onPress={() => this.onTextInputPress(this.state.city, 'City')}
+            >
               <View
                 style={{
                   flex: 1,
@@ -715,7 +902,8 @@ class AccountScreen extends React.Component {
                   borderColor: '#dbdbdb',
                   borderWidth: 1,
                   justifyContent: 'center',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontSize: 18,
@@ -726,7 +914,8 @@ class AccountScreen extends React.Component {
                     color: 'black',
                     margin: 10,
                     paddingLeft: 5,
-                  }}>
+                  }}
+                >
                   {this.state.city}
                 </Text>
               </View>
@@ -740,10 +929,12 @@ class AccountScreen extends React.Component {
               marginTop: 15,
               marginBottom: 30,
               flexDirection: 'row',
-            }}>
+            }}
+          >
             <TouchableOpacity
-              style={{flex: 1, marginRight: 10}}
-              onPress={() => this.logout()}>
+              style={{ flex: 1, marginRight: 10 }}
+              onPress={() => this.logout()}
+            >
               <View
                 style={{
                   flex: 1,
@@ -751,7 +942,8 @@ class AccountScreen extends React.Component {
                   borderRadius: 5,
                   justifyContent: 'center',
                   alignItems: 'center',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontSize: 18,
@@ -762,14 +954,15 @@ class AccountScreen extends React.Component {
                     color: 'white',
                     margin: 10,
                     paddingLeft: 5,
-                  }}>
+                  }}
+                >
                   Sign Out
                 </Text>
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={{flex: 1, marginLeft: 10}}
+              style={{ flex: 1, marginLeft: 10 }}
               onPress={() => {
                 Alert.alert(
                   'Alert',
@@ -779,11 +972,12 @@ class AccountScreen extends React.Component {
                       text: 'YES',
                       onPress: () => this.deactivate_account(),
                     },
-                    {text: 'NO'},
+                    { text: 'NO' },
                   ],
-                  {cancelable: false},
+                  { cancelable: false },
                 );
-              }}>
+              }}
+            >
               <View
                 style={{
                   flex: 1,
@@ -791,7 +985,8 @@ class AccountScreen extends React.Component {
                   borderRadius: 5,
                   justifyContent: 'center',
                   alignItems: 'center',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontSize: 18,
@@ -802,7 +997,8 @@ class AccountScreen extends React.Component {
                     color: 'white',
                     margin: 10,
                     paddingLeft: 5,
-                  }}>
+                  }}
+                >
                   Delete
                 </Text>
               </View>
@@ -851,7 +1047,7 @@ class AccountScreen extends React.Component {
 
     const SettingsScreen = () => {
       return (
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <View
             style={{
               position: 'absolute',
@@ -859,7 +1055,8 @@ class AccountScreen extends React.Component {
               height: '100%',
               alignItems: 'center',
               justifyContent: 'center',
-            }}>
+            }}
+          >
             <Text
               style={{
                 color: 'black',
@@ -868,25 +1065,31 @@ class AccountScreen extends React.Component {
                     ? 'Asap-Regular_SemiBold'
                     : 'AsapSemiBold',
                 fontSize: 16,
-              }}>
+              }}
+            >
               Coming soon
             </Text>
           </View>
           <Animated.View>{this.renderCard()}</Animated.View>
-          <View style={{margin: 10, marginTop: 20}}>
+          <View style={{ margin: 10, marginTop: 20 }}>
             <TouchableOpacity
               disabled={true}
-              onPress={() =>
-                this.props.navigation.navigate('CreditCardScreen')
-              }>
+              onPress={() => this.props.navigation.navigate('CreditCardScreen')}
+            >
               <View
                 style={{
                   flexDirection: 'row',
                   margin: 10,
                   alignItems: 'center',
-                }}>
+                }}
+              >
                 {/* <IonicIcon name="add-circle" size={30} color={'#d1d1d1'} /> */}
-                <FontAwesome6 name="circle-plus" size={30} color="#d1d1d1" solid />
+                <FontAwesome6
+                  name="circle-plus"
+                  size={30}
+                  color="#d1d1d1"
+                  solid
+                />
                 <Text
                   style={{
                     flex: 1,
@@ -897,11 +1100,17 @@ class AccountScreen extends React.Component {
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     color: '#d1d1d1',
-                  }}>
+                  }}
+                >
                   Add Credit or Debit card
                 </Text>
                 {/* <IonicIcon name="chevron-forward" size={30} color={'#d1d1d1'} /> */}
-                <FontAwesome6 name="chevron-right" size={30} color="#d1d1d1" solid />
+                <FontAwesome6
+                  name="chevron-right"
+                  size={30}
+                  color="#d1d1d1"
+                  solid
+                />
               </View>
             </TouchableOpacity>
           </View>
@@ -911,7 +1120,9 @@ class AccountScreen extends React.Component {
 
     if (this.state.isLoading) {
       return (
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        <View
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
           <ActivityIndicator
             animating={this.state.isLoading}
             size="large"
@@ -921,10 +1132,10 @@ class AccountScreen extends React.Component {
       );
     } else {
       return (
-        <Animated.View style={[{flex: 1}, {opacity: this.state.fadeAnim}]}>
-          <View style={{flex: 1}}>
+        <Animated.View style={[{ flex: 1 }, { opacity: this.state.fadeAnim }]}>
+          <View style={{ flex: 1 }}>
             {this.state.userlog === null ? (
-              <View style={{flex: 1}}>
+              <View style={{ flex: 1 }}>
                 <Text
                   style={{
                     fontFamily:
@@ -935,10 +1146,11 @@ class AccountScreen extends React.Component {
                     margin: 30,
                     marginTop: 20,
                     alignSelf: 'center',
-                  }}>
+                  }}
+                >
                   Profile
                 </Text>
-                <View style={{justifyContent: 'center', flex: 1}}>
+                <View style={{ justifyContent: 'center', flex: 1 }}>
                   <Text
                     style={{
                       fontFamily:
@@ -947,7 +1159,8 @@ class AccountScreen extends React.Component {
                           : 'AsapBold',
                       fontSize: 24,
                       textAlign: 'center',
-                    }}>
+                    }}
+                  >
                     Don't have sign in
                   </Text>
                   <Text
@@ -961,7 +1174,8 @@ class AccountScreen extends React.Component {
                       textAlign: 'center',
                       marginLeft: 40,
                       marginRight: 40,
-                    }}>
+                    }}
+                  >
                     Register to access all the features of our service. Eat,
                     drink and live free.{' '}
                   </Text>
@@ -973,7 +1187,8 @@ class AccountScreen extends React.Component {
                       marginRight: 40,
                       marginBottom: 30,
                     }}
-                    onPress={() => this.CheckSign()}>
+                    onPress={() => this.CheckSign()}
+                  >
                     <View
                       style={{
                         width: '40%',
@@ -982,7 +1197,8 @@ class AccountScreen extends React.Component {
                         justifyContent: 'center',
                         backgroundColor: 'black',
                         borderRadius: 50,
-                      }}>
+                      }}
+                    >
                       <Text
                         style={{
                           color: 'white',
@@ -991,7 +1207,8 @@ class AccountScreen extends React.Component {
                               ? 'Asap-Regular_Medium'
                               : 'AsapMedium',
                           fontSize: 18,
-                        }}>
+                        }}
+                      >
                         Sign in
                       </Text>
                     </View>
@@ -1007,7 +1224,8 @@ class AccountScreen extends React.Component {
                     alignItems: 'center',
                     justifyContent: 'center',
                     backgroundColor: '#e3e3e3',
-                  }}>
+                  }}
+                >
                   {this.state.fileData !== null ? (
                     <>
                       <Image
@@ -1020,7 +1238,7 @@ class AccountScreen extends React.Component {
                       <View
                         style={[
                           StyleSheet.absoluteFillObject,
-                          {backgroundColor: 'rgba(0,0,0,0.4)'},
+                          { backgroundColor: 'rgba(0,0,0,0.4)' },
                         ]}
                       />
                     </>
@@ -1041,7 +1259,8 @@ class AccountScreen extends React.Component {
                       borderWidth: 2,
                       alignItems: 'center',
                       justifyContent: 'center',
-                    }}>
+                    }}
+                  >
                     <Image
                       source={
                         this.state.fileData === null
@@ -1059,7 +1278,7 @@ class AccountScreen extends React.Component {
                       }}
                     />
                   </View>
-                  <View style={{marginLeft: 20}}>
+                  <View style={{ marginLeft: 20 }}>
                     <Text
                       style={{
                         color: this.state.fileData === null ? 'black' : 'white',
@@ -1068,7 +1287,8 @@ class AccountScreen extends React.Component {
                             ? 'Asap-Regular_Bold'
                             : 'AsapBold',
                         fontSize: 20,
-                      }}>
+                      }}
+                    >
                       {this.state.Firstname} {this.state.Lastname}
                     </Text>
                     <Text
@@ -1080,13 +1300,15 @@ class AccountScreen extends React.Component {
                             : 'AsapMedium',
                         fontSize: 16,
                         textTransform: 'lowercase',
-                      }}>
+                      }}
+                    >
                       @{this.state.Firstname}
                       {this.state.Lastname}
                     </Text>
                     <TouchableOpacity
-                      style={{marginTop: 5}}
-                      onPress={() => this.RBSheet.open()}>
+                      style={{ marginTop: 5 }}
+                      onPress={() => this.RBSheet.open()}
+                    >
                       <View
                         style={{
                           alignItems: 'center',
@@ -1096,7 +1318,8 @@ class AccountScreen extends React.Component {
                           borderColor:
                             this.state.fileData === null ? 'black' : 'white',
                           borderWidth: 1,
-                        }}>
+                        }}
+                      >
                         <Text
                           style={{
                             paddingLeft: 15,
@@ -1109,7 +1332,8 @@ class AccountScreen extends React.Component {
                                 ? 'Asap-Regular'
                                 : 'AsapRegular',
                             fontSize: 16,
-                          }}>
+                          }}
+                        >
                           Edit profile image
                         </Text>
                       </View>
@@ -1125,9 +1349,10 @@ class AccountScreen extends React.Component {
                           ? 'Asap-Regular_Medium'
                           : 'AsapMedium',
                     },
-                    indicatorStyle: {backgroundColor: 'black'},
-                    style: {backgroundColor: 'transparent'},
-                  }}>
+                    indicatorStyle: { backgroundColor: 'black' },
+                    style: { backgroundColor: 'transparent' },
+                  }}
+                >
                   <Tab.Screen name="Personal info" children={HomeScreen} />
                   <Tab.Screen name="Wallet" children={SettingsScreen} />
                 </Tab.Navigator>
@@ -1151,8 +1376,9 @@ class AccountScreen extends React.Component {
               draggableIcon: {
                 backgroundColor: '#000',
               },
-            }}>
-            <View style={{flex: 1}}>
+            }}
+          >
+            <View style={{ flex: 1 }}>
               <Text
                 style={{
                   margin: 10,
@@ -1163,7 +1389,8 @@ class AccountScreen extends React.Component {
                   fontSize: 18,
                   color: 'black',
                   alignSelf: 'center',
-                }}>
+                }}
+              >
                 Select a photo
               </Text>
               <TouchableOpacity
@@ -1172,7 +1399,8 @@ class AccountScreen extends React.Component {
                   justifyContent: 'center',
                   margin: 5,
                 }}
-                onPress={() => this.takePhoto()}>
+                onPress={() => this.takePhoto()}
+              >
                 <View
                   style={{
                     width: '90%',
@@ -1181,7 +1409,8 @@ class AccountScreen extends React.Component {
                     justifyContent: 'center',
                     backgroundColor: 'black',
                     borderRadius: 5,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       color: 'white',
@@ -1190,7 +1419,8 @@ class AccountScreen extends React.Component {
                           ? 'Asap-Regular_Medium'
                           : 'AsapMedium',
                       fontSize: 18,
-                    }}>
+                    }}
+                  >
                     Take photo
                   </Text>
                 </View>
@@ -1201,7 +1431,8 @@ class AccountScreen extends React.Component {
                   justifyContent: 'center',
                   margin: 5,
                 }}
-                onPress={() => this.chooseImage()}>
+                onPress={() => this.chooseImage()}
+              >
                 <View
                   style={{
                     width: '90%',
@@ -1210,7 +1441,8 @@ class AccountScreen extends React.Component {
                     justifyContent: 'center',
                     backgroundColor: 'black',
                     borderRadius: 5,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       color: 'white',
@@ -1219,7 +1451,8 @@ class AccountScreen extends React.Component {
                           ? 'Asap-Regular_Medium'
                           : 'AsapMedium',
                       fontSize: 18,
-                    }}>
+                    }}
+                  >
                     Choose from library
                   </Text>
                 </View>
@@ -1306,7 +1539,7 @@ class AccountScreen extends React.Component {
 
 const mapDispatchToProps = dispatch => {
   return {
-    resetCart: () => dispatch({type: 'RESET_CART'}),
+    resetCart: () => dispatch({ type: 'RESET_CART' }),
   };
 };
 

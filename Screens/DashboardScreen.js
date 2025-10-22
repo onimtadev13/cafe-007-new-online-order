@@ -749,21 +749,23 @@ class DashboardScreen extends React.PureComponent {
                 marginTop: 10,
               }}
             >
-              {/* <View style={{ flex: 0.2 }}>
-                <TouchableOpacity>
-                  <FontAwesome6 name="location-dot" size={20} solid />
-                </TouchableOpacity>
-              </View> */}
+              <View style={{ flex: 0.2 }}>
+                <FontAwesome6
+                  name="location-dot"
+                  size={20}
+                  solid
+                  color={'#424141ff'}
+                />
+              </View>
 
               <Text
                 style={{
-                  marginRight: 57,
                   fontFamily:
                     Platform.OS === 'ios'
                       ? 'Asap-Regular_SemiBold'
                       : 'AsapSemiBold',
                   fontSize: 16,
-                  paddingLeft: 5,
+
                   paddingRight: 5,
                   textAlign: 'left',
                 }}

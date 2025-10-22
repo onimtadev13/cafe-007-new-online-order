@@ -54,6 +54,7 @@
     "react-native-otp-verify": "^1.1.8",
     "react-native-pager-view": "^6.9.1",
     "react-native-paper": "^5.14.5",
+    "react-native-permissions": "^5.4.2",
     "react-native-push-notification": "^8.1.1",
     "react-native-radio-button": "^2.0.1",
     "react-native-radio-buttons-group": "^2.1.1",
