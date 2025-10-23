@@ -525,43 +525,103 @@ const CheckAppVersion = () => {
     });
 };
 
+const checkPromotionsExist = async () => {
+  try {
+    const response = await fetch(APIURL, {
+      method: 'POST',
+      cache: 'no-cache',
+      headers: {
+        'content-type': 'application/json',
+        'cache-control': 'no-cache',
+      },
+      body: JSON.stringify({
+        HasReturnData: 'T',
+        Parameters: [
+          {
+            Para_Data: '123',
+            Para_Direction: 'Input',
+            Para_Lenth: 30,
+            Para_Name: '@Iid',
+            Para_Type: 'int',
+          },
+          {
+            Para_Data: '',
+            Para_Direction: 'Input',
+            Para_Lenth: 5000,
+            Para_Name: '@Text1',
+            Para_Type: 'varchar',
+          },
+          {
+            Para_Data: '',
+            Para_Direction: 'Input',
+            Para_Lenth: 100,
+            Para_Name: '@Text2',
+            Para_Type: 'varchar',
+          },
+        ],
+        SpName: 'sp_Android_Common_API',
+        con: '1',
+      }),
+    });
+
+    const json = await response.json();
+    const result = json?.CommonResult?.Table;
+
+    // Return true only if there are valid promotions
+    return Array.isArray(result) && result.length > 0;
+  } catch (error) {
+    console.error('Error checking promotions:', error);
+    return false;
+  }
+};
+
   useEffect(() => {
     if (loginstate.userToken) {
       AsyncStorage.removeItem('promoShown');
     }
   }, [loginstate.userToken]);
 
-  useEffect(() => {
-    if (!loginstate.userToken) return;
+ useEffect(() => {
+  if (!loginstate.userToken) return;
 
-    const checkPromo = async () => {
-      const hasShown = await AsyncStorage.getItem('promoShown');
-      if (!hasShown) {
-        setShowPromo(true);
-        await AsyncStorage.setItem('promoShown', 'true');
-      }
-    };
+  const checkPromo = async () => {
+    const hasShown = await AsyncStorage.getItem('promoShown');
+    
+    // Check if promotions exist before showing
+    const hasPromotions = await checkPromotionsExist();
+    
+    if (!hasShown && hasPromotions) {
+      setShowPromo(true);
+      await AsyncStorage.setItem('promoShown', 'true');
+    }
+  };
 
-    checkPromo();
+  checkPromo();
 
-    const subscription = AppState.addEventListener(
-      'change',
-      async nextAppState => {
-        if (
-          appState.current.match(/inactive|background/) &&
-          nextAppState === 'active' &&
-          loginstate.userToken
-        ) {
-          await AsyncStorage.removeItem('promoShown');
+  const subscription = AppState.addEventListener(
+    'change',
+    async nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active' &&
+        loginstate.userToken
+      ) {
+        await AsyncStorage.removeItem('promoShown');
+        
+        // Check if promotions exist before showing
+        const hasPromotions = await checkPromotionsExist();
+        
+        if (hasPromotions) {
           setShowPromo(true);
           await AsyncStorage.setItem('promoShown', 'true');
         }
-        appState.current = nextAppState;
-      },
-    );
+      }
+      appState.current = nextAppState;
+    },
+  );
 
-    return () => subscription.remove();
-  }, [loginstate.userToken]);
+  return () => subscription.remove();
+}, [loginstate.userToken]);
 
   const handleDismissPromo = () => {
     setShowPromo(false);
