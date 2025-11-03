@@ -591,13 +591,7 @@ class CheckoutScreen extends React.Component {
   };
 
   onCardPayment = DefaultEmail => {
-    let OrderID = '';
-    let Mobile = '';
-    let Address = '';
-    let FirstName = '';
-    let LastName = '';
-    let Email = '';
-    let City = '';
+    console.log('🟢 onCardPayment started');
 
     AsyncStorage.multiGet([
       'OrderID',
@@ -607,130 +601,113 @@ class CheckoutScreen extends React.Component {
       'lastname',
       'email',
       'city',
-    ]).then(response => {
-      OrderID = response[0][1];
-      Mobile = response[1][1];
-      Address = response[2][1];
-      FirstName = response[3][1];
-      LastName = response[4][1];
-      Email = response[5][1];
-      City = response[6][1];
-      this.setState({ OrderID: OrderID });
+    ])
+      .then(response => {
+        const OrderID = response[0][1] || '';
+        const Mobile = response[1][1] || '';
+        const Address = response[2][1] || 'No Address';
+        const FirstName = response[3][1] || 'Guest';
+        const LastName = response[4][1] || 'User';
+        const Email = response[5][1] || '';
+        const City = response[6][1] || 'Colombo';
 
-      const paymentObject = {
-        sandbox: false, // true if using Sandbox Merchant ID
-        merchant_id: '218556', // Replace your Merchant ID
-        merchant_secret: '4aBBo875VQb4JH6rXEXACi4a8bdnXYAPB8LV4XlLMDGV', // See step 4e
-        notify_url: 'http://sample.com/notify',
-        order_id: OrderID,
-        items: OrderID,
-        amount: parseFloat(this.state.netTotal).toFixed(2),
-        currency: 'LKR',
-        first_name: FirstName,
-        last_name: LastName,
-        email: DefaultEmail === null ? Email : DefaultEmail,
-        phone: Mobile,
-        address: Address,
-        city: City,
-        country: 'Sri Lanka',
-        delivery_address: this.state.address,
-        delivery_city: this.state.city,
-        delivery_country: 'Sri Lanka',
-        custom_1: '',
-        custom_2: '',
-      };
+        console.log('📋 Payment Details:', {
+          OrderID,
+          Mobile,
+          FirstName,
+          LastName,
+          Email,
+          DefaultEmail,
+          netTotal: this.state.netTotal,
+          address: this.state.address,
+          city: this.state.city,
+        });
 
-      PayHere.startPayment(
-        paymentObject,
-        paymentId => {
-          console.log('Payment Completed', paymentId);
-
-          this.OnlineOrderDataSave();
-
-          // let DeliveryCharge = 0;
-          // let ServiceCharge = 0;
-          //
-          // Address = "";
-          // const ItemList = this.props.cartItems;
-          // this.setState({OrderID: OrderID});
-          //
-          // switch (this.state.dineType) {
-          //     case "EatIn":
-          //         DeliveryCharge = 0;
-          //         ServiceCharge = this.state.serviceCharge;
-          //         break;
-          //     case "PickUp":
-          //         DeliveryCharge = 0;
-          //         ServiceCharge = this.state.serviceCharge;
-          //         break;
-          //     case "Delivery":
-          //         Address = this.state.address;
-          //         DeliveryCharge = this.state.deliveryCharge;
-          //         ServiceCharge = 0;
-          //         break;
-          //
-          //     default:
-          //         break;
-          // }
-          //
-          // let Order = {
-          //     OrderID: OrderID,
-          //     Mobile: Mobile,
-          //     Tax: this.state.tax,
-          //     Version: getVersion(),
-          //     Discount: this.state.discount,
-          //     DeliveryCharge: DeliveryCharge,
-          //     ServiceCharge: ServiceCharge,
-          //     SubTotal: this.state.subTotal,
-          //     NetTotal: this.state.netTotal,
-          //     DineType: this.state.dineType,
-          //     DeliveryAddress: Address,
-          //     PaymentType: this.state.paymentType,
-          //     ScheduleTime: this.state.scheduleTime,
-          //     BranchLocation: this.state.locationPressed,
-          //     Items: ItemList
-          // }
-          //
-          //
-          // fetch(PLACEORDERURL, {
-          //     method: 'POST',
-          //     cache: 'no-cache',
-          //     headers: {
-          //         'content-type': 'application/json',
-          //         'cache-control': 'no-cache'
-          //     },
-          //     body: JSON.stringify(Order)
-          // }).then(res => {
-          //     return res.json();
-          // }).then(json => {
-          //
-          //     if (json.strRturnRes === true) {
-          //         this.RRBSheet.open();
-          //         this.onClearAsync();
-          //     }
-          //
-          // }).catch(er => {
-          //     console.log("onPlaceorderPress", er);
-          //     this.touchableInactive = false;
-          //     Alert.alert("Warning", "The operation coundn't be completed.", [
-          //             {
-          //                 text: "Try Again"
-          //             }
-          //         ],
-          //         {cancelable: false}
-          //     );
-          // })
-        },
-        errorData => {
-          Alert.alert('PayHere Error', errorData);
+        // Validate required fields
+        if (!OrderID) {
+          Alert.alert('Error', 'Order ID is missing');
           this.touchableInactive = false;
-        },
-        () => {
-          console.log('Payment Dismissed');
+          return;
+        }
+
+        if (!Mobile) {
+          Alert.alert('Error', 'Phone number is missing');
           this.touchableInactive = false;
-        },
-      );
-    });
+          return;
+        }
+
+        const finalEmail = DefaultEmail || Email || 'noemail@example.com';
+        if (!finalEmail.includes('@')) {
+          Alert.alert('Error', 'Valid email is required');
+          this.touchableInactive = false;
+          return;
+        }
+
+        const amount = parseFloat(this.state.netTotal);
+        if (!amount || amount <= 0 || isNaN(amount)) {
+          Alert.alert('Error', 'Invalid payment amount');
+          this.touchableInactive = false;
+          return;
+        }
+
+        this.setState({ OrderID: OrderID });
+
+        const paymentObject = {
+          sandbox: false,
+          merchant_id: '218556',
+          merchant_secret: '4aBBo875VQb4JH6rXEXACi4a8bdnXYAPB8LV4XlLMDGV',
+          notify_url: 'http://sample.com/notify',
+          order_id: OrderID,
+          items: `Order ${OrderID}`,
+          amount: amount.toFixed(2),
+          currency: 'LKR',
+          first_name: FirstName,
+          last_name: LastName,
+          email: finalEmail,
+          phone: Mobile,
+          address: Address,
+          city: City,
+          country: 'Sri Lanka',
+          delivery_address: this.state.address || Address,
+          delivery_city: this.state.city || City,
+          delivery_country: 'Sri Lanka',
+          custom_1: '',
+          custom_2: '',
+        };
+
+        console.log(
+          '💳 Payment Object:',
+          JSON.stringify(paymentObject, null, 2),
+        );
+
+        try {
+          PayHere.startPayment(
+            paymentObject,
+            paymentId => {
+              console.log('✅ Payment Completed', paymentId);
+              this.OnlineOrderDataSave();
+            },
+            errorData => {
+              console.log('❌ PayHere Error:', errorData);
+              Alert.alert('Payment Error', JSON.stringify(errorData));
+              this.touchableInactive = false;
+            },
+            () => {
+              console.log('⚠️ Payment Dismissed');
+              this.touchableInactive = false;
+            },
+          );
+        } catch (error) {
+          console.log('❌ PayHere.startPayment crashed:', error);
+          Alert.alert('Error', 'Payment system error: ' + error.message);
+          this.touchableInactive = false;
+        }
+      })
+      .catch(error => {
+        console.log('❌ AsyncStorage error:', error);
+        Alert.alert('Error', 'Failed to retrieve user data: ' + error.message);
+        this.touchableInactive = false;
+      });
   };
 
   onPlaceorderPress = async () => {
@@ -743,20 +720,32 @@ class CheckoutScreen extends React.Component {
       Alert.alert('Warning', 'Please select all required items');
     } else {
       if (this.state.paymentType === 'Card') {
+        console.log('cards press');
+
         if (!this.touchableInactive) {
+          console.log('then');
           this.touchableInactive = true;
           if (this.state.DefaultEmail === null) {
+            console.log('no email');
+
             if (this.state.isEmailVerified) {
+              console.log('then');
               this.OnlineOrderDataSaveBeforPay(true);
             } else {
+              console.log('email not verified');
+
               Alert.alert('Warning', 'Please verified your email first');
             }
           } else {
-            this.props.dispatch(clearCart());
+            console.log('  this.props.dispatch(clearCart());');
+
+            //  this.props.dispatch(clearCart());
             this.OnlineOrderDataSaveBeforPay(true);
           }
         }
       } else {
+        console.log('else');
+
         if (!this.touchableInactive) {
           this.touchableInactive = true;
           this.OnlineOrderDataSaveBeforPay(false);
@@ -885,7 +874,7 @@ class CheckoutScreen extends React.Component {
         });
         break;
       case 'Later':
-        this.setState({ scheduleStatus: 'Later', scheduleTime: 'Choose Time'});
+        this.setState({ scheduleStatus: 'Later', scheduleTime: 'Choose Time' });
         break;
 
       default:
@@ -1608,15 +1597,13 @@ class CheckoutScreen extends React.Component {
                   </Text>
                   {/* White border + glow */}
                   <MaskedView
-                    style={
-                      (style = {
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        left: 0,
-                      })
-                    }
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      bottom: 0,
+                      left: 0,
+                    }}
                     maskElement={
                       <View
                         style={{
@@ -4451,7 +4438,6 @@ class CheckoutScreen extends React.Component {
       console.log('Failed to clear cart:', error);
     }
   };
-
   async OnlineOrderDataSave() {
     let DeliveryCharge = 0;
     let ServiceCharge = 0;
@@ -4460,7 +4446,6 @@ class CheckoutScreen extends React.Component {
     let Mobile = await AsyncStorage.getItem('phonenumber');
     let Address = '';
     const ItemList = this.props.cartItems;
-    this.setState({ OrderID: OrderID });
 
     switch (this.state.dineType) {
       case 'EatIn':
@@ -4476,7 +4461,6 @@ class CheckoutScreen extends React.Component {
         DeliveryCharge = this.state.deliveryCharge;
         ServiceCharge = 0;
         break;
-
       default:
         break;
     }
@@ -4497,7 +4481,7 @@ class CheckoutScreen extends React.Component {
       ScheduleTime: this.state.scheduleTime,
       BranchLocation: this.state.locationPressed,
       Items: ItemList,
-      isPayment: true,
+      isPayment: true, // Mark that payment was completed
     };
 
     fetch(PLACEORDERURL, {
@@ -4516,24 +4500,21 @@ class CheckoutScreen extends React.Component {
         if (json.strRturnRes === true) {
           this.RRBSheet.open();
           this.onClearAsync();
+          this.touchableInactive = false;
         }
       })
       .catch(er => {
-        console.log('onPlaceorderPress', er);
+        console.log('OnlineOrderDataSave error:', er);
         this.touchableInactive = false;
         Alert.alert(
           'Warning',
-          "The operation coundn't be completed.",
-          [
-            {
-              text: 'Try Again',
-            },
-          ],
+          "The operation couldn't be completed.",
+          [{ text: 'Try Again' }],
           { cancelable: false },
         );
       });
   }
-
+  // Method 1: Called when order needs to be saved before payment
   async OnlineOrderDataSaveBeforPay(isCard) {
     let DeliveryCharge = 0;
     let ServiceCharge = 0;
@@ -4558,7 +4539,6 @@ class CheckoutScreen extends React.Component {
         DeliveryCharge = this.state.deliveryCharge;
         ServiceCharge = 0;
         break;
-
       default:
         break;
     }
@@ -4595,28 +4575,27 @@ class CheckoutScreen extends React.Component {
       })
       .then(json => {
         if (json.strRturnRes === true) {
-          // this.RRBSheet.open();
-          // this.onClearAsync();
-          // this.onClearCart();
-          this.props.onClearCart;
+          // For CARD payment: trigger PayHere gateway
           if (isCard) {
+            console.log(this.state.DefaultEmail);
+
             this.onCardPayment(this.state.DefaultEmail);
-          } else {
-            this.OnlineOrderDataSave();
+          }
+          // For CASH payment: show success and clear cart
+          else {
+            this.RRBSheet.open();
+            this.onClearAsync();
+            this.touchableInactive = false;
           }
         }
       })
       .catch(er => {
-        console.log('onPlaceorderPress', er);
+        console.log('OnlineOrderDataSaveBeforPay error:', er);
         this.touchableInactive = false;
         Alert.alert(
           'Warning',
-          "The operation coundn't be completed.",
-          [
-            {
-              text: 'Try Again',
-            },
-          ],
+          "The operation couldn't be completed.",
+          [{ text: 'Try Again' }],
           { cancelable: false },
         );
       });

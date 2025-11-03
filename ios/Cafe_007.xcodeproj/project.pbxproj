@@ -197,6 +197,7 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				CF014324CD2291C68D824047 /* [CP] Embed Pods Frameworks */,
 				095673B05843EFA0F1956F63 /* [CP-User] [RNFB] Core Configuration */,
+				7BE45C707BCA55D80ED1AD0F /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -326,6 +327,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7BE45C707BCA55D80ED1AD0F /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Cafe_007/Pods-Cafe_007-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Cafe_007/Pods-Cafe_007-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cafe_007/Pods-Cafe_007-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		CF014324CD2291C68D824047 /* [CP] Embed Pods Frameworks */ = {

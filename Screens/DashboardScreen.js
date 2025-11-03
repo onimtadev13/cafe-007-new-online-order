@@ -31,7 +31,7 @@ import { getVersion, isTablet } from 'react-native-device-info';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import ScaledImage from '../Components/ScaledImage';
 import RadioButtonRN from 'radio-buttons-react-native';
-
+import PromoCard from '../Components/PromoCard';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 
@@ -42,6 +42,8 @@ var db = openDatabase({ name: 'UserDatabase.db' });
 class DashboardScreen extends React.PureComponent {
   constructor(props) {
     super(props);
+    this.promotionTimer = null;
+    this.hasLoadedPromotions = false;
     this.state = {
       fadeAnim: new Animated.Value(1),
       slideDown: new Animated.Value(-width),
@@ -72,6 +74,7 @@ class DashboardScreen extends React.PureComponent {
       locationState: '',
       pulseAnim: new Animated.Value(1),
       glowAnim: new Animated.Value(0),
+      showPromo: false,
     };
     this.touchableInactive = false;
   }
@@ -126,6 +129,12 @@ class DashboardScreen extends React.PureComponent {
     setTimeout(() => {
       this.debugAsyncStorage();
     }, 1000);
+    this.promotionTimer = setTimeout(() => {
+      if (!this.hasLoadedPromotions) {
+        this.loadPromotions();
+        this.hasLoadedPromotions = true;
+      }
+    }, 3000);
 
     this.onSaveOrderID();
   }
@@ -139,7 +148,60 @@ class DashboardScreen extends React.PureComponent {
       this.onReduxToAsync();
     }
   }
+  loadPromotions = () => {
+    fetch(APIURL, {
+      method: 'POST',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+      },
+      body: JSON.stringify({
+        HasReturnData: 'T',
+        Parameters: [
+          {
+            Para_Data: '123',
+            Para_Direction: 'Input',
+            Para_Lenth: 30,
+            Para_Name: '@Iid',
+            Para_Type: 'int',
+          },
+          {
+            Para_Data: '',
+            Para_Direction: 'Input',
+            Para_Lenth: 5000,
+            Para_Name: '@Text1',
+            Para_Type: 'varchar',
+          },
+          {
+            Para_Data: '',
+            Para_Direction: 'Input',
+            Para_Lenth: 100,
+            Para_Name: '@Text2',
+            Para_Type: 'varchar',
+          },
+        ],
+        SpName: 'sp_Android_Common_API',
+        con: '1',
+      }),
+    })
+      .then(res => res.json())
+      .then(json => {
+        const result = json?.CommonResult?.Table;
 
+        if (Array.isArray(result) && result.length > 0) {
+          this.setState({ showPromo: true });
+        } else {
+          console.warn('⚠️ No valid promotion data found.');
+          this.setState({ showPromo: false });
+        }
+      })
+      .catch(err => {
+        console.error('❌ API Error:', err);
+        Alert.alert('Error', 'Failed to load promotions.');
+        this.setState({ showPromo: false });
+      });
+  };
   restoreCartSilently = async () => {
     try {
       const userlog = await AsyncStorage.getItem('phonenumber');
@@ -436,6 +498,17 @@ class DashboardScreen extends React.PureComponent {
       this.setState({ Location: res[0][1], LocationName: res[1][1] }, () => {
         this.LoadFavouriteItem(res[0][1]);
       });
+    });
+  };
+
+  handleDismissPromo = () => {
+    this.setState({ showPromo: false });
+  };
+  handleMoreOptions = () => {
+    this.setState({ showPromo: false });
+    this.props.navigation.navigate('PromotionsScreen', {
+      screen: 'PromotionsScreen',
+      params: {},
     });
   };
 
@@ -1397,6 +1470,12 @@ class DashboardScreen extends React.PureComponent {
             <View style={{ marginBottom: 0 }}>
               {this.renderOffterItem(this.state.offersList)}
             </View>
+
+            <PromoCard
+              visible={this.state.showPromo}
+              onDismiss={this.handleDismissPromo}
+              onMoreOptions={this.handleMoreOptions}
+            />
           </Animated.View>
         </ScrollView>
 
