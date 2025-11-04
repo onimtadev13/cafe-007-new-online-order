@@ -1,4 +1,4 @@
-package com.cafe_007
+package com.onimta.onlineorderapp
 
 import android.app.Application
 import com.facebook.react.PackageList
