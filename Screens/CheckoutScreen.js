@@ -620,7 +620,7 @@ class CheckoutScreen extends React.Component {
       const paymentObject = {
         sandbox: false, // true if using Sandbox Merchant ID
         merchant_id: '218556', // Replace your Merchant ID
-        merchant_secret: '4aBBo875VQb4JH6rXEXACi4a8bdnXYAPB8LV4XlLMDGV', // See step 4e
+        merchant_secret: 'Mzg3NjcyNTY3MjQ1Nzk0NTY5OTMwMTIxMTA4NzI0MTI4MjU5MzM=', // See step 4e
         notify_url: 'http://sample.com/notify',
         order_id: OrderID,
         items: OrderID,
@@ -733,37 +733,39 @@ class CheckoutScreen extends React.Component {
     });
   };
 
-  onPlaceorderPress = async () => {
-    if (
-      this.state.dineType == 'null' ||
-      this.state.paymentType == '' ||
-      this.state.scheduleTime === 'Choose Time' ||
-      this.state.locationPressed === ''
-    ) {
-      Alert.alert('Warning', 'Please select all required items');
-    } else {
-      if (this.state.paymentType === 'Card') {
-        if (!this.touchableInactive) {
-          this.touchableInactive = true;
-          if (this.state.DefaultEmail === null) {
-            if (this.state.isEmailVerified) {
-              this.OnlineOrderDataSaveBeforPay(true);
-            } else {
-              Alert.alert('Warning', 'Please verified your email first');
-            }
-          } else {
-            this.props.dispatch(clearCart());
+onPlaceorderPress = async () => {
+  if (
+    this.state.dineType == 'null' ||
+    this.state.paymentType == '' ||
+    this.state.scheduleTime === 'Choose Time' ||
+    this.state.locationPressed === ''
+  ) {
+    Alert.alert('Warning', 'Please select all required items');
+  } else {
+    if (this.state.paymentType === 'Card') {
+      if (!this.touchableInactive) {
+        this.touchableInactive = true;
+        if (this.state.DefaultEmail === null) {
+          if (this.state.isEmailVerified) {
             this.OnlineOrderDataSaveBeforPay(true);
+          } else {
+            Alert.alert('Warning', 'Please verified your email first');
+            this.touchableInactive = false; // Reset the flag
           }
-        }
-      } else {
-        if (!this.touchableInactive) {
-          this.touchableInactive = true;
-          this.OnlineOrderDataSaveBeforPay(false);
+        } else {
+          // Just proceed with payment, don't clear cart yet
+          // this.props.dispatch(clearCart());
+          this.OnlineOrderDataSaveBeforPay(true);
         }
       }
+    } else {
+      if (!this.touchableInactive) {
+        this.touchableInactive = true;
+        this.OnlineOrderDataSaveBeforPay(false);
+      }
     }
-  };
+  }
+};
 
   generateOrderID = length => {
     const digits = '0123456789';
@@ -1015,19 +1017,6 @@ class CheckoutScreen extends React.Component {
                   </Text>
                 )} // <--- Don't forget this!
               />
-              {/* <Text
-                style={{
-                  color: '#FF5722',
-                  fontSize: 16,
-                  marginTop: 4,
-                  textAlign: 'right',
-                  fontFamily:
-                    Platform.OS === 'ios'
-                      ? 'Asap-Regular_Medium'
-                      : 'AsapMedium',
-                }}>
-                ( 10% OFF )
-              </Text> */}
               {item.isDiscounted && (
                 <Text
                   style={{
@@ -1495,87 +1484,6 @@ class CheckoutScreen extends React.Component {
               >
                 Your Items
               </Text>
-              {/* <TouchableOpacity onPress={() => this.onSeeMenu()}>
-                <Text
-                  style={{
-                    marginTop: 2,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: '#7a7a7a',
-                    fontSize: 16,
-                  }}>
-                  See menu
-                </Text>
-              </TouchableOpacity> */}
-
-              {/* <TouchableOpacity
-                onPress={() => this.onSeeMenu()}
-                style={{
-                  backgroundColor: '#ffa363',
-                  paddingVertical: 12,
-                  paddingHorizontal: 24,
-                  borderRadius: 25,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  shadowColor: '#000',
-                  shadowOffset: {width: 0, height: 3},
-                  shadowOpacity: 0.2,
-                  shadowRadius: 4,
-                  elevation: 4,
-                }}>
-
-                <Text
-                  style={{
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: '#ffffffff',
-                    fontSize: 16,
-                    fontWeight: '600',
-                  }}>
-                  See menu
-                </Text>
-              </TouchableOpacity> */}
-
-              {/* <TouchableOpacity
-                activeOpacity={0.8}
-                style={{flex: 0.5, alignItems: 'flex-end', marginRight: 10}}
-                onPress={() => this.props.navigation.navigate('HomeScreen')}>
-                <LinearGradient
-                  colors={['#ff914d', '#ff5e62']}
-                  style={{
-                    width: 120,
-                    height: 45,
-                    borderRadius: 25,
-                    borderWidth: 2,
-                    borderColor: '#fff',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    shadowColor: '#000',
-                    shadowOffset: {width: 0, height: 4},
-                    shadowOpacity: 0.25,
-                    shadowRadius: 4,
-                    elevation: 6,
-                  }}>
-                  <Text
-                    allowFontScaling={false}
-                    style={{
-                      fontFamily:
-                        Platform.OS === 'ios'
-                          ? 'Asap-SemiBold'
-                          : 'AsapSemiBold',
-                      fontSize: 16,
-                      textAlign: 'center',
-                      color: '#fff',
-                      letterSpacing: 1,
-                    }}>
-                    See Menu
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity> */}
 
               <TouchableOpacity
                 style={{ flex: 0.5, alignItems: 'flex-end', marginRight: 10 }}
@@ -1607,16 +1515,14 @@ class CheckoutScreen extends React.Component {
                     See menu
                   </Text>
                   {/* White border + glow */}
-                  <MaskedView
-                    style={
-                      (style = {
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        left: 0,
-                      })
-                    }
+                    <MaskedView
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      bottom: 0,
+                      left: 0,
+                    }}
                     maskElement={
                       <View
                         style={{

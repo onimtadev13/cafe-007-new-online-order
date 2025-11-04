@@ -13,7 +13,13 @@ import Slider from '../Components/Slider';
 
 const {width, height} = Dimensions.get('window');
 
-export default function PromoCard({visible = false, onDismiss, onMoreOptions}) {
+export default function PromoCard({
+  visible = false,
+  promotionsData = null,
+  onDismiss,
+  onMoreOptions,
+}) {
+  
   const slideAnim = useRef(new Animated.Value(height)).current;
 
   const cardWidth = width * 0.9;
@@ -40,13 +46,23 @@ export default function PromoCard({visible = false, onDismiss, onMoreOptions}) {
 
   const handleMoreOptions = () => {
     console.log('Clicked More Options...');
-    onDismiss(); // Close the modal
+    onDismiss();
     if (onMoreOptions) {
-      onMoreOptions(); // Call the onMoreOptions callback
+      onMoreOptions();
     } else {
       console.warn('onMoreOptions is not provided');
     }
   };
+
+ 
+  const promotion = promotionsData && promotionsData.length > 0 
+    ? promotionsData[0] 
+    : null;
+
+  const title = promotion?.Title || promotion?.Promo_Title || 'Enjoy 50% off (up to LKR 400)';
+  const description = promotion?.Description || promotion?.Promo_Description || 
+    'LKR 100 minimum order (excluding promotions) • Delivery orders only • Some merchants excluded • This promotion does not apply to already...';
+
   return (
     <Modal
       transparent
@@ -69,15 +85,12 @@ export default function PromoCard({visible = false, onDismiss, onMoreOptions}) {
             ]}>
             <View style={styles.content}>
               <View style={styles.sliderWrapper}>
-                <Slider />
+                {/* Pass promotionsData to Slider component */}
+                <Slider promotionsData={promotionsData} />
               </View>
 
-              <Text style={styles.title}>Enjoy 50% off (up to LKR 400)</Text>
-              <Text style={styles.description}>
-                LKR 100 minimum order (excluding promotions) • Delivery orders
-                only • Some merchants excluded • This promotion does not apply
-                to already...
-              </Text>
+              <Text style={styles.title}>{title}</Text>
+              <Text style={styles.description}>{description}</Text>
 
               <View style={styles.dashedLine} />
 
@@ -89,7 +102,7 @@ export default function PromoCard({visible = false, onDismiss, onMoreOptions}) {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.button, styles.moreButton]}
-                  onPress={onMoreOptions}>
+                  onPress={handleMoreOptions}>
                   <Text style={styles.moreText}>More Options</Text>
                 </TouchableOpacity>
               </View>

@@ -63,6 +63,7 @@ const App = () => {
   const navigationRef = React.createRef();
 
   const [showPromo, setShowPromo] = useState(false);
+  const [promotionsData, setPromotionsData] = useState(null);
 
   function navigate(name, params) {
     navigationRef.current && navigationRef.current.navigate(name, params);
@@ -525,7 +526,7 @@ const CheckAppVersion = () => {
     });
 };
 
-const checkPromotionsExist = async () => {
+const fetchPromotions = async () => {
   try {
     const response = await fetch(APIURL, {
       method: 'POST',
@@ -567,19 +568,18 @@ const checkPromotionsExist = async () => {
     const json = await response.json();
     const result = json?.CommonResult?.Table;
 
-    // Return true only if there are valid promotions
-    return Array.isArray(result) && result.length > 0;
+    return Array.isArray(result) && result.length > 0 ? result : null;
   } catch (error) {
-    console.error('Error checking promotions:', error);
-    return false;
+    console.error('Error fetching promotions:', error);
+    return null;
   }
 };
 
-  useEffect(() => {
-    if (loginstate.userToken) {
-      AsyncStorage.removeItem('promoShown');
-    }
-  }, [loginstate.userToken]);
+useEffect(() => {
+  if (!loginstate.userToken) {
+    AsyncStorage.removeItem('promoShown');
+  }
+}, [loginstate.userToken]);
 
  useEffect(() => {
   if (!loginstate.userToken) return;
@@ -587,10 +587,10 @@ const checkPromotionsExist = async () => {
   const checkPromo = async () => {
     const hasShown = await AsyncStorage.getItem('promoShown');
     
-    // Check if promotions exist before showing
-    const hasPromotions = await checkPromotionsExist();
+    const promoData = await fetchPromotions();
     
-    if (!hasShown && hasPromotions) {
+    if (!hasShown && promoData) {
+      setPromotionsData(promoData); 
       setShowPromo(true);
       await AsyncStorage.setItem('promoShown', 'true');
     }
@@ -608,10 +608,10 @@ const checkPromotionsExist = async () => {
       ) {
         await AsyncStorage.removeItem('promoShown');
         
-        // Check if promotions exist before showing
-        const hasPromotions = await checkPromotionsExist();
+        const promoData = await fetchPromotions();
         
-        if (hasPromotions) {
+        if (promoData) {
+          setPromotionsData(promoData); 
           setShowPromo(true);
           await AsyncStorage.setItem('promoShown', 'true');
         }
@@ -1385,10 +1385,11 @@ useEffect(() => {
             </Provider>
             {loginstate.userToken && (
               <PromoCard
-                visible={showPromo}
-                onDismiss={handleDismissPromo}
-                onMoreOptions={handleMoreOptions}
-              />
+  visible={showPromo}
+  promotionsData={promotionsData} // Pass the data
+  onDismiss={handleDismissPromo}
+  onMoreOptions={handleMoreOptions}
+/>
             )}
           </NavigationContainer>
         </AuthContext.Provider>

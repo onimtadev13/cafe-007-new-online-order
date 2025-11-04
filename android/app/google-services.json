@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:727006768161:android:64d1e49dee46c8e97fc760",
         "android_client_info": {
-          "package_name": "com.cafe_007"
+          "package_name": "com.onimta.onlineorderapp"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "727006768161-nqfqrhn5ecp4lh74bkk40j7ijcejh3uu.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.cafe_007",
+            "package_name": "com.onimta.onlineorderapp",
             "certificate_hash": "8281927fbab9ccd43ee4cc71627cde115233de85"
           }
         },
@@ -42,7 +42,7 @@
               "client_id": "727006768161-ov7b3ajsii0bv1cnvs279jlqha6ddhhv.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.cafe_007"
+                "bundle_id": "com.onimta.onlineorderapp"
               }
             }
           ]
