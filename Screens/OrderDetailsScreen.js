@@ -26,7 +26,8 @@ import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import OrderProcess from '../Components/OrderProcess';
-import {firebase} from '@react-native-firebase/messaging';
+// import {firebase} from '@react-native-firebase/messaging';
+import messaging from '@react-native-firebase/messaging'; 
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {CommonActions} from '@react-navigation/native';
 import OrderImageSlider from '../Components/OrderImageSlider';
@@ -92,34 +93,31 @@ export default class OrderDetailsScreen extends React.PureComponent {
     this.messageListner();
   }
 
-  localNotification = () => {
-    this.messageListner = firebase
-      .messaging()
-      .onMessage(async remoteMessage => {
-        // console.log(remoteMessage.data);
-        switch (remoteMessage.data.Status) {
-          case 'Processing':
-            this.setState({OrderStatus: '1'});
-            break;
-          case 'Preparing':
-            this.setState({OrderStatus: '2'});
-            break;
-          case 'Delivery':
-            this.setState({OrderStatus: '3'});
-            break;
-          case 'Cancel':
-            this.setState({OrderStatus: '4'});
-            break;
-          case 'Finish':
-            this.setState({OrderStatus: '5'});
-            break;
-
-          default:
-            break;
-        }
-      });
-  };
-
+ localNotification = () => {
+  this.messageListner = messaging().onMessage(async remoteMessage => {  // ✅ FIXED
+    const status = remoteMessage.data?.Status;  // Added optional chaining for safety
+    
+    switch (status) {
+      case 'Processing':
+        this.setState({OrderStatus: '1'});
+        break;
+      case 'Preparing':
+        this.setState({OrderStatus: '2'});
+        break;
+      case 'Delivery':
+        this.setState({OrderStatus: '3'});
+        break;
+      case 'Cancel':
+        this.setState({OrderStatus: '4'});
+        break;
+      case 'Finish':
+        this.setState({OrderStatus: '5'});
+        break;
+      default:
+        break;
+    }
+  });
+};
   onOrderCancelPress = Reason => {
     fetch(APIURL, {
       method: 'POST',

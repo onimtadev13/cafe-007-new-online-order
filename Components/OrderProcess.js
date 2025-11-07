@@ -1,4 +1,5 @@
-import {firebase} from '@react-native-firebase/messaging';
+// import {firebase} from '@react-native-firebase/messaging';
+import messaging from '@react-native-firebase/messaging';
 import moment from 'moment';
 import React from 'react';
 import {Animated, Platform, Text, View} from 'react-native';
@@ -113,13 +114,9 @@ export default class OrderProcess extends React.PureComponent {
   };
 
   localNotification = () => {
-    var list = [];
-    this.messageListner = firebase
-      .messaging()
-      .onMessage(async remoteMessage => {
-        // console.log(JSON.stringify(remoteMessage.data.Status));
-        if (remoteMessage.data.OrderID === this.state.orderID) {
-          this.setState({orderStatus: remoteMessage.data.Status});
+  this.messageListner = messaging().onMessage(async remoteMessage => {  // ✅ FIXED
+    if (remoteMessage.data?.OrderID === this.state.orderID) {
+      this.setState({orderStatus: remoteMessage.data.Status});
 
           list = this.state.statusList;
           var index = list.findIndex(i => i === remoteMessage.data.Status);

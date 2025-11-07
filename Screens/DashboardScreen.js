@@ -91,6 +91,7 @@ class DashboardScreen extends React.PureComponent {
     'promoShown',
   ]);
 
+
   componentDidMount() {
     this.startGlow();
     this.hasRestoredCart = false;
@@ -174,6 +175,8 @@ class DashboardScreen extends React.PureComponent {
       console.error('Error restoring cart:', error);
     }
   };
+
+  
 
   onReduxToAsync = async () => {
     const reduxList = this.props.cartItems;
@@ -815,7 +818,7 @@ class DashboardScreen extends React.PureComponent {
                 }}
               >
                 Delivery Details
-              </Text>
+              </Text>             
               <Text
                 style={{
                   fontFamily:

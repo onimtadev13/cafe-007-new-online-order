@@ -22,11 +22,12 @@ export default class NotificationModal extends React.PureComponent {
     super(props);
     this.state = {
       zoomIn: new Animated.Value(1),
+      hasCalledAPI: false, // ✅ Track if we've already called the API
     };
   }
 
   componentDidMount() {
-    this.NotificationVisit();
+    // ✅ FIXED: Only start animation, don't call API yet
     this.ButtonTimout = setInterval(() => {
       Animated.timing(this.state.zoomIn, {
         toValue: 1.2,
@@ -40,18 +41,46 @@ export default class NotificationModal extends React.PureComponent {
     }, 1000);
   }
 
+  componentDidUpdate(prevProps) {
+    // ✅ FIXED: Only call API when modal becomes visible and has image
+    // and we haven't called it yet for this notification
+    if (
+      this.props.visible && 
+      !prevProps.visible && 
+      this.props.image && 
+      this.props.image !== '' &&
+      !this.state.hasCalledAPI
+    ) {
+      console.log('📲 [MODAL] Modal opened, calling NotificationVisit API');
+      this.NotificationVisit();
+      this.setState({ hasCalledAPI: true });
+    }
+    
+    // ✅ Reset flag when modal closes so next notification can call API
+    if (!this.props.visible && prevProps.visible) {
+      console.log('📲 [MODAL] Modal closed, resetting API flag');
+      this.setState({ hasCalledAPI: false });
+    }
+  }
+
   componentWillUnmount() {
     clearInterval(this.ButtonTimout);
   }
 
   NotificationVisit = async () => {
-    console.log('NotificationVisit');
+    console.log('📲 [MODAL] NotificationVisit called');
 
     var mobilenumber = await AsyncStorage.getItem('phonenumber');
     var NotificationId = await AsyncStorage.getItem('NID');
 
-    console.log(mobilenumber);
-    console.log(NotificationId);
+    console.log('📲 [MODAL] Mobile number:', mobilenumber);
+    console.log('📲 [MODAL] Notification ID:', NotificationId);
+
+    // ✅ FIXED: Don't call API if we don't have required data
+    if (!mobilenumber || !NotificationId) {
+      console.log('⚠️ [MODAL] Missing mobile number or notification ID, skipping API call');
+      return;
+    }
 
     fetch(APIURL, {
       method: 'POST',
@@ -93,10 +122,10 @@ export default class NotificationModal extends React.PureComponent {
         return res.json();
       })
       .then(json => {
-        console.log('NotificationVisit then');
+        console.log('✅ [MODAL] NotificationVisit API success:', json);
       })
       .catch(er => {
-        console.log(er);
+        console.error('❌ [MODAL] NotificationVisit API error:', er);
       });
   };
 
@@ -113,6 +142,9 @@ export default class NotificationModal extends React.PureComponent {
       itemCode,
       onMenuPress,
     } = this.props;
+
+    // ✅ IMPROVED: Better logging
+    // console.log('📲 [MODAL] Render - visible:', visible, 'image:', image ? 'yes' : 'no');
 
     return (
       <>

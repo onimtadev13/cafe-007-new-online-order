@@ -1,100 +1,189 @@
 import {Platform} from 'react-native';
-import PushNotification from 'react-native-push-notification';
+import PushNotification, {Importance} from 'react-native-push-notification';
+import {PermissionsAndroid} from 'react-native';
 
-class LocalNoticationService { 
-  constructor(onNotificationPop) {
-    PushNotification.createChannel(
-      {
-        channelId: 'channel-id', // (required)
-        channelName: 'My channel', // (required)
-        channelDescription: 'A channel to categorise your notifications', // (optional) default: undefined.
-        playSound: false, // (optional) default: true
-        soundName: 'default', // (optional) See `soundName` parameter of `localNotification` function
-        importance: 4, // (optional) default: 4. Int value of the Android notification importance
-        vibrate: true, // (optional) default: true. Creates the default vibration patten if true.
-      },
-      created => console.log(`createChannel returned '${created}'`), // (optional) callback returns whether the channel was created, false means it already existed.
-    );
-
-    this.configure(onNotificationPop);
+class LocalNotificationService {
+  constructor() {
     this.lastId = 0;
+    this._createDefaultChannels();
   }
 
+  // Create notification channels (Android 8.0+)
+  _createDefaultChannels() {
+    PushNotification.createChannel(
+      {
+        channelId: 'channel-id', // Match this in your notifications
+        channelName: 'My channel',
+        channelDescription: 'A channel to categorise your notifications',
+        playSound: true,
+        soundName: 'default',
+        importance: Importance.HIGH,
+        vibrate: true,
+      },
+      (created) => console.log(`Default channel created: ${created}`)
+    );
+
+    PushNotification.createChannel(
+      {
+        // channelId: 'order-channel-id',
+        // channelName: 'Order Notifications',
+        channelId: 'channel-id', // Match this in your notifications
+        channelName: 'My channel',
+        channelDescription: 'Notifications for order updates',
+        playSound: true,
+        soundName: 'default',
+        importance: Importance.HIGH,
+        vibrate: true,
+      },
+      (created) => console.log(`Order channel created: ${created}`)
+    );
+  }
+
+  // Configure push notifications
   configure(onNotificationPop) {
     PushNotification.configure({
       onRegister: function (token) {
-        // console.log("[LocalNoticationService] onRegister ", token);
+        console.log('[LocalNotificationService] Token:', token);
       },
-      onNotification: function (notification) {
-        const clicked = notification.userInteraction;
-        if (clicked) {
-          notification.userInteraction = true;
-          if (onNotificationPop !== undefined) {
-            onNotificationPop(notification);
-          }
 
-          if (Platform.OS === 'ios') {
-            // (required) Called when a remote is received or opened, or local notification is opened
-            // notification.finish(PushNotificationIOS.FetchResult.NoData)
-          }
-        } else {
-          console.log('NOT CLICK');
+      onNotification: function (notification) {
+        console.log('[LocalNotificationService] Notification:', notification);
+        
+        // Check if notification was clicked
+        const clicked = notification.userInteraction;
+        
+        if (clicked && onNotificationPop) {
+          onNotificationPop(notification);
+        }
+
+        // Required for iOS
+        if (Platform.OS === 'ios') {
+          notification.finish('UIBackgroundFetchResultNoData');
         }
       },
 
-      // IOS ONLY (optional): default: all - Permissions to register.
+      // Should the initial notification be popped automatically
+      popInitialNotification: true,
+
+      // iOS permissions
       permissions: {
         alert: true,
         badge: true,
         sound: true,
       },
 
-      popInitialNotification: true,
-      requestPermissions: true,
+      // Request permissions on iOS
+      requestPermissions: Platform.OS === 'ios',
     });
   }
 
-  //Appears right away
-  localNotification(Title, MSG, IMGURL, JSON) {
+  // Request Android 13+ notification permission
+  async requestPermissions() {
+    if (Platform.OS === 'android') {
+      if (Platform.Version >= 33) {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+            {
+              title: 'Notification Permission',
+              message: 'This app needs permission to show notifications',
+              buttonPositive: 'Allow',
+              buttonNegative: 'Deny',
+            }
+          );
+          return granted === PermissionsAndroid.RESULTS.GRANTED;
+        } catch (err) {
+          console.warn('[LocalNotificationService] Permission error:', err);
+          return false;
+        }
+      }
+      return true; // Android < 13 doesn't need runtime permission
+    }
+    return true;
+  }
+
+  // Show local notification immediately
+  localNotification(title, message, imageUrl, data) {
     this.lastId++;
-    PushNotification.localNotification({
-      channelId: 'channel-id',
-      title: Title,
-      message: MSG,
+    
+    const notification = {
+      id: this.lastId.toString(),
+      channelId: 'channel-id', // Must match created channel
+      title: title || 'Notification',
+      message: message || '',
       playSound: true,
       soundName: 'default',
-      bigPictureUrl: IMGURL,
-      smallIcon: 'ic_stat_ic_notification',
-      userInfo: JSON,
-    });
+      importance: 'high',
+      priority: 'high',
+      vibrate: true,
+      vibration: 300,
+      userInfo: data || {},
+      data: data || {},
+    };
+
+    // Add image if provided (Android only)
+    if (Platform.OS === 'android' && imageUrl) {
+      notification.bigPictureUrl = imageUrl;
+      notification.largeIconUrl = imageUrl;
+      notification.smallIcon = 'ic_stat_ic_notification';
+    }
+
+    // iOS specific
+    if (Platform.OS === 'ios' && imageUrl) {
+      notification.attachments = [{
+        url: imageUrl,
+      }];
+    }
+
+    PushNotification.localNotification(notification);
   }
 
-  //Appears after a specified time. App does not have to be open.
-  scheduleNotification() {
+  // Schedule notification for later
+  scheduleNotification(title, message, date, data) {
     this.lastId++;
+    
     PushNotification.localNotificationSchedule({
-      date: new Date(Date.now() + 30 * 1000), //30 seconds
-      title: 'Scheduled Notification',
-      message: 'My Notification Message',
+      id: this.lastId.toString(),
+      channelId: 'default-channel-id',
+      title: title || 'Scheduled Notification',
+      message: message || '',
+      date: date || new Date(Date.now() + 60 * 1000), // 1 minute from now
       playSound: true,
       soundName: 'default',
+      userInfo: data || {},
+      data: data || {},
     });
   }
 
-  checkPermission(cbk) {
-    return PushNotification.checkPermissions(cbk);
+  // Check notification permissions
+  checkPermissions(callback) {
+    PushNotification.checkPermissions(callback);
   }
 
-  cancelNotif() {
-    PushNotification.cancelLocalNotifications({id: '' + this.lastId});
+  // Cancel specific notification
+  cancelNotification(id) {
+    PushNotification.cancelLocalNotification(id || this.lastId.toString());
   }
 
-  cancelAll() {
+  // Cancel all notifications
+  cancelAllNotifications() {
     PushNotification.cancelAllLocalNotifications();
   }
 
+  // Remove all delivered notifications
+  removeAllDeliveredNotifications() {
+    PushNotification.removeAllDeliveredNotifications();
+  }
+
+  // Unregister from notifications
   unregister() {
     PushNotification.unregister();
   }
+
+  // Get notification channels (Android)
+  getChannels(callback) {
+    PushNotification.getChannels(callback);
+  }
 }
-export default new LocalNoticationService();
+
+export default new LocalNotificationService();

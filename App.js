@@ -9,6 +9,7 @@ import {
   Platform,
   Linking,
   AppState,
+  PermissionsAndroid,
 } from 'react-native';
 import AuthContext from './Components/Context';
 import BottomTabNavigation from './Routes/BottomTabNavigation';
@@ -36,6 +37,12 @@ import {
 
 var db = openDatabase({ name: 'UserDatabase.db' });
 const RootStack = createStackNavigator();
+
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  console.log('🔔 Background message:', remoteMessage);
+  // Handle background notifications here
+  return Promise.resolve();
+});
 
 const App = () => {
   const [isClick, setClick] = React.useState(false);
@@ -623,6 +630,26 @@ useEffect(() => {
   return () => subscription.remove();
 }, [loginstate.userToken]);
 
+// Add this useEffect in App.js
+// useEffect(() => {
+//   // Request notification permissions
+//   const requestNotificationPermission = async () => {
+//     if (Platform.OS === 'android' && Platform.Version >= 33) {
+//       const granted = await PermissionsAndroid.request(
+//         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+//       );
+      
+//       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+//         console.log('Notification permission granted');
+//       } else {
+//         console.log('Notification permission denied');
+//       }
+//     }
+//   };
+
+//   requestNotificationPermission();
+// }, []);
+
   const handleDismissPromo = () => {
     setShowPromo(false);
   };
@@ -1133,211 +1160,582 @@ useEffect(() => {
     }
   };
 
-  messaging().onNotificationOpenedApp(remoteMessage => {
-    console.log(
-      '[FCMService] onNotificationOpenedApp Notification caused app to open',
-    );
-    console.log(remoteMessage.data);
+  // messaging().onNotificationOpenedApp(remoteMessage => {
+  //   console.log(
+  //     '[FCMService] onNotificationOpenedApp Notification caused app to open',
+  //   );
+  //   console.log(remoteMessage.data);
 
-    if (remoteMessage) {
-      if (remoteMessage.data.OrderID !== undefined) {
-        const OrderID = remoteMessage.data.OrderID;
-        navigate('Orders', {
-          screen: 'OrderDetailsScreen',
-          params: { OrderID: OrderID },
-        });
-      } else if (Platform.OS === 'android') {
-        if (remoteMessage.notification.android.imageUrl !== '') {
-          setstate(prevState => ({
-            ...prevState,
-            Type: remoteMessage.data.type,
-            Description: remoteMessage.notification.body,
-            More_Description: remoteMessage.data.item_description,
-            Image: remoteMessage.notification.android.imageUrl,
-            ItemCode: remoteMessage.data.item_code,
-            isVisible: true,
-            isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
-          }));
+  //   if (remoteMessage) {
+  //     if (remoteMessage.data.OrderID !== undefined) {
+  //       const OrderID = remoteMessage.data.OrderID;
+  //       navigate('Orders', {
+  //         screen: 'OrderDetailsScreen',
+  //         params: { OrderID: OrderID },
+  //       });
+  //     } else if (Platform.OS === 'android') {
+  //       if (remoteMessage.notification.android.imageUrl !== '') {
+  //         setstate(prevState => ({
+  //           ...prevState,
+  //           Type: remoteMessage.data.type,
+  //           Description: remoteMessage.notification.body,
+  //           More_Description: remoteMessage.data.item_description,
+  //           Image: remoteMessage.notification.android.imageUrl,
+  //           ItemCode: remoteMessage.data.item_code,
+  //           isVisible: true,
+  //           isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
+  //         }));
 
-          AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+  //         AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+  //       } else {
+  //         setstate(prevState => ({ ...prevState, isVisible: false }));
+  //       }
+  //     } else {
+  //       if (remoteMessage.data.fcm_options.image !== '') {
+  //         setstate(prevState => ({
+  //           ...prevState,
+  //           Type: remoteMessage.data.type,
+  //           Description: remoteMessage.notification.body,
+  //           More_Description: remoteMessage.data.item_description,
+  //           Image: remoteMessage.data.fcm_options.image,
+  //           ItemCode: remoteMessage.data.item_code,
+  //           isVisible: true,
+  //           isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
+  //         }));
+
+  //         AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+  //       } else {
+  //         setstate(prevState => ({ ...prevState, isVisible: false }));
+  //       }
+  //     }
+  //   }
+  // });
+
+  // messaging()
+  //   .getInitialNotification()
+  //   .then(remoteMessage => {
+  //     if (remoteMessage) {
+  //       if (remoteMessage.data.OrderID !== undefined) {
+  //         const OrderID = remoteMessage.data.OrderID;
+  //         navigate('Orders', {
+  //           screen: 'OrderDetailsScreen',
+  //           params: { OrderID: OrderID },
+  //         });
+  //       } else if (Platform.OS === 'android') {
+  //         if (remoteMessage.notification.android.imageUrl !== '') {
+  //           setstate(prevState => ({
+  //             ...prevState,
+  //             Type: remoteMessage.data.type,
+  //             Description: remoteMessage.notification.body,
+  //             More_Description: remoteMessage.data.item_description,
+  //             Image: remoteMessage.notification.android.imageUrl,
+  //             ItemCode: remoteMessage.data.item_code,
+  //             isVisible: true,
+  //             isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
+  //           }));
+
+  //           AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+  //         } else {
+  //           setstate(prevState => ({ ...prevState, isVisible: false }));
+  //         }
+  //       } else {
+  //         if (remoteMessage.data.fcm_options.image !== '') {
+  //           setTimeout(() => {
+  //             setstate(prevState => ({
+  //               ...prevState,
+  //               Type: remoteMessage.data.type,
+  //               Description: remoteMessage.notification.body,
+  //               More_Description: remoteMessage.data.item_description,
+  //               Image: remoteMessage.data.fcm_options.image,
+  //               ItemCode: remoteMessage.data.item_code,
+  //               isVisible: true,
+  //               isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
+  //             }));
+
+  //             AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+  //           }, 1000);
+  //         } else {
+  //           setTimeout(() => {
+  //             setstate(prevState => ({ ...prevState, isVisible: false }));
+  //           }, 1000);
+  //         }
+  //       }
+  //     }
+  //   });
+
+// React.useEffect(() => {
+//   console.log('[APP] Main useEffect started');
+//   // Request notification permissions
+//   const initializeNotifications = async () => {
+//     console.log('[INIT] Starting notification initialization');
+//     // Request Android 13+ notification permission
+//     if (Platform.OS === 'android' && Platform.Version >= 33) {
+//       try {
+//         const granted = await PermissionsAndroid.request(
+//           PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+//           {
+//             title: 'Notification Permission',
+//             message: 'Allow notifications to receive order updates and promotions',
+//             buttonPositive: 'Allow',
+//             buttonNegative: 'Deny',
+//           }
+//         );
+        
+//         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+//           console.log('Notification permission granted');
+//         } else {
+//           console.log('Notification permission denied');
+//         }
+//       } catch (err) {
+//         console.warn('Notification permission error:', err);
+//       }
+//     }
+
+//     // Request Firebase messaging permissions
+//     await requestPermission();
+//   };
+
+//   // Initialize all services
+//   initializeNotifications();
+  
+//   const branchUnsubscribe = branch.subscribe(handleBranchLink);
+//   registerAppWithFCM();
+//   CreatSqlitTable();
+//   CheckAppVersion();
+
+//   // Configure local notifications with callback
+//   LocalNotificationService.configure(onNotificationPop);
+
+//   // Notification tap handler
+//   function onNotificationPop(notification) {
+//     console.log('START onNotificationPop', notification);
+
+//     // Handle order status notifications
+//     if (notification.data?.Status !== undefined) {
+//       const OrderID = notification.data.OrderID;
+//       navigate('Orders', {
+//         screen: 'OrderDetailsScreen',
+//         params: {OrderID: OrderID},
+//       });
+//     } 
+//     // Handle image notifications (promotional/menu items)
+//     else if (
+//       notification.bigPictureUrl ||
+//       notification.data?.fcm_options?.image
+//     ) {
+//       setstate(prevState => ({
+//         ...prevState,
+//         Type: notification.data?.type || '',
+//         Description: notification.message || '',
+//         More_Description: notification.data?.item_description || '',
+//         Image:
+//           Platform.OS === 'android'
+//             ? notification.bigPictureUrl
+//             : notification.data?.fcm_options?.image || '',
+//         ItemCode: notification.data?.item_code || '',
+//         isVisible: true,
+//         isMenuButtonVisible: notification.data?.is_visible_Menu_Button || false,
+//       }));
+//     } else {
+//       setstate(prevState => ({...prevState, isVisible: false}));
+//     }
+//   }
+
+//   // Listen for foreground FCM messages
+//   const unsubscribeNotification = messaging().onMessage(
+//     async remoteMessage => {
+//       console.log('FCM foreground message received:', remoteMessage);
+      
+//       const data = remoteMessage.data || {};
+      
+//       // Handle OTP messages
+//       if (data.OTP !== undefined) {
+//         Alert.alert('OTP Verification', data.OTP);
+//         return;
+//       }
+
+//       // Display local notification for other messages
+//       try {
+//         const title = remoteMessage.notification?.title || 'Notification';
+//         const body = remoteMessage.notification?.body || '';
+//         let imageUrl = '';
+        
+//         if (Platform.OS === 'ios') {
+//           imageUrl = data.fcm_options?.image || '';
+//         } else {
+//           imageUrl = remoteMessage.notification?.android?.imageUrl || '';
+//         }
+
+//         LocalNotificationService.localNotification(
+//           title,
+//           body,
+//           imageUrl,
+//           data,
+//         );
+//       } catch (error) {
+//         console.error('Error displaying local notification:', error);
+//       }
+//     },
+//   );
+
+//   // Handle Branch deep links
+//   branch.getFirstReferringParams().then(params => {
+//     if (params && params['+clicked_branch_link']) {
+//       const emailVerifyUrls = [
+//         'https://cafe007.lk/embilipitiya-cafe007/',
+//       ];
+      
+//       if (
+//         emailVerifyUrls.includes(params.$canonical_url) ||
+//         emailVerifyUrls.includes(params.$desktop_url) ||
+//         emailVerifyUrls.includes(params.custom_url)
+//       ) {
+//         UpdateEmailVerify();
+//       }
+//     }
+//   }).catch(error => {
+//     console.log('Branch deep link error:', error);
+//   });
+
+//   // Listen for app state changes
+//   const subscription = AppState.addEventListener('change', nextAppState => {
+//     if (
+//       appState.current.match(/inactive|background/) &&
+//       nextAppState === 'active'
+//     ) {
+//       CheckAppVersion();
+//     }
+
+//     appState.current = nextAppState;
+//     setAppStateVisible(appState.current);
+//   });
+
+//   // Cleanup function
+//   return () => {
+//     branchUnsubscribe();
+//     unsubscribeNotification();
+//     LocalNotificationService.unregister();
+//     subscription.remove();
+//   };
+//   // eslint-disable-next-line react-hooks/exhaustive-deps
+// }, []);
+
+React.useEffect(() => {
+  console.log('[APP] Main useEffect started');
+  
+  const initializeNotifications = async () => {
+    console.log('[INIT] Starting notification initialization');
+    
+    // Request Android 13+ notification permission FIRST
+    if (Platform.OS === 'android' && Platform.Version >= 33) {
+      console.log(`[PERMISSION] Android version: ${Platform.Version}, requesting POST_NOTIFICATIONS`);
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+          {
+            title: 'Notification Permission',
+            message: 'Allow notifications to receive order updates and promotions',
+            buttonPositive: 'Allow',
+            buttonNegative: 'Deny',
+          }
+        );
+        
+        console.log(`[PERMISSION] Permission result: ${granted}`);
+        
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('Notification permission granted');
         } else {
-          setstate(prevState => ({ ...prevState, isVisible: false }));
+          console.log('Notification permission denied');
         }
-      } else {
-        if (remoteMessage.data.fcm_options.image !== '') {
-          setstate(prevState => ({
-            ...prevState,
-            Type: remoteMessage.data.type,
-            Description: remoteMessage.notification.body,
-            More_Description: remoteMessage.data.item_description,
-            Image: remoteMessage.data.fcm_options.image,
-            ItemCode: remoteMessage.data.item_code,
-            isVisible: true,
-            isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
-          }));
+      } catch (err) {
+        console.error('Notification permission error:', err);
+      }
+    }
 
-          AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+    // Request Firebase messaging permissions
+    console.log('[FIREBASE] Requesting Firebase permissions...');
+    await requestPermission();
+  };
+
+  // Initialize notifications FIRST
+  initializeNotifications();
+  
+  // Then other services
+  const branchUnsubscribe = branch.subscribe(handleBranchLink);
+  registerAppWithFCM();
+  CreatSqlitTable();
+  CheckAppVersion();
+
+  // Configure local notifications with callback
+  console.log('[LOCAL] Configuring LocalNotificationService...');
+  LocalNotificationService.configure(onNotificationPop);
+  console.log('[LOCAL] LocalNotificationService configured');
+
+  // Notification tap handler
+  function onNotificationPop(notification) {
+    console.log('═══════════════════════════════════════');
+    console.log('[TAP] Notification tapped!');
+    console.log('═══════════════════════════════════════');
+    console.log('[TAP] Full notification:', JSON.stringify(notification, null, 2));
+    console.log('[TAP] userInteraction:', notification.userInteraction);
+    console.log('[TAP] data:', notification.data);
+    console.log('[TAP] userInfo:', notification.userInfo);
+
+    // Handle order status notifications
+    if (notification.data?.OrderID || notification.userInfo?.OrderID) {
+      const OrderID = notification.data?.OrderID || notification.userInfo?.OrderID;
+      console.log('[TAP] Navigating to order:', OrderID);
+      navigate('Orders', {
+        screen: 'OrderDetailsScreen',
+        params: {OrderID: OrderID},
+      });
+    } 
+    // Handle image notifications (promotional/menu items)
+    else if (
+      notification.bigPictureUrl ||
+      notification.data?.fcm_options?.image ||
+      notification.userInfo?.fcm_options?.image
+    ) {
+      console.log('[TAP] Showing image notification modal');
+      
+      const data = notification.data || notification.userInfo || {};
+      
+      setstate(prevState => ({
+        ...prevState,
+        Type: data.type || '',
+        Description: notification.message || notification.body || '',
+        More_Description: data.item_description || '',
+        Image: Platform.OS === 'android'
+          ? notification.bigPictureUrl
+          : data.fcm_options?.image || '',
+        ItemCode: data.item_code || '',
+        isVisible: true,
+        isMenuButtonVisible: data.is_visible_Menu_Button || false,
+      }));
+      
+      // Save notification ID
+      if (data.notification_id) {
+        AsyncStorage.setItem('NID', data.notification_id);
+        console.log('[TAP] Saved notification ID:', data.notification_id);
+      }
+    } else {
+      console.log('[TAP] Unknown notification type');
+    }
+    console.log('═══════════════════════════════════════');
+  }
+
+  // Listen for foreground FCM messages
+  console.log('[FCM] Setting up onMessage listener...');
+  const unsubscribeNotification = messaging().onMessage(
+    async remoteMessage => {
+      console.log('');
+      console.log('═══════════════════════════════════════');
+      console.log('[FCM] FOREGROUND MESSAGE RECEIVED!');
+      console.log('═══════════════════════════════════════');
+      console.log('[FCM] Full message:', JSON.stringify(remoteMessage, null, 2));
+      console.log('[FCM] Notification:', remoteMessage.notification);
+      console.log('[FCM] Data:', remoteMessage.data);
+      
+      const data = remoteMessage.data || {};
+      
+      // Handle OTP messages
+      if (data.OTP !== undefined) {
+        console.log('[OTP] OTP message received:', data.OTP);
+        Alert.alert('OTP Verification', data.OTP);
+        return;
+      }
+
+      // Display local notification for other messages
+      try {
+        const title = remoteMessage.notification?.title || 'Notification';
+        const body = remoteMessage.notification?.body || '';
+        let imageUrl = '';
+        
+        if (Platform.OS === 'ios') {
+          imageUrl = data.fcm_options?.image || '';
         } else {
-          setstate(prevState => ({ ...prevState, isVisible: false }));
+          imageUrl = remoteMessage.notification?.android?.imageUrl || '';
+        }
+
+        console.log('[LOCAL] Creating local notification...');
+        console.log('[LOCAL] Title:', title);
+        console.log('[LOCAL] Body:', body);
+        console.log('[LOCAL] Image URL:', imageUrl);
+        console.log('[LOCAL] Data to pass:', data);
+
+        // Pass the complete data object
+        LocalNotificationService.localNotification(
+          title,
+          body,
+          imageUrl,
+          data  // This contains OrderID, notification_id, etc.
+        );
+        
+        console.log('[LOCAL] Local notification created');
+      } catch (error) {
+        console.error('Error displaying local notification:', error);
+        console.error('[LOCAL] Error stack:', error.stack);
+      }
+      
+      console.log('═══════════════════════════════════════');
+      console.log('');
+    },
+  );
+  console.log('[FCM] onMessage listener set up');
+
+  //Handle app opened from BACKGROUND by notification tap
+  console.log('[FCM] Setting up onNotificationOpenedApp listener...');
+  const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(remoteMessage => {
+    console.log('');
+    console.log('═══════════════════════════════════════');
+    console.log('[BACKGROUND TAP] App opened from background!');
+    console.log('═══════════════════════════════════════');
+    console.log('[BACKGROUND TAP] Full message:', JSON.stringify(remoteMessage, null, 2));
+    
+    if (remoteMessage?.data?.OrderID) {
+      const OrderID = remoteMessage.data.OrderID;
+      console.log('[BACKGROUND TAP] Navigating to order:', OrderID);
+      navigate('Orders', {
+        screen: 'OrderDetailsScreen',
+        params: { OrderID: OrderID },
+      });
+    } else {
+      // Handle image notifications
+      const imageUrl = Platform.OS === 'android' 
+        ? remoteMessage.notification?.android?.imageUrl 
+        : remoteMessage.data?.fcm_options?.image;
+
+      if (imageUrl) {
+        console.log('[BACKGROUND TAP] Showing image notification modal');
+        
+        setstate(prevState => ({
+          ...prevState,
+          Type: remoteMessage.data?.type || '',
+          Description: remoteMessage.notification?.body || '',
+          More_Description: remoteMessage.data?.item_description || '',
+          Image: imageUrl,
+          ItemCode: remoteMessage.data?.item_code || '',
+          isVisible: true,
+          isMenuButtonVisible: remoteMessage.data?.is_visible_Menu_Button || false,
+        }));
+
+        if (remoteMessage.data?.notification_id) {
+          AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+          console.log('[BACKGROUND TAP] Saved notification ID:', remoteMessage.data.notification_id);
         }
       }
     }
+    console.log('═══════════════════════════════════════');
   });
+  console.log('[FCM] onNotificationOpenedApp listener set up');
 
+  //Handle app opened from QUIT STATE by notification tap
+  console.log('[FCM] Checking for initial notification (quit state)...');
   messaging()
     .getInitialNotification()
     .then(remoteMessage => {
       if (remoteMessage) {
-        if (remoteMessage.data.OrderID !== undefined) {
-          const OrderID = remoteMessage.data.OrderID;
-          navigate('Orders', {
-            screen: 'OrderDetailsScreen',
-            params: { OrderID: OrderID },
-          });
-        } else if (Platform.OS === 'android') {
-          if (remoteMessage.notification.android.imageUrl !== '') {
-            setstate(prevState => ({
-              ...prevState,
-              Type: remoteMessage.data.type,
-              Description: remoteMessage.notification.body,
-              More_Description: remoteMessage.data.item_description,
-              Image: remoteMessage.notification.android.imageUrl,
-              ItemCode: remoteMessage.data.item_code,
-              isVisible: true,
-              isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
-            }));
-
-            AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+        console.log('');
+        console.log('═══════════════════════════════════════');
+        console.log('[QUIT TAP] App opened from quit state!');
+        console.log('═══════════════════════════════════════');
+        console.log('[QUIT TAP] Full message:', JSON.stringify(remoteMessage, null, 2));
+        
+        // Wait a bit for navigation to be ready
+        setTimeout(() => {
+          if (remoteMessage.data?.OrderID) {
+            const OrderID = remoteMessage.data.OrderID;
+            console.log('[QUIT TAP] Navigating to order:', OrderID);
+            navigate('Orders', {
+              screen: 'OrderDetailsScreen',
+              params: { OrderID: OrderID },
+            });
           } else {
-            setstate(prevState => ({ ...prevState, isVisible: false }));
-          }
-        } else {
-          if (remoteMessage.data.fcm_options.image !== '') {
-            setTimeout(() => {
+            const imageUrl = Platform.OS === 'android' 
+              ? remoteMessage.notification?.android?.imageUrl 
+              : remoteMessage.data?.fcm_options?.image;
+
+            if (imageUrl) {
+              console.log('[QUIT TAP] Showing image notification modal');
+              
               setstate(prevState => ({
                 ...prevState,
-                Type: remoteMessage.data.type,
-                Description: remoteMessage.notification.body,
-                More_Description: remoteMessage.data.item_description,
-                Image: remoteMessage.data.fcm_options.image,
-                ItemCode: remoteMessage.data.item_code,
+                Type: remoteMessage.data?.type || '',
+                Description: remoteMessage.notification?.body || '',
+                More_Description: remoteMessage.data?.item_description || '',
+                Image: imageUrl,
+                ItemCode: remoteMessage.data?.item_code || '',
                 isVisible: true,
-                isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
+                isMenuButtonVisible: remoteMessage.data?.is_visible_Menu_Button || false,
               }));
 
-              AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
-            }, 1000);
-          } else {
-            setTimeout(() => {
-              setstate(prevState => ({ ...prevState, isVisible: false }));
-            }, 1000);
+              if (remoteMessage.data?.notification_id) {
+                AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+                console.log('[QUIT TAP] Saved notification ID:', remoteMessage.data.notification_id);
+              }
+            }
           }
-        }
+          console.log('═══════════════════════════════════════');
+        }, 2000); // Wait 2 seconds for navigation to be ready
+      } else {
+        console.log('[FCM] No initial notification (app not opened from notification)');
       }
+    })
+    .catch(error => {
+      console.error('[FCM] Error getting initial notification:', error);
     });
 
-  React.useEffect(() => {
-    requestPermission();
-    const branchUnsubscribe = branch.subscribe(handleBranchLink);
-    registerAppWithFCM();
-    CreatSqlitTable();
-    CheckAppVersion();
-
-    LocalNotificationService.configure(onNotificationPop);
-
-    function onNotificationPop(notification) {
-      console.log('START  onNotificationPop');
-
-      if (notification.data.Status !== undefined) {
-        const OrderID = notification.data.OrderID;
-        navigate('Orders', {
-          screen: 'OrderDetailsScreen',
-          params: { OrderID: OrderID },
-        });
-      } else if (
-        notification.bigPictureUrl !== '' ||
-        notification.data.fcm_options.image !== ''
+  // Handle Branch deep links
+  branch.getFirstReferringParams().then(params => {
+    if (params && params['+clicked_branch_link']) {
+      const emailVerifyUrls = [
+        'https://cafe007.lk/embilipitiya-cafe007/',
+      ];
+      
+      if (
+        emailVerifyUrls.includes(params.$canonical_url) ||
+        emailVerifyUrls.includes(params.$desktop_url) ||
+        emailVerifyUrls.includes(params.custom_url)
       ) {
-        setstate(prevState => ({
-          ...prevState,
-          Type: notification.data.type,
-          Description: notification.message,
-          More_Description: notification.data.item_description,
-          Image:
-            Platform.OS === 'android'
-              ? notification.bigPictureUrl
-              : notification.data.fcm_options.image,
-          ItemCode: notification.data.item_code,
-          isVisible: true,
-          isMenuButtonVisible: notification.data.is_visible_Menu_Button,
-        }));
-      } else {
-        setstate(prevState => ({ ...prevState, isVisible: false }));
+        UpdateEmailVerify();
       }
     }
+  }).catch(error => {
+    console.log('Branch deep link error:', error);
+  });
 
-    const unsubscribeNotification = messaging().onMessage(
-      async remoteMessage => {
-        const data = remoteMessage.data;
-        if (data.OTP !== undefined) {
-          Alert.alert('OTP Verification', data.OTP);
-        } else {
-          if (Platform.OS === 'ios') {
-            LocalNotificationService.localNotification(
-              remoteMessage.notification.title,
-              remoteMessage.notification.body,
-              remoteMessage.data.fcm_options.image,
-              remoteMessage.data,
-            );
-          } else {
-            LocalNotificationService.localNotification(
-              remoteMessage.notification.title,
-              remoteMessage.notification.body,
-              remoteMessage.notification.android.imageUrl,
-              remoteMessage.data,
-            );
-          }
-        }
-      },
-    );
+  // Listen for app state changes
+  const subscription = AppState.addEventListener('change', nextAppState => {
+    console.log(`[APPSTATE] App state: ${appState.current} -> ${nextAppState}`);
+    
+    if (
+      appState.current.match(/inactive|background/) &&
+      nextAppState === 'active'
+    ) {
+      console.log('[APPSTATE] App came to foreground');
+      CheckAppVersion();
+    }
 
-    branch.getFirstReferringParams().then(params => {
-      if (params && params['+clicked_branch_link']) {
-        if (
-          params.$canonical_url ===
-            'https://cafe007.lk/embilipitiya-cafe007/' ||
-          params.$desktop_url === 'https://cafe007.lk/embilipitiya-cafe007/' ||
-          params.custom_url === 'https://cafe007.lk/embilipitiya-cafe007/'
-        ) {
-          UpdateEmailVerify();
-        }
-      }
-    });
+    appState.current = nextAppState;
+    setAppStateVisible(appState.current);
+  });
 
-    const subscription = AppState.addEventListener('change', nextAppState => {
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === 'active'
-      ) {
-        CheckAppVersion();
-      }
+  //Cleanup function with unsubscribeOpenedApp
+  return () => {
+    console.log('Cleaning up listeners');
+    branchUnsubscribe();
+    unsubscribeOpenedApp(); 
+    unsubscribeNotification();
+    LocalNotificationService.unregister();
+    subscription.remove();
+  };
+}, []);
 
-      appState.current = nextAppState;
-      setAppStateVisible(appState.current);
-    });
-
-    return () => {
-      branchUnsubscribe();
-      unsubscribeNotification();
-      LocalNotificationService.unregister();
-      subscription.remove();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   function onClosePopUp() {
     setstate(prevState => ({ ...prevState, isVisible: false }));
   }
+
 
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
@@ -1353,7 +1751,6 @@ useEffect(() => {
             hidden={false}
             barStyle="default"
           />
-
           <NavigationContainer ref={navigationRef}>
             <Provider store={store}>
               <RootStack.Navigator>

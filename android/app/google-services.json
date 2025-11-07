@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "727006768161",
     "project_id": "online-food-order-d220b",
-    "storage_bucket": "online-food-order-d220b.appspot.com"
+    "storage_bucket": "online-food-order-d220b.firebasestorage.app"
   },
   "client": [
     {
@@ -12,20 +12,7 @@
           "package_name": "com.onimta.onlineorderapp"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "727006768161-nqfqrhn5ecp4lh74bkk40j7ijcejh3uu.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.onimta.onlineorderapp",
-            "certificate_hash": "8281927fbab9ccd43ee4cc71627cde115233de85"
-          }
-        },
-        {
-          "client_id": "727006768161-hb1nsp85aie3p7th4mindigfjoej302a.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
           "current_key": "AIzaSyBJxrdJWEkY2nZ-eYz3idToJyBHFSrxvQI"
@@ -33,19 +20,26 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "727006768161-hb1nsp85aie3p7th4mindigfjoej302a.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "727006768161-ov7b3ajsii0bv1cnvs279jlqha6ddhhv.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.onimta.onlineorderapp"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:727006768161:android:b1876d07656f201f7fc760",
+        "android_client_info": {
+          "package_name": "com.onlineorderapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJxrdJWEkY2nZ-eYz3idToJyBHFSrxvQI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
         }
       }
     }

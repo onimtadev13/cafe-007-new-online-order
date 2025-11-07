@@ -16,7 +16,8 @@ import {APIURL} from '../Data/CloneData';
 // import IonicIcon from 'react-native-vector-icons/Ionicons';
 import moment from 'moment';
 import {NumericFormat} from 'react-number-format';
-import {firebase} from '@react-native-firebase/messaging';
+// import {firebase} from '@react-native-firebase/messaging';
+import messaging from '@react-native-firebase/messaging';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 // import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
@@ -56,16 +57,25 @@ export default class OrderScreen extends React.PureComponent {
     this.messageListner();
   }
 
+  // localNotification = () => {
+  //   this.messageListner = firebase
+  //     .messaging()
+  //     .onMessage(async remoteMessage => {
+  //       if (remoteMessage.data.Status === 'Finish') {
+  //         this.setState({isLoading: true});
+  //         this.onGetOrderHeader();
+  //       }
+  //     });
+  // };
+
   localNotification = () => {
-    this.messageListner = firebase
-      .messaging()
-      .onMessage(async remoteMessage => {
-        if (remoteMessage.data.Status === 'Finish') {
-          this.setState({isLoading: true});
-          this.onGetOrderHeader();
-        }
-      });
-  };
+  this.messageListner = messaging().onMessage(async remoteMessage => {  // ✅ FIXED
+    if (remoteMessage.data?.Status === 'Finish') {
+      this.setState({isLoading: true});
+      this.onGetOrderHeader();
+    }
+  });
+};
 
   fadeIn = () => {
     // Will change fadeAnim value to 1 in 5 seconds
