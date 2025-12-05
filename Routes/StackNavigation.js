@@ -3,6 +3,7 @@ import {
   CardStyleInterpolators,
   createStackNavigator,
 } from '@react-navigation/stack';
+import { Platform } from 'react-native';
 import HomeScreen from '../Screens/HomeScreen';
 import ItemScreen from '../Screens/ItemScreen';
 import CartScreen from '../Screens/CartScreen';
@@ -32,21 +33,16 @@ const AuthStackNavigation = ({
   isUpdated,
 }) => {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
-      
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="LoginScreen"
-        // options={{
-        //   cardStyleInterpolator:
-        //     CardStyleInterpolators.forFadeFromBottomAndroid,
-        //   headerShown: false,
-        // }}
         options={{
           presentation: 'modal',
           cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS,
           headerShown: false,
           gestureEnabled: true,
-        }}>
+        }}
+      >
         {props => (
           <LoginScreen
             {...props}
@@ -55,10 +51,9 @@ const AuthStackNavigation = ({
             OTPNotification={OTPNotification}
             isUpdated={isUpdated}
           />
-          
         )}
       </Stack.Screen>
-      
+
       <Stack.Screen
         name="DashboardScreen"
         component={DashboardScreen}
@@ -66,13 +61,13 @@ const AuthStackNavigation = ({
           headerShown: false,
         }}
       />
-
       <Stack.Screen
         name="AddInfoScreen"
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
-        }}>
+        }}
+      >
         {props => <AddInfoScreen {...props} isLoading={isLoading} />}
       </Stack.Screen>
     </Stack.Navigator>
@@ -84,7 +79,8 @@ const StackNavigation = () => {
     <Stack.Navigator
       screenOptions={{
         cardStyleInterpolator: CardStyleInterpolators.forFadeFromBottomAndroid,
-      }}>
+      }}
+    >
       {/*<Stack.Screen*/}
       {/*    name="BottomTabNavigation"*/}
       {/*    component={BottomTabNavigation}*/}
@@ -92,7 +88,6 @@ const StackNavigation = () => {
       {/*        headerShown: false*/}
       {/*    }}*/}
       {/*/>*/}
-
 
       <Stack.Screen
         name="DashboardScreen"
@@ -128,7 +123,6 @@ const StackNavigation = () => {
           headerShown: false,
         }}
       />
-      
 
       <Stack.Screen
         name="PromotionsScreen"
@@ -180,7 +174,8 @@ const CartStackNavigation = () => {
     <Stack.Navigator
       screenOptions={{
         cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-      }}>
+      }}
+    >
       <Stack.Screen
         name="CartScreen"
         component={CartScreen}
@@ -192,7 +187,7 @@ const CartStackNavigation = () => {
       <Stack.Screen
         name="ItemScreen"
         component={ItemScreen}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
 
       <Stack.Screen
@@ -226,19 +221,19 @@ const CartStackNavigation = () => {
       <Stack.Screen
         name="OrderDetailsScreen"
         component={OrderDetailsScreen}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
 
       <Stack.Screen
         name={'OrderCancelScreen'}
         component={OrderCancelScreen}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
 
       <Stack.Screen
         name="OrderScreen"
         component={OrderScreen}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
@@ -249,23 +244,24 @@ const OrderStackNavigation = () => {
     <Stack.Navigator
       screenOptions={{
         cardStyleInterpolator: CardStyleInterpolators.forScaleFromCenterAndroid,
-      }}>
+      }}
+    >
       <Stack.Screen
         name="OrderScreen"
         component={OrderScreen}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
 
       <Stack.Screen
         name="OrderDetailsScreen"
         component={OrderDetailsScreen}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
 
       <Stack.Screen
         name={'OrderCancelScreen'}
         component={OrderCancelScreen}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
@@ -276,7 +272,8 @@ const AccountStackNavigation = () => {
     <Stack.Navigator
       screenOptions={{
         cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-      }}>
+      }}
+    >
       <Stack.Screen
         name="AccountScreen"
         component={AccountScreen}

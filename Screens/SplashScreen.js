@@ -1,7 +1,8 @@
 import React from 'react';
-import {Image, Text, View} from 'react-native';
+import { Image, Text, View } from 'react-native';
 import BouncingPreloader from '../Components/BouncingPreLoader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import FastImage from 'react-native-fast-image';
 
 export default class SplashScreen extends React.Component {
   constructor(props) {
@@ -16,14 +17,17 @@ export default class SplashScreen extends React.Component {
 
   componentDidMount() {
     setTimeout(async () => {
-      const shownPromo = await AsyncStorage.getItem('shownPromo');
-      if (!shownPromo) {
-        this.props.navigation.replace('PromoCardScreen');
-        await AsyncStorage.setItem('shownPromo', 'true');
+      // Determine whether user is logged in based on stored phone number
+      const phonenumber = await AsyncStorage.getItem('phonenumber');
+
+      if (phonenumber) {
+        // If logged in, navigate to the main app
+        this.props.navigation.replace('App');
       } else {
-        this.props.navigation.replace('LoginScreen');
+        // Otherwise, go to the Auth flow
+        this.props.navigation.replace('Auth');
       }
-    }, 5000);
+    }, 3000);
   }
 
   render() {
@@ -33,8 +37,9 @@ export default class SplashScreen extends React.Component {
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: 'black',
-        }}>
+          backgroundColor: 'white',
+        }}
+      >
         {/* <BouncingPreloader
                     icons={[
                         require('../assets/burger.png'),
@@ -51,10 +56,11 @@ export default class SplashScreen extends React.Component {
         {/* <Text style={{ margin: 30, textAlign: 'center', fontFamily: 'AsapBold', fontSize: 20 }}>
                     Think Choose Order Delivered {'\n'} Eat Enjoy and Repeat
                     </Text> */}
-        <Image
-          source={require('../assets/launch_image.jpg')}
+        <FastImage
+          source={require('../assets/launch_screen.jpg')}
           resizeMethod="resize"
-          resizeMode="cover"
+          resizeMode="contain"
+          style={{ width: 200, height: 200 }}
         />
       </View>
     );

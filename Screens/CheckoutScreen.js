@@ -89,7 +89,7 @@ class CheckoutScreen extends React.Component {
       isCustomPromo: false,
       appliedCoupon: null,
       savedAmount: 0,
-      isDelivery: 'false',
+      isDelivery: false,
       zoomIn: new Animated.Value(1),
       glowAnim: new Animated.Value(0),
     };
@@ -722,7 +722,7 @@ class CheckoutScreen extends React.Component {
           // })
         },
         errorData => {
-          Alert.alert('PayHere Error', errorData);
+          //Alert.alert('PayHere Error', errorData);
           this.touchableInactive = false;
         },
         () => {
@@ -733,39 +733,39 @@ class CheckoutScreen extends React.Component {
     });
   };
 
-onPlaceorderPress = async () => {
-  if (
-    this.state.dineType == 'null' ||
-    this.state.paymentType == '' ||
-    this.state.scheduleTime === 'Choose Time' ||
-    this.state.locationPressed === ''
-  ) {
-    Alert.alert('Warning', 'Please select all required items');
-  } else {
-    if (this.state.paymentType === 'Card') {
-      if (!this.touchableInactive) {
-        this.touchableInactive = true;
-        if (this.state.DefaultEmail === null) {
-          if (this.state.isEmailVerified) {
-            this.OnlineOrderDataSaveBeforPay(true);
+  onPlaceorderPress = async () => {
+    if (
+      this.state.dineType == 'null' ||
+      this.state.paymentType == '' ||
+      this.state.scheduleTime === 'Choose Time' ||
+      this.state.locationPressed === ''
+    ) {
+      Alert.alert('Warning', 'Please select all required items');
+    } else {
+      if (this.state.paymentType === 'Card') {
+        if (!this.touchableInactive) {
+          this.touchableInactive = true;
+          if (this.state.DefaultEmail === null) {
+            if (this.state.isEmailVerified) {
+              this.OnlineOrderDataSaveBeforPay(true);
+            } else {
+              Alert.alert('Warning', 'Please verified your email first');
+              this.touchableInactive = false; // Reset the flag
+            }
           } else {
-            Alert.alert('Warning', 'Please verified your email first');
-            this.touchableInactive = false; // Reset the flag
+            // Just proceed with payment, don't clear cart yet
+            // this.props.dispatch(clearCart());
+            this.OnlineOrderDataSaveBeforPay(true);
           }
-        } else {
-          // Just proceed with payment, don't clear cart yet
-          // this.props.dispatch(clearCart());
-          this.OnlineOrderDataSaveBeforPay(true);
+        }
+      } else {
+        if (!this.touchableInactive) {
+          this.touchableInactive = true;
+          this.OnlineOrderDataSaveBeforPay(false);
         }
       }
-    } else {
-      if (!this.touchableInactive) {
-        this.touchableInactive = true;
-        this.OnlineOrderDataSaveBeforPay(false);
-      }
     }
-  }
-};
+  };
 
   generateOrderID = length => {
     const digits = '0123456789';
@@ -887,7 +887,7 @@ onPlaceorderPress = async () => {
         });
         break;
       case 'Later':
-        this.setState({ scheduleStatus: 'Later', scheduleTime: 'Choose Time'});
+        this.setState({ scheduleStatus: 'Later', scheduleTime: 'Choose Time' });
         break;
 
       default:
@@ -1515,7 +1515,7 @@ onPlaceorderPress = async () => {
                     See menu
                   </Text>
                   {/* White border + glow */}
-                    <MaskedView
+                  <MaskedView
                     style={{
                       position: 'absolute',
                       top: 0,
@@ -4236,7 +4236,7 @@ onPlaceorderPress = async () => {
         <Modal
           transparent
           visible={this.state.promoModalVisible}
-          animationType="slide"
+          animationType="fade"
           onRequestClose={() => this.togglePromoModal(false)}
         >
           <View

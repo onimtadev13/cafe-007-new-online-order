@@ -1,6 +1,6 @@
-import {Platform} from 'react-native';
-import PushNotification, {Importance} from 'react-native-push-notification';
-import {PermissionsAndroid} from 'react-native';
+import { Platform } from 'react-native';
+import PushNotification, { Importance } from 'react-native-push-notification';
+import { PermissionsAndroid } from 'react-native';
 
 class LocalNotificationService {
   constructor() {
@@ -20,23 +20,23 @@ class LocalNotificationService {
         importance: Importance.HIGH,
         vibrate: true,
       },
-      (created) => console.log(`Default channel created: ${created}`)
+      created => console.log(`Default channel created: ${created}`),
     );
 
-    PushNotification.createChannel(
-      {
-        // channelId: 'order-channel-id',
-        // channelName: 'Order Notifications',
-        channelId: 'channel-id', // Match this in your notifications
-        channelName: 'My channel',
-        channelDescription: 'Notifications for order updates',
-        playSound: true,
-        soundName: 'default',
-        importance: Importance.HIGH,
-        vibrate: true,
-      },
-      (created) => console.log(`Order channel created: ${created}`)
-    );
+    // PushNotification.createChannel(
+    //   {
+    //     // channelId: 'order-channel-id',
+    //     // channelName: 'Order Notifications',
+    //     channelId: 'channel-id', // Match this in your notifications
+    //     channelName: 'My channel',
+    //     channelDescription: 'Notifications for order updates',
+    //     playSound: true,
+    //     soundName: 'default',
+    //     importance: Importance.HIGH,
+    //     vibrate: true,
+    //   },
+    //   (created) => console.log(`Order channel created: ${created}`)
+    // );
   }
 
   // Configure push notifications
@@ -48,10 +48,10 @@ class LocalNotificationService {
 
       onNotification: function (notification) {
         console.log('[LocalNotificationService] Notification:', notification);
-        
+
         // Check if notification was clicked
         const clicked = notification.userInteraction;
-        
+
         if (clicked && onNotificationPop) {
           onNotificationPop(notification);
         }
@@ -89,7 +89,7 @@ class LocalNotificationService {
               message: 'This app needs permission to show notifications',
               buttonPositive: 'Allow',
               buttonNegative: 'Deny',
-            }
+            },
           );
           return granted === PermissionsAndroid.RESULTS.GRANTED;
         } catch (err) {
@@ -105,7 +105,7 @@ class LocalNotificationService {
   // Show local notification immediately
   localNotification(title, message, imageUrl, data) {
     this.lastId++;
-    
+
     const notification = {
       id: this.lastId.toString(),
       channelId: 'channel-id', // Must match created channel
@@ -130,9 +130,11 @@ class LocalNotificationService {
 
     // iOS specific
     if (Platform.OS === 'ios' && imageUrl) {
-      notification.attachments = [{
-        url: imageUrl,
-      }];
+      notification.attachments = [
+        {
+          url: imageUrl,
+        },
+      ];
     }
 
     PushNotification.localNotification(notification);
@@ -141,7 +143,7 @@ class LocalNotificationService {
   // Schedule notification for later
   scheduleNotification(title, message, date, data) {
     this.lastId++;
-    
+
     PushNotification.localNotificationSchedule({
       id: this.lastId.toString(),
       channelId: 'default-channel-id',
