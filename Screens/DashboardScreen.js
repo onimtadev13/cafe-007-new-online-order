@@ -92,44 +92,49 @@ class DashboardScreen extends React.PureComponent {
   ]);
 
 
-  componentDidMount() {
-    this.startGlow();
-    this.hasRestoredCart = false;
+  async componentDidMount() {
+  this.startGlow();
+  this.hasRestoredCart = false;
 
-    this._unsubscribe = this.props.navigation.addListener('focus', async () => {
-      this.fadeIn();
-      const preNAme = await AsyncStorage.getItem('Firstname');
-      const preAddress = await AsyncStorage.getItem('Address');
-      if (
-        preNAme !== this.state.Firstname ||
-        preAddress !== this.state.address
-      ) {
-        this.CheckUserLog();
-      }
-    });
+  // Set up navigation listeners
+  this._unsubscribe = this.props.navigation.addListener('focus', async () => {
+    this.fadeIn();
+    const preNAme = await AsyncStorage.getItem('firstname');
+    const preAddress = await AsyncStorage.getItem('address');
+    if (
+      preNAme !== this.state.Firstname ||
+      preAddress !== this.state.address
+    ) {
+      this.CheckUserLog();
+    }
+  });
 
-    this._unsubscribe2 = this.props.navigation.addListener('blur', async () => {
-      this.fadeOut();
-    });
+  this._unsubscribe2 = this.props.navigation.addListener('blur', async () => {
+    this.fadeOut();
+  });
 
-    this.GetLocationDetails();
-    this.CheckUserLog();
+  // Load location details first
+  this.GetLocationDetails();
+  
+  // Check user login status
+  await this.CheckUserLog();
 
-    // Restore cart AFTER CheckUserLog completes
-    setTimeout(async () => {
-      const userlog = await AsyncStorage.getItem('phonenumber');
-      if (userlog && !this.hasRestoredCart) {
-        await this.restoreCartSilently();
-        this.hasRestoredCart = true;
-      }
-    }, 500); // Give time for CheckUserLog to complete
+  // Restore cart after a short delay to ensure user data is loaded
+  setTimeout(async () => {
+    const userlog = await AsyncStorage.getItem('phonenumber');
+    if (userlog && !this.hasRestoredCart) {
+      await this.restoreCartSilently();
+      this.hasRestoredCart = true;
+    }
+  }, 500);
 
-    setTimeout(() => {
-      this.debugAsyncStorage();
-    }, 1000);
+  // Debug AsyncStorage
+  setTimeout(() => {
+    this.debugAsyncStorage();
+  }, 1000);
 
-    this.onSaveOrderID();
-  }
+  this.onSaveOrderID();
+}
 
   componentDidUpdate(prevProps) {
     // Only sync to AsyncStorage if cart was modified (not on initial restore)
@@ -359,26 +364,34 @@ class DashboardScreen extends React.PureComponent {
     }
   };
 
-  CheckUserLog = async () => {
-    let number = null;
-    number = await AsyncStorage.getItem('phonenumber');
+ CheckUserLog = async () => {
+  try {
+    let number = await AsyncStorage.getItem('phonenumber');
+    
     if (number === null) {
       this.setState({ userlog: number });
     } else {
-      this.setState({ userlog: number }, () => {
-        this.GetPersonalInfo();
-      });
+      this.setState({ userlog: number });
+      await this.GetPersonalInfo();
     }
-  };
+  } catch (error) {
+    console.error('Error checking user login:', error);
+  }
+};
 
   GetPersonalInfo = async () => {
-    var Firstname = await AsyncStorage.getItem('firstname');
-    var Address = await AsyncStorage.getItem('address');
+  try {
+    const Firstname = await AsyncStorage.getItem('firstname');
+    const Address = await AsyncStorage.getItem('address');
+    
     this.setState({
-      Firstname: Firstname,
-      address: Address,
+      Firstname: Firstname || '',
+      address: Address || '',
     });
-  };
+  } catch (error) {
+    console.error('Error getting personal info:', error);
+  }
+};
 
   numberWithCommas = x => {
     let convertX = x.toString().replace(/\B(?=(\d{1000})+(?!\d))/g, ',');
