@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -432,136 +433,90 @@ export default class EditInfoScreen extends React.Component {
 
     return (
       <KeyboardAvoidingView
-        behavior={Platform.OS == 'ios' ? 'padding' : null}
-        style={{flex: 1}}>
-        <View style={{flex: 1}}>
-          <TouchableOpacity
-            style={{marginTop: 35, marginLeft: 25, marginBottom: 50}}
-            onPress={() => this.props.navigation.goBack()}>
-            <View
-              style={[
-                {
-                  width: 50,
-                  height: 50,
-                  borderRadius: 50 / 2,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: '#e6e6e6',
-                },
-              ]}>
-              {/* <Icon name="chevron-back" size={35} /> */}
-              <FontAwesome6 name="chevron-left" size={35} color="#000000" />
-            </View>
-          </TouchableOpacity>
-
-          <Text
-            style={{
-              fontFamily:
-                Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-              fontSize: 18,
-              margin: 10,
-              marginLeft: 35,
-            }}>
-            {this.state.Title}
-          </Text>
-
-          {this.state.Title === 'Phone Number' ? (
-            <View style={{flex: 1}}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{flex: 1}}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1}}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}>
+          <View style={{flex: 1}}>
+            <TouchableOpacity
+              style={{marginTop: 35, marginLeft: 25, marginBottom: 50}}
+              onPress={() => this.props.navigation.goBack()}>
               <View
-                style={{
-                  flexDirection: 'row',
-                  borderRadius: 5,
-                  backgroundColor: '#f0f0f0',
-                  borderColor: '#dbdbdb',
-                  borderWidth: 1,
-                  alignItems: 'center',
-                  marginLeft: 30,
-                  marginRight: 30,
-                }}>
-                <Text
-                  style={{
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    fontSize: 18,
-                    marginLeft: 15,
-                  }}>
-                  +94
-                </Text>
-                <TextInput
-                  style={{
-                    flex: 1,
-                    fontSize: 18,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    padding: 7,
-                    color: 'black',
-                  }}
-                  placeholder={this.state.Title}
-                  placeholderTextColor={'#7a7a7a'}
-                  value={this.state.Value}
-                  autoFocus={true}
-                  onChangeText={text => this.setState({Value: text})}
-                  keyboardType={'numeric'}
-                />
+                style={[
+                  {
+                    width: 50,
+                    height: 50,
+                    borderRadius: 50 / 2,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#e6e6e6',
+                  },
+                ]}>
+                <FontAwesome6 name="chevron-left" size={35} color="#000000" />
               </View>
-              <Text
-                style={{
-                  alignSelf: 'center',
-                  fontFamily:
-                    Platform.OS === 'ios'
-                      ? 'Asap-Regular_Medium'
-                      : 'AsapMedium',
-                  margin: 10,
-                  fontSize: 16,
-                  color: '#7a7a7a',
-                }}>
-                A verification code will be sent to this number
-              </Text>
-              <Text
-                style={{
-                  fontFamily:
-                    Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                  fontSize: 18,
-                  margin: 10,
-                  marginRight: 30,
-                  textAlign: 'right',
-                  color: '#ff0000',
-                }}>
-                {this.state.Errors}
-              </Text>
-            </View>
-          ) : (
-            <View style={{marginLeft: 30, marginRight: 30, flex: 1}}>
-              <TextInput
-                style={{
-                  color: 'black',
-                  backgroundColor: '#f0f0f0',
-                  height: this.state.Title === 'Address' ? 100 : 40,
-                  paddingLeft: 20,
-                  borderRadius: 5,
-                  borderColor: '#dbdbdb',
-                  borderWidth: 1,
-                  fontSize: 18,
-                  fontFamily:
-                    Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                  textAlignVertical: 'top',
-                }}
-                multiline={this.state.Title === 'Address'}
-                blurOnSubmit={true}
-                placeholder={this.state.Title}
-                placeholderTextColor={'#7a7a7a'}
-                value={this.state.Value}
-                autoFocus={true}
-                onChangeText={text => this.setState({Value: text})}
-              />
+            </TouchableOpacity>
 
-              {this.state.Title === 'Email' ? (
+            <Text
+              style={{
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                fontSize: 18,
+                margin: 10,
+                marginLeft: 35,
+              }}>
+              {this.state.Title}
+            </Text>
+
+            {this.state.Title === 'Phone Number' ? (
+              <View style={{flex: 1}}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    borderRadius: 5,
+                    backgroundColor: '#f0f0f0',
+                    borderColor: '#dbdbdb',
+                    borderWidth: 1,
+                    alignItems: 'center',
+                    marginLeft: 30,
+                    marginRight: 30,
+                  }}>
+                  <Text
+                    style={{
+                      fontFamily:
+                        Platform.OS === 'ios'
+                          ? 'Asap-Regular_Medium'
+                          : 'AsapMedium',
+                      fontSize: 18,
+                      marginLeft: 15,
+                    }}>
+                    +94
+                  </Text>
+                  <TextInput
+                    style={{
+                      flex: 1,
+                      fontSize: 18,
+                      fontFamily:
+                        Platform.OS === 'ios'
+                          ? 'Asap-Regular_Medium'
+                          : 'AsapMedium',
+                      padding: 7,
+                      color: 'black',
+                    }}
+                    placeholder={this.state.Title}
+                    placeholderTextColor={'#7a7a7a'}
+                    value={this.state.Value}
+                    autoFocus={true}
+                    onChangeText={text => this.setState({Value: text})}
+                    keyboardType={'numeric'}
+                  />
+                </View>
                 <Text
                   style={{
+                    alignSelf: 'center',
                     fontFamily:
                       Platform.OS === 'ios'
                         ? 'Asap-Regular_Medium'
@@ -570,197 +525,240 @@ export default class EditInfoScreen extends React.Component {
                     fontSize: 16,
                     color: '#7a7a7a',
                   }}>
-                  Check your email to confirm verification
+                  A verification code will be sent to this number
                 </Text>
-              ) : null}
+                <Text
+                  style={{
+                    fontFamily:
+                      Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                    fontSize: 18,
+                    margin: 10,
+                    marginRight: 30,
+                    textAlign: 'right',
+                    color: '#ff0000',
+                  }}>
+                  {this.state.Errors}
+                </Text>
+              </View>
+            ) : (
+              <View style={{marginLeft: 30, marginRight: 30, flex: 1}}>
+                <TextInput
+                  style={{
+                    color: 'black',
+                    backgroundColor: '#f0f0f0',
+                    height: this.state.Title === 'Address' ? 100 : 40,
+                    paddingLeft: 20,
+                    borderRadius: 5,
+                    borderColor: '#dbdbdb',
+                    borderWidth: 1,
+                    fontSize: 18,
+                    fontFamily:
+                      Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                    textAlignVertical: 'top',
+                  }}
+                  multiline={this.state.Title === 'Address'}
+                  blurOnSubmit={true}
+                  placeholder={this.state.Title}
+                  placeholderTextColor={'#7a7a7a'}
+                  value={this.state.Value}
+                  autoFocus={true}
+                  onChangeText={text => this.setState({Value: text})}
+                />
 
-              <Text
-                style={{
-                  fontFamily:
-                    Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                  fontSize: 18,
-                  margin: 10,
-                  textAlign: 'right',
-                  color: '#ff0000',
-                }}>
-                {this.state.Errors}
-              </Text>
-            </View>
-          )}
-
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: 30,
-              marginLeft: 30,
-              marginRight: 30,
-              marginBottom: 30,
-              backgroundColor: 'black',
-            }}
-            onPress={() => this.SaveData()}>
-            <View
-              style={{
-                flex: 1,
-                height: 50,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginLeft: 40,
-              }}>
-              <Text
-                style={{
-                  color: 'white',
-                  fontFamily:
-                    Platform.OS === 'ios'
-                      ? 'Asap-Regular_Medium'
-                      : 'AsapMedium',
-                  fontSize: 18,
-                }}>
-                Update {this.state.Title}
-              </Text>
-            </View>
-            <ActivityIndicator
-              size={'small'}
-              color={'white'}
-              animating={this.state.isLoading}
-              style={{marginRight: 20}}
-            />
-          </TouchableOpacity>
-
-          <Modal
-            visible={this.state.isvisible}
-            transparent={true}
-            animated={true}
-            animationType={'fade'}>
-            <View
-              style={{
-                flex: 1,
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: 'rgba(0,0,0, 0.7)',
-              }}>
-              <Card
-                style={{backgroundColor: 'white', width: 310, height: 460}}
-                cardElevation={2}
-                cardMaxElevation={2}
-                cornerRadius={10}>
-                <View style={{alignItems: 'flex-end', marginRight: 10}}>
-                  <TouchableOpacity
-                    style={{position: 'relative', marginTop: 10}}
-                    onPress={() => this.onClosePres()}>
-                    {/* <Icon name="close-circle" size={40} /> */}
-                    <FontAwesome6 name="circle-xmark" size={40} />
-                  </TouchableOpacity>
-                </View>
-
-                <View style={{flex: 1, alignItems: 'center'}}>
-                  <View
-                    style={{
-                      width: 55,
-                      height: 55,
-                      borderRadius: 100 / 2,
-                      backgroundColor: '#F4F4F4',
-                      margin: 30,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                    {/* <Icon
-                      name="lock-closed-outline"
-                      size={25}
-                      color={'black'}></Icon> */}
-                      <FontAwesome6
-  name="lock"
-  size={25}
-  color={'black'}
-/>
-                  </View>
-
+                {this.state.Title === 'Email' ? (
                   <Text
                     style={{
-                      fontSize: 20,
                       fontFamily:
                         Platform.OS === 'ios'
-                          ? 'Asap-Regular_Bold'
-                          : 'AsapBold',
+                          ? 'Asap-Regular_Medium'
+                          : 'AsapMedium',
+                      margin: 10,
+                      fontSize: 16,
+                      color: '#7a7a7a',
                     }}>
-                    Enter your code
+                    Check your email to confirm verification
                   </Text>
-                  <Text
-                    style={{
-                      textAlign: 'center',
-                      marginTop: 10,
-                      fontFamily:
-                        Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                    }}>
-                    To continue please enter{'\n'} the verification code we've
-                    {'\n'} just send for you
-                  </Text>
+                ) : null}
 
-                  <OTPInputView
-                    style={{width: '80%', height: 100}}
-                    pinCount={4}
-                    keyboardType={'phone-pad'}
-                    code={this.state.code} //You can supply this prop or not. The component will be used as a controlled / uncontrolled component respectively.
-                    onCodeChanged={code => this.setState({code: code})}
-                    autoFocusOnLoad={false}
-                    codeInputFieldStyle={styles.underlineStyleBase}
-                    codeInputHighlightStyle={styles.underlineStyleHighLighted}
-                    onCodeFilled={code => this.setState({code: code})}
-                  />
+                <Text
+                  style={{
+                    fontFamily:
+                      Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                    fontSize: 18,
+                    margin: 10,
+                    textAlign: 'right',
+                    color: '#ff0000',
+                  }}>
+                  {this.state.Errors}
+                </Text>
+              </View>
+            )}
 
-                  <TouchableOpacity
-                    disabled={this.state.isEnable}
-                    style={{flex: 1}}
-                    onPress={() => {
-                      this.resendOTP();
-                    }}>
-                    <View>
-                      <Text
-                        style={{
-                          color: this.state.isEnable ? '#d1d1d1' : 'black',
-                        }}>
-                        Resend Code{' '}
-                        {this.state.isEnable ? '00:' + this.state.second : null}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: 30,
+                marginLeft: 30,
+                marginRight: 30,
+                marginBottom: 30,
+                backgroundColor: 'black',
+              }}
+              onPress={() => this.SaveData()}>
+              <View
+                style={{
+                  flex: 1,
+                  height: 50,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginLeft: 40,
+                }}>
+                <Text
+                  style={{
+                    color: 'white',
+                    fontFamily:
+                      Platform.OS === 'ios'
+                        ? 'Asap-Regular_Medium'
+                        : 'AsapMedium',
+                    fontSize: 18,
+                  }}>
+                  Update {this.state.Title}
+                </Text>
+              </View>
+              <ActivityIndicator
+                size={'small'}
+                color={'white'}
+                animating={this.state.isLoading}
+                style={{marginRight: 20}}
+              />
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
 
-                  <TouchableOpacity
-                    style={{
-                      width: 150,
-                      height: 50,
-                      backgroundColor: 'black',
-                      borderRadius: 10,
-                      marginTop: -30,
-                      marginBottom: 30,
-                    }}
-                    onPress={() => this.continuebuttonPress()}>
-                    <View
-                      style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flex: 1,
-                      }}>
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          color: 'white',
-                          fontFamily:
-                            Platform.OS === 'ios'
-                              ? 'Asap-Regular_Bold'
-                              : 'AsapBold',
-                        }}>
-                        Continue
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
+        <Modal
+          visible={this.state.isvisible}
+          transparent={true}
+          animated={true}
+          animationType={'fade'}>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0,0,0, 0.7)',
+            }}>
+            <Card
+              style={{backgroundColor: 'white', width: 310, height: 460}}
+              cardElevation={2}
+              cardMaxElevation={2}
+              cornerRadius={10}>
+              <View style={{alignItems: 'flex-end', marginRight: 10}}>
+                <TouchableOpacity
+                  style={{position: 'relative', marginTop: 10}}
+                  onPress={() => this.onClosePres()}>
+                  <FontAwesome6 name="circle-xmark" size={40} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={{flex: 1, alignItems: 'center'}}>
+                <View
+                  style={{
+                    width: 55,
+                    height: 55,
+                    borderRadius: 100 / 2,
+                    backgroundColor: '#F4F4F4',
+                    margin: 30,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <FontAwesome6 name="lock" size={25} color={'black'} />
                 </View>
-              </Card>
-            </View>
-          </Modal>
-        </View>
+
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontFamily:
+                      Platform.OS === 'ios'
+                        ? 'Asap-Regular_Bold'
+                        : 'AsapBold',
+                  }}>
+                  Enter your code
+                </Text>
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    marginTop: 10,
+                    fontFamily:
+                      Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                  }}>
+                  To continue please enter{'\n'} the verification code we've
+                  {'\n'} just send for you
+                </Text>
+
+                <OTPInputView
+                  style={{width: '80%', height: 100}}
+                  pinCount={4}
+                  keyboardType={'phone-pad'}
+                  code={this.state.code}
+                  onCodeChanged={code => this.setState({code: code})}
+                  autoFocusOnLoad={false}
+                  codeInputFieldStyle={styles.underlineStyleBase}
+                  codeInputHighlightStyle={styles.underlineStyleHighLighted}
+                  onCodeFilled={code => this.setState({code: code})}
+                />
+
+                <TouchableOpacity
+                  disabled={this.state.isEnable}
+                  style={{flex: 1}}
+                  onPress={() => {
+                    this.resendOTP();
+                  }}>
+                  <View>
+                    <Text
+                      style={{
+                        color: this.state.isEnable ? '#d1d1d1' : 'black',
+                      }}>
+                      Resend Code{' '}
+                      {this.state.isEnable ? '00:' + this.state.second : null}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    width: 150,
+                    height: 50,
+                    backgroundColor: 'black',
+                    borderRadius: 10,
+                    marginTop: -30,
+                    marginBottom: 30,
+                  }}
+                  onPress={() => this.continuebuttonPress()}>
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flex: 1,
+                    }}>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: 'white',
+                        fontFamily:
+                          Platform.OS === 'ios'
+                            ? 'Asap-Regular_Bold'
+                            : 'AsapBold',
+                      }}>
+                      Continue
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </Card>
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
     );
   }

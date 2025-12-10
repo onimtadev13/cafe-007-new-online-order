@@ -421,8 +421,7 @@ export default class LoginScreen extends React.PureComponent {
                         }
                       />
                     </Animated.View>
-                  </Animated.View>
-                  <TouchableOpacity
+                    <TouchableOpacity
                     disabled={!this.props.isUpdated}
                     style={{
                       marginLeft: 20,
@@ -455,6 +454,8 @@ export default class LoginScreen extends React.PureComponent {
                       />
                     </View>
                   </TouchableOpacity>
+                  </Animated.View>
+                  
                 </Animated.View>
               </Animated.View>
             </View>

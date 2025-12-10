@@ -40,7 +40,7 @@ var db = openDatabase({ name: 'UserDatabase.db' });
 const RootStack = createStackNavigator();
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
-  console.log('🔔 Background message:', remoteMessage);
+  console.log('Background message:', remoteMessage);
   // Handle background notifications here
   return Promise.resolve();
 });
@@ -1432,8 +1432,6 @@ const CheckAppVersion = () => {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
 
-// Replace the entire React.useEffect that handles initialization
-
 React.useEffect(() => {
   console.log('[APP] Main useEffect started');
 
@@ -1784,13 +1782,43 @@ React.useEffect(() => {
   };
 }, []);
 
+const initializeNotifications = async () => {
+  console.log('[INIT] Starting notification initialization');
+
+  // Request permissions for local notifications (Android 13+)
+  const localPermissionGranted = await LocalNotificationService.requestPermissions();
+  console.log('[LOCAL] Local notification permission:', localPermissionGranted);
+
+  // Request Android 13+ notification permission for FCM
+  if (Platform.OS === 'android' && Platform.Version >= 33) {
+    console.log(`[PERMISSION] Android version: ${Platform.Version}, requesting POST_NOTIFICATIONS`);
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        {
+          title: 'Notification Permission',
+          message: 'Allow notifications to receive order updates and promotions',
+          buttonPositive: 'Allow',
+          buttonNegative: 'Deny',
+        }
+      );
+
+      console.log(`[PERMISSION] Permission result: ${granted}`);
+    } catch (err) {
+      console.error('Notification permission error:', err);
+    }
+  }
+
+  // Request Firebase messaging permissions
+  console.log('[FIREBASE] Requesting Firebase permissions...');
+  await requestPermission();
+};
+
   function onClosePopUp() {
     setstate(prevState => ({ ...prevState, isVisible: false }));
   }
 
   const initialRootRoute = 'SplashScreen';
-
-// Replace the return statement in App.js with this:
 
 return (
   <SafeAreaProvider initialMetrics={initialWindowMetrics}>

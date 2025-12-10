@@ -8,58 +8,58 @@ import {
   ActivityIndicator,
   Animated,
   Platform,
+  StyleSheet,
 } from 'react-native';
 import BannerImage from './BannerImage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {APIURL, Offers} from '../Data/CloneData';
-import {Value} from 'react-native-reanimated';
+import {APIURL} from '../Data/CloneData';
 
-const width = Dimensions.get('window').width;
+const {width, height} = Dimensions.get('window');
 
 export default class NotificationModal extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       zoomIn: new Animated.Value(1),
-      hasCalledAPI: false, // ✅ Track if we've already called the API
+      slideUp: new Animated.Value(0), 
+      fadeIn: new Animated.Value(1),  
+      hasCalledAPI: false,
     };
   }
 
   componentDidMount() {
-    // ✅ FIXED: Only start animation, don't call API yet
     this.ButtonTimout = setInterval(() => {
       Animated.timing(this.state.zoomIn, {
-        toValue: 1.2,
+        toValue: 1.05,
+        duration: 800,
         useNativeDriver: true,
       }).start(() => {
         Animated.timing(this.state.zoomIn, {
           toValue: 1,
+          duration: 800,
           useNativeDriver: true,
         }).start();
       });
-    }, 1000);
+    }, 1600);
   }
 
   componentDidUpdate(prevProps) {
-    // ✅ FIXED: Only call API when modal becomes visible and has image
-    // and we haven't called it yet for this notification
     if (
-      this.props.visible && 
-      !prevProps.visible && 
-      this.props.image && 
+      this.props.visible &&
+      !prevProps.visible &&
+      this.props.image &&
       this.props.image !== '' &&
       !this.state.hasCalledAPI
     ) {
-      console.log('📲 [MODAL] Modal opened, calling NotificationVisit API');
+      console.log('[MODAL] Modal opened, calling NotificationVisit API');
       this.NotificationVisit();
-      this.setState({ hasCalledAPI: true });
+      this.setState({hasCalledAPI: true});
     }
-    
-    // ✅ Reset flag when modal closes so next notification can call API
+
     if (!this.props.visible && prevProps.visible) {
-      console.log('📲 [MODAL] Modal closed, resetting API flag');
-      this.setState({ hasCalledAPI: false });
+      console.log('[MODAL] Modal closed, resetting API flag');
+      this.setState({hasCalledAPI: false});
     }
   }
 
@@ -68,17 +68,16 @@ export default class NotificationModal extends React.PureComponent {
   }
 
   NotificationVisit = async () => {
-    console.log('📲 [MODAL] NotificationVisit called');
+    console.log('[MODAL] NotificationVisit called');
 
     var mobilenumber = await AsyncStorage.getItem('phonenumber');
     var NotificationId = await AsyncStorage.getItem('NID');
 
-    console.log('📲 [MODAL] Mobile number:', mobilenumber);
-    console.log('📲 [MODAL] Notification ID:', NotificationId);
+    console.log('[MODAL] Mobile number:', mobilenumber);
+    console.log('[MODAL] Notification ID:', NotificationId);
 
-    // ✅ FIXED: Don't call API if we don't have required data
     if (!mobilenumber || !NotificationId) {
-      console.log('⚠️ [MODAL] Missing mobile number or notification ID, skipping API call');
+      console.log('[MODAL] Missing mobile number or notification ID, skipping API call');
       return;
     }
 
@@ -122,10 +121,10 @@ export default class NotificationModal extends React.PureComponent {
         return res.json();
       })
       .then(json => {
-        console.log('✅ [MODAL] NotificationVisit API success:', json);
+        console.log('[MODAL] NotificationVisit API success:', json);
       })
       .catch(er => {
-        console.error('❌ [MODAL] NotificationVisit API error:', er);
+        console.error('[MODAL] NotificationVisit API error:', er);
       });
   };
 
@@ -143,135 +142,241 @@ export default class NotificationModal extends React.PureComponent {
       onMenuPress,
     } = this.props;
 
-    // ✅ IMPROVED: Better logging
-    // console.log('📲 [MODAL] Render - visible:', visible, 'image:', image ? 'yes' : 'no');
-
     return (
       <>
         {image !== '' ? (
           <Modal animationType="fade" visible={visible} transparent={true}>
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                backgroundColor: 'rgba(0,0,0, 0.7)',
-              }}>
-              <View style={{position: 'absolute', top: 80, right: 20}}>
+            <Animated.View
+              style={[
+                styles.overlay,
+              ]}>
+              <TouchableOpacity
+                style={styles.overlayTouchable}
+                activeOpacity={1}
+                onPress={onClosePress}
+              />
+
+              <Animated.View
+                style={[
+                  styles.modalContainer,
+                ]}>
+                {/* Close Button - Repositioned */}
                 <TouchableOpacity
-                  style={{marginTop: -60}}
-                  onPress={() => onClosePress()}>
-                  <Icon name="close-circle" size={40} color={'white'} />
+                  style={styles.closeButton}
+                  onPress={onClosePress}
+                  hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                  <View style={styles.closeButtonInner}>
+                    <Icon name="close" size={24} color={'#fff'} />
+                  </View>
                 </TouchableOpacity>
-              </View>
-              <View
-                style={{
-                  height: '50%',
-                  backgroundColor: 'white',
-                  justifyContent: 'center',
-                  marginTop: 50,
-                  borderTopLeftRadius: 20,
-                  borderTopRightRadius: 20,
-                }}>
-                {image === undefined ? (
-                  <ActivityIndicator
-                    animating={true}
-                    color="black"
-                    size={'large'}
-                  />
-                ) : (
-                  <BannerImage
-                    uri={image}
-                    width={width}
-                    header_Description={description}
-                  />
-                )}
-              </View>
-              <View
-                style={{
-                  backgroundColor: 'white',
-                  borderBottomLeftRadius: 20,
-                  borderBottomRightRadius: 20,
-                }}>
-                <Text
-                  numberOfLines={6}
-                  style={{
-                    paddingLeft: 10,
-                    paddingBottom: 10,
-                    margin: more_description === '' ? 0 : 10,
-                    fontFamily:
-                      Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                  }}>
-                  {more_description}
-                </Text>
-              </View>
-              {type === 'item' ? (
-                <View style={{alignItems: 'center', marginTop: 20}}>
-                  <TouchableOpacity onPress={() => onItemPress(itemCode)}>
-                    <Animated.View
-                      style={[
-                        {
-                          height: 45,
-                          width: 180,
-                          backgroundColor: 'black',
-                          justifyContent: 'center',
-                          borderRadius: 20,
-                          borderWidth: 1,
-                          borderColor: 'white',
-                        },
-                        {transform: [{scale: this.state.zoomIn}]},
-                      ]}>
-                      <Text
-                        style={{
-                          fontFamily:
-                            Platform.OS === 'ios'
-                              ? 'Asap-Regular_Medium'
-                              : 'AsapMedium',
-                          textAlign: 'center',
-                          color: 'white',
-                          fontSize: 16,
-                        }}>
-                        Have a taste
+
+                {/* Content Card */}
+                <View style={styles.contentCard}>
+                  {/* Image Section */}
+                  <View style={styles.imageContainer}>
+                    {image === undefined ? (
+                      <ActivityIndicator
+                        animating={true}
+                        color="#000"
+                        size={'large'}
+                      />
+                    ) : (
+                      <BannerImage
+                        uri={image}
+                        width={width - 48}
+                        header_Description={description}
+                      />
+                    )}
+                  </View>
+
+                  {/* Description Section */}
+                  {more_description !== '' && (
+                    <View style={styles.descriptionContainer}>
+                      <View style={styles.decorativeLine} />
+                      <Text style={styles.descriptionText}>
+                        {more_description}
                       </Text>
-                    </Animated.View>
-                  </TouchableOpacity>
+                    </View>
+                  )}
+
+                  {/* Action Buttons */}
+                  <View style={styles.actionsContainer}>
+                    {type === 'item' && (
+                      <TouchableOpacity
+                        onPress={() => onItemPress(itemCode)}
+                        activeOpacity={0.8}>
+                        <Animated.View
+                          style={[
+                            styles.actionButton,
+                            styles.primaryButton,
+                            {transform: [{scale: this.state.zoomIn}]},
+                          ]}>
+                          <Icon
+                            name="restaurant"
+                            size={20}
+                            color="#fff"
+                            style={styles.buttonIcon}
+                          />
+                          <Text style={styles.primaryButtonText}>
+                            Have a taste
+                          </Text>
+                        </Animated.View>
+                      </TouchableOpacity>
+                    )}
+
+                    {isMenuButtonVisible === 'true' && (
+                      <TouchableOpacity
+                        onPress={() => onMenuPress('Menu')}
+                        activeOpacity={0.8}>
+                        <Animated.View
+                          style={[
+                            styles.actionButton,
+                            type === 'item'
+                              ? styles.secondaryButton
+                              : styles.primaryButton,
+                            {transform: [{scale: this.state.zoomIn}]},
+                          ]}>
+                          <Icon
+                            name="menu"
+                            size={20}
+                            color={type === 'item' ? '#000' : '#fff'}
+                            style={styles.buttonIcon}
+                          />
+                          <Text
+                            style={
+                              type === 'item'
+                                ? styles.secondaryButtonText
+                                : styles.primaryButtonText
+                            }>
+                            See Menu
+                          </Text>
+                        </Animated.View>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </View>
-              ) : null}
-              {isMenuButtonVisible === 'true' ? (
-                <View style={{alignItems: 'center', marginTop: 20}}>
-                  <TouchableOpacity onPress={() => onMenuPress('Menu')}>
-                    <Animated.View
-                      style={[
-                        {
-                          height: 45,
-                          width: 180,
-                          backgroundColor: 'black',
-                          justifyContent: 'center',
-                          borderRadius: 20,
-                          borderWidth: 1,
-                          borderColor: 'white',
-                        },
-                        {transform: [{scale: this.state.zoomIn}]},
-                      ]}>
-                      <Text
-                        style={{
-                          fontFamily:
-                            Platform.OS === 'ios'
-                              ? 'Asap-Regular_Medium'
-                              : 'AsapMedium',
-                          textAlign: 'center',
-                          color: 'white',
-                          fontSize: 16,
-                        }}>
-                        See Menu
-                      </Text>
-                    </Animated.View>
-                  </TouchableOpacity>
-                </View>
-              ) : null}
-            </View>
+              </Animated.View>
+            </Animated.View>
           </Modal>
         ) : null}
       </>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overlayTouchable: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  modalContainer: {
+    width: width - 48,
+    maxHeight: height * 0.85,
+    position: 'relative',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: -15,
+    right: -5,
+    zIndex: 10,
+  },
+  closeButtonInner: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  contentCard: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 10},
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 15,
+  },
+  imageContainer: {
+    width: '100%',
+    minHeight: 250,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
+  },
+  descriptionContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: '#fff',
+  },
+  decorativeLine: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#000',
+    borderRadius: 2,
+    marginBottom: 12,
+  },
+  descriptionText: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#333',
+    fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+  },
+  actionsContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 24,
+    gap: 12,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    height: 52,
+    borderRadius: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  primaryButton: {
+    backgroundColor: '#000',
+  },
+  secondaryButton: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#000',
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  primaryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+  },
+  secondaryButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+  },
+});
