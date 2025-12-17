@@ -82,11 +82,17 @@ android {
         applicationId "com.onimta.onlineorderapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "0.6.8"
+        versionCode 15
+        versionName "0.7.2"
         multiDexEnabled true  // Add this line if you encounter dex limit issues
     }
     signingConfigs {
+        release {
+            storeFile file('my-upload-key.keystore')
+            storePassword 'onimta1+'
+            keyAlias 'my-key-alias'
+            keyPassword 'onimta1+'
+        }
         debug {
             storeFile file('debug.keystore')
             storePassword 'android'
@@ -99,9 +105,8 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+       
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

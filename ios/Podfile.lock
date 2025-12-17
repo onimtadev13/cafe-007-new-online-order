@@ -3151,6 +3151,8 @@ PODS:
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.10)
   - SocketRocket (0.7.1)
+  - TouchID (4.4.1):
+    - React
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -3264,6 +3266,7 @@ DEPENDENCIES:
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - SDWebImage
   - SocketRocket (~> 0.7.1)
+  - TouchID (from `../node_modules/react-native-touch-id`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -3495,6 +3498,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-svg"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
+  TouchID:
+    :path: "../node_modules/react-native-touch-id"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -3622,6 +3627,7 @@ SPEC CHECKSUMS:
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
+  TouchID: ba4c656d849cceabc2e4eef722dea5e55959ecf4
   Yoga: 922d794dce2af9c437f864bf4093abfa7a131adb
 
 PODFILE CHECKSUM: 7cb0d75034a93e22be1abd4099d8478911e1f70a

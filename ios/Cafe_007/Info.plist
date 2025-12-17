@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Cafe_007</string>
+	<string>Cafe 007</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -66,7 +66,6 @@
 				<key>NSIncludesSubdomains</key>
 				<true/>
 			</dict>
-			<!-- PayHere Domains -->
 			<key>payhere.lk</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>

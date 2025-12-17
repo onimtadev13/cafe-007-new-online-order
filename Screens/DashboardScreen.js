@@ -91,50 +91,49 @@ class DashboardScreen extends React.PureComponent {
     'promoShown',
   ]);
 
-
   async componentDidMount() {
-  this.startGlow();
-  this.hasRestoredCart = false;
+    this.startGlow();
+    this.hasRestoredCart = false;
 
-  // Set up navigation listeners
-  this._unsubscribe = this.props.navigation.addListener('focus', async () => {
-    this.fadeIn();
-    const preNAme = await AsyncStorage.getItem('firstname');
-    const preAddress = await AsyncStorage.getItem('address');
-    if (
-      preNAme !== this.state.Firstname ||
-      preAddress !== this.state.address
-    ) {
-      this.CheckUserLog();
-    }
-  });
+    // Set up navigation listeners
+    this._unsubscribe = this.props.navigation.addListener('focus', async () => {
+      this.fadeIn();
+      const preNAme = await AsyncStorage.getItem('firstname');
+      const preAddress = await AsyncStorage.getItem('address');
+      if (
+        preNAme !== this.state.Firstname ||
+        preAddress !== this.state.address
+      ) {
+        this.CheckUserLog();
+      }
+    });
 
-  this._unsubscribe2 = this.props.navigation.addListener('blur', async () => {
-    this.fadeOut();
-  });
+    this._unsubscribe2 = this.props.navigation.addListener('blur', async () => {
+      this.fadeOut();
+    });
 
-  // Load location details first
-  this.GetLocationDetails();
-  
-  // Check user login status
-  await this.CheckUserLog();
+    // Load location details first
+    this.GetLocationDetails();
 
-  // Restore cart after a short delay to ensure user data is loaded
-  setTimeout(async () => {
-    const userlog = await AsyncStorage.getItem('phonenumber');
-    if (userlog && !this.hasRestoredCart) {
-      await this.restoreCartSilently();
-      this.hasRestoredCart = true;
-    }
-  }, 500);
+    // Check user login status
+    await this.CheckUserLog();
 
-  // Debug AsyncStorage
-  setTimeout(() => {
-    this.debugAsyncStorage();
-  }, 1000);
+    // Restore cart after a short delay to ensure user data is loaded
+    setTimeout(async () => {
+      const userlog = await AsyncStorage.getItem('phonenumber');
+      if (userlog && !this.hasRestoredCart) {
+        await this.restoreCartSilently();
+        this.hasRestoredCart = true;
+      }
+    }, 500);
 
-  this.onSaveOrderID();
-}
+    // Debug AsyncStorage
+    setTimeout(() => {
+      this.debugAsyncStorage();
+    }, 1000);
+
+    this.onSaveOrderID();
+  }
 
   componentDidUpdate(prevProps) {
     // Only sync to AsyncStorage if cart was modified (not on initial restore)
@@ -180,8 +179,6 @@ class DashboardScreen extends React.PureComponent {
       console.error('Error restoring cart:', error);
     }
   };
-
-  
 
   onReduxToAsync = async () => {
     const reduxList = this.props.cartItems;
@@ -300,25 +297,35 @@ class DashboardScreen extends React.PureComponent {
   };
 
   onFacebookPress = () => {
-    Linking.canOpenURL('fb://page/610237876001241').then(supported => {
+    Linking.canOpenURL(
+      'https://www.facebook.com/share/1NGgA5QHtT/?mibextid=wwXIfr',
+    ).then(supported => {
       if (supported) {
-        return Linking.openURL('fb://page/610237876001241');
+        return Linking.openURL(
+          'https://www.facebook.com/share/1NGgA5QHtT/?mibextid=wwXIfr',
+        );
       } else {
-        return Linking.openURL('https://www.facebook.com/Cafe007Srilanka/');
+        return Linking.openURL(
+          'https://www.facebook.com/share/1NGgA5QHtT/?mibextid=wwXIfr',
+        );
       }
     });
   };
 
   onInstagramPress = () => {
-    Linking.canOpenURL('instagram://user?username=cafe007.kuruwita').then(
-      supported => {
-        if (supported) {
-          return Linking.openURL('instagram://user?username=cafe007.kuruwita');
-        } else {
-          return Linking.openURL('https://www.instagram.com/cafe007.kuruwita/');
-        }
-      },
-    );
+    Linking.canOpenURL(
+      'https://www.instagram.com/cafe007_emb?igsh=MXE1ZG1iZW82ZXJodg==',
+    ).then(supported => {
+      if (supported) {
+        return Linking.openURL(
+          'https://www.instagram.com/cafe007_emb?igsh=MXE1ZG1iZW82ZXJodg==',
+        );
+      } else {
+        return Linking.openURL(
+          'https://www.instagram.com/cafe007_emb?igsh=MXE1ZG1iZW82ZXJodg==',
+        );
+      }
+    });
   };
 
   onYoutubePress = () => {
@@ -364,34 +371,34 @@ class DashboardScreen extends React.PureComponent {
     }
   };
 
- CheckUserLog = async () => {
-  try {
-    let number = await AsyncStorage.getItem('phonenumber');
-    
-    if (number === null) {
-      this.setState({ userlog: number });
-    } else {
-      this.setState({ userlog: number });
-      await this.GetPersonalInfo();
+  CheckUserLog = async () => {
+    try {
+      let number = await AsyncStorage.getItem('phonenumber');
+
+      if (number === null) {
+        this.setState({ userlog: number });
+      } else {
+        this.setState({ userlog: number });
+        await this.GetPersonalInfo();
+      }
+    } catch (error) {
+      console.error('Error checking user login:', error);
     }
-  } catch (error) {
-    console.error('Error checking user login:', error);
-  }
-};
+  };
 
   GetPersonalInfo = async () => {
-  try {
-    const Firstname = await AsyncStorage.getItem('firstname');
-    const Address = await AsyncStorage.getItem('address');
-    
-    this.setState({
-      Firstname: Firstname || '',
-      address: Address || '',
-    });
-  } catch (error) {
-    console.error('Error getting personal info:', error);
-  }
-};
+    try {
+      const Firstname = await AsyncStorage.getItem('firstname');
+      const Address = await AsyncStorage.getItem('address');
+
+      this.setState({
+        Firstname: Firstname || '',
+        address: Address || '',
+      });
+    } catch (error) {
+      console.error('Error getting personal info:', error);
+    }
+  };
 
   numberWithCommas = x => {
     let convertX = x.toString().replace(/\B(?=(\d{1000})+(?!\d))/g, ',');
@@ -831,7 +838,7 @@ class DashboardScreen extends React.PureComponent {
                 }}
               >
                 Delivery Details
-              </Text>             
+              </Text>
               <Text
                 style={{
                   fontFamily:
@@ -1583,21 +1590,27 @@ class DashboardScreen extends React.PureComponent {
               </Text>
               {}
 
-              <Text
-                allowFontScaling={false}
-                style={{
-                  fontFamily:
-                    Platform.OS === 'ios'
-                      ? 'Asap-Regular_SemiBold'
-                      : 'AsapSemiBold',
-                  fontSize: 18,
-                  color: 'black',
-                  alignSelf: 'center',
-                }}
+              <TouchableOpacity
+                onPress={() => Linking.openURL('mailto:info@cafe007.lk')}
+                accessibilityRole="button"
+                style={{ alignSelf: 'center' }}
               >
-                {' '}
-                info@cafe007.lk
-              </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={{
+                    fontFamily:
+                      Platform.OS === 'ios'
+                        ? 'Asap-Regular_SemiBold'
+                        : 'AsapSemiBold',
+                    fontSize: 18,
+                    color: '#1a73e8',
+                    textDecorationLine: 'underline',
+                    alignSelf: 'center',
+                  }}
+                >
+                  info@cafe007.lk
+                </Text>
+              </TouchableOpacity>
               <View
                 style={{
                   height: 1,
@@ -1618,7 +1631,7 @@ class DashboardScreen extends React.PureComponent {
                   justifyContent: 'center',
                 }}
               >
-                <View style={{ margin: 10, alignItems: 'flex-start' }}>
+                {/* <View style={{ margin: 10, alignItems: 'flex-start' }}>
                   <Text
                     allowFontScaling={false}
                     style={{
@@ -1685,8 +1698,8 @@ class DashboardScreen extends React.PureComponent {
                       Tel: {this.state.LocationIMobile}
                     </Text>
                   </TouchableOpacity>
-                </View>
-                <View style={{ margin: 10, alignItems: 'flex-end' }}>
+                </View> */}
+                <View style={{ margin: 10, alignItems: 'center' }}>
                   <Text
                     allowFontScaling={false}
                     style={{
@@ -1829,6 +1842,10 @@ class DashboardScreen extends React.PureComponent {
               >
                 powered by
               </Text>
+              <Image
+                source={require('../assets/images.png')}
+                style={{ width: 50, height: 50, alignSelf: 'center' }}
+              />
               <TouchableOpacity
                 style={{ marginBottom: 20 }}
                 onPress={() => Linking.openURL('http://www.onimtait.com')}

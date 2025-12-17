@@ -1,6 +1,6 @@
 // import {NavigationContainer, DefaultTheme as NavigationDefaultTheme, DarkTheme as NavigationDarkTheme} from '@react-navigation/native';
 import { useEffect, useState, useRef } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import React from 'react';
 import {
   Alert,
@@ -10,6 +10,7 @@ import {
   Linking,
   AppState,
   PermissionsAndroid,
+  Image,
 } from 'react-native';
 import AuthContext from './Components/Context';
 import BottomTabNavigation from './Routes/BottomTabNavigation';
@@ -29,6 +30,7 @@ import branch from 'react-native-branch';
 import LocalNotificationService from './Services/LocalNotificationService';
 import NotificationModal from './Components/NotificationModal';
 import PromoCard from './Components/PromoCard';
+import FlashMessage, { showMessage } from 'react-native-flash-message';
 
 import {
   SafeAreaProvider,
@@ -46,6 +48,7 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
 });
 
 const App = () => {
+  const flashMessageRef = useRef(null);
   const [isClick, setClick] = React.useState(false);
   const [isOTPVisible, setOTPVisible] = React.useState(false);
   const [OtpCode, setOtpCode] = React.useState('');
@@ -68,17 +71,85 @@ const App = () => {
     isVisible: false,
   });
 
-  const navigationRef = React.createRef();
+  const navigationRef = useRef(null);
 
   const [showPromo, setShowPromo] = useState(false);
   const [promotionsData, setPromotionsData] = useState(null);
 
   function navigate(name, params) {
-    navigationRef.current && navigationRef.current.navigate(name, params);
+    const nav = navigationRef.current;
+    if (!nav) {
+      console.warn('[NAVIGATE] navigationRef not ready');
+      return;
+    }
+
+    // If params specify a nested screen (e.g. Orders -> OrderDetailsScreen),
+    // use CommonActions.navigate to ensure nested navigators receive the action.
+    try {
+      console.log('[NAVIGATE] Navigating to', name, 'with params:', params);
+      if (params && params.screen) {
+        console.log(
+          '[NAVIGATE] Using CommonActions for nested screen:',
+          params.screen,
+        );
+        nav.dispatch(
+          CommonActions.navigate({
+            name,
+            params: {
+              screen: params.screen,
+              params: params.params || params.params,
+            },
+          }),
+        );
+      } else {
+        nav.navigate(name, params);
+      }
+    } catch (err) {
+      console.error('[NAVIGATE] Error:', err);
+      try {
+        nav.navigate(name, params);
+      } catch (fallbackErr) {
+        console.error('[NAVIGATE] Fallback also failed:', fallbackErr);
+      }
+    }
+  }
+
+  // Dedicated helper for order navigation with timing safety
+  function navigateToOrder(orderId) {
+    console.log('[ORDER_NAV] Navigating to order:', orderId);
+    if (!orderId) {
+      console.warn('[ORDER_NAV] No OrderID provided');
+      return;
+    }
+
+    // Use setTimeout to ensure navigation happens after notification callback is complete
+    setTimeout(() => {
+      const nav = navigationRef.current;
+      if (!nav) {
+        console.error('[ORDER_NAV] navigationRef not available');
+        return;
+      }
+
+      try {
+        console.log('[ORDER_NAV] Executing navigation to Orders tab');
+        nav.dispatch(
+          CommonActions.navigate({
+            name: 'Orders',
+            params: {
+              screen: 'OrderDetailsScreen',
+              params: { OrderID: orderId },
+            },
+          }),
+        );
+      } catch (err) {
+        console.error('[ORDER_NAV] Navigation failed:', err);
+      }
+    }, 100);
   }
 
   function replace(name, params) {
-    navigationRef.current && navigationRef.current.replace(name, params);
+    const nav = navigationRef.current;
+    nav && nav.replace && nav.replace(name, params);
   }
 
   const Initialloginstate = {
@@ -441,110 +512,110 @@ const App = () => {
     );
   };
 
-const CheckAppVersion = () => {
-  fetch(APIURL, {
-    method: 'POST',
-    cache: 'no-cache',
-    headers: {
-      'content-type': 'application/json',
-      'cache-control': 'no-cache',
-    },
-    body: JSON.stringify({
-      HasReturnData: 'T',
-      Parameters: [
-        {
-          Para_Data: '92',
-          Para_Direction: 'Input',
-          Para_Lenth: 10,
-          Para_Name: '@Iid',
-          Para_Type: 'int',
-        },
-        {
-          Para_Data: getVersion(),
-          Para_Direction: 'Input',
-          Para_Lenth: 100,
-          Para_Name: '@Text1',
-          Para_Type: 'varchar',
-        },
-        {
-          Para_Data: Platform.OS,
-          Para_Direction: 'Input',
-          Para_Lenth: 100,
-          Para_Name: '@Text2',
-          Para_Type: 'varchar',
-        },
-      ],
-      SpName: 'sp_Android_Common_API',
-      con: '1',
-    }),
-  })
-    .then(res => res.json())
-    .then(async json => {
-      const Status = json.CommonResult.Table[0].Status;
-      var AppURL = json.CommonResult.Table[0].AppURL;
+  const CheckAppVersion = () => {
+    fetch(APIURL, {
+      method: 'POST',
+      cache: 'no-cache',
+      headers: {
+        'content-type': 'application/json',
+        'cache-control': 'no-cache',
+      },
+      body: JSON.stringify({
+        HasReturnData: 'T',
+        Parameters: [
+          {
+            Para_Data: '92',
+            Para_Direction: 'Input',
+            Para_Lenth: 10,
+            Para_Name: '@Iid',
+            Para_Type: 'int',
+          },
+          {
+            Para_Data: getVersion(),
+            Para_Direction: 'Input',
+            Para_Lenth: 100,
+            Para_Name: '@Text1',
+            Para_Type: 'varchar',
+          },
+          {
+            Para_Data: Platform.OS,
+            Para_Direction: 'Input',
+            Para_Lenth: 100,
+            Para_Name: '@Text2',
+            Para_Type: 'varchar',
+          },
+        ],
+        SpName: 'sp_Android_Common_API',
+        con: '1',
+      }),
+    })
+      .then(res => res.json())
+      .then(async json => {
+        const Status = json.CommonResult.Table[0].Status;
+        var AppURL = json.CommonResult.Table[0].AppURL;
 
-      if (Status === 'Exist') {
-        setUpdated(true);
-        
-        // Check if user is logged in and set token accordingly
-        const phonenumber = await AsyncStorage.getItem('phonenumber');
-        if (phonenumber) {
-          // User has logged in before, verify with server
-          getToken().then(fcmToken => {
-            CheckUserExist(phonenumber);
-          });
+        if (Status === 'Exist') {
+          setUpdated(true);
+
+          // Check if user is logged in and set token accordingly
+          const phonenumber = await AsyncStorage.getItem('phonenumber');
+          if (phonenumber) {
+            // User has logged in before, verify with server
+            getToken().then(fcmToken => {
+              CheckUserExist(phonenumber);
+            });
+          } else {
+            // No stored credentials, stop loading and show login
+            dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
+          }
         } else {
-          // No stored credentials, stop loading and show login
+          setUpdated(false);
+          Alert.alert(
+            'Update is available',
+            'An update for the application is available',
+            [
+              {
+                text: 'Update',
+                onPress: () => openAppStore(AppURL),
+              },
+            ],
+            { cancelable: false },
+          );
+        }
+      })
+      .catch(async er => {
+        console.log('CheckAppVersion', er);
+
+        // On error, still try to log user in if they have credentials
+        const phone = await AsyncStorage.getItem('phonenumber');
+        if (phone) {
+          dispatch({ Type: 'RETREIVE_TOKEN', Token: phone });
+        } else {
           dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
         }
-      } else {
-        setUpdated(false);
+
         Alert.alert(
-          'Update is available',
-          'An update for the application is available',
+          'Warning',
+          "The operation couldn't be completed.",
           [
             {
-              text: 'Update',
-              onPress: () => openAppStore(AppURL),
+              text: 'Try Again',
+              onPress: () => CheckAppVersion(),
+            },
+            {
+              text: 'Continue',
+              onPress: () => {},
             },
           ],
           { cancelable: false },
         );
-      }
-    })
-    .catch(async er => {
-      console.log('CheckAppVersion', er);
-
-      // On error, still try to log user in if they have credentials
-      const phone = await AsyncStorage.getItem('phonenumber');
-      if (phone) {
-        dispatch({ Type: 'RETREIVE_TOKEN', Token: phone });
-      } else {
-        dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
-      }
-
-      Alert.alert(
-        'Warning',
-        "The operation couldn't be completed.",
-        [
-          {
-            text: 'Try Again',
-            onPress: () => CheckAppVersion(),
-          },
-          {
-            text: 'Continue',
-            onPress: () => {},
-          },
-        ],
-        { cancelable: false },
-      );
-    })
-    .finally(() => {
-      setTimeout(() => {
-        SplashScreen.hide();
-      }, 500);
-    });
-};
+      })
+      .finally(() => {
+        setTimeout(() => {
+          SplashScreen.hide();
+        }, 500);
+      });
+  };
 
   const fetchPromotions = async () => {
     try {
@@ -1432,13 +1503,376 @@ const CheckAppVersion = () => {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
 
-React.useEffect(() => {
-  console.log('[APP] Main useEffect started');
+  React.useEffect(() => {
+    console.log('[APP] Main useEffect started');
 
+    const initializeNotifications = async () => {
+      console.log('[INIT] Starting notification initialization');
+
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
+        console.log(
+          `[PERMISSION] Android version: ${Platform.Version}, requesting POST_NOTIFICATIONS`,
+        );
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+            {
+              title: 'Notification Permission',
+              message:
+                'Allow notifications to receive order updates and promotions',
+              buttonPositive: 'Allow',
+              buttonNegative: 'Deny',
+            },
+          );
+
+          console.log(`[PERMISSION] Permission result: ${granted}`);
+
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            console.log('Notification permission granted');
+          } else {
+            console.log('Notification permission denied');
+          }
+        } catch (err) {
+          console.error('Notification permission error:', err);
+        }
+      }
+
+      console.log('[FIREBASE] Requesting Firebase permissions...');
+      await requestPermission();
+    };
+
+    initializeNotifications();
+
+    const branchUnsubscribe = branch.subscribe(handleBranchLink);
+    registerAppWithFCM();
+    CreatSqlitTable();
+    CheckAppVersion();
+
+    console.log('[LOCAL] Configuring LocalNotificationService...');
+    LocalNotificationService.configure(onNotificationPop);
+    console.log('[LOCAL] LocalNotificationService configured');
+
+    function onNotificationPop(notification) {
+      console.log('═══════════════════════════════════════');
+      console.log('[TAP] Notification tapped!');
+      console.log('═══════════════════════════════════════');
+      console.log(
+        '[TAP] Full notification:',
+        JSON.stringify(notification, null, 2),
+      );
+
+      // Handle order status notifications
+      if (notification.data?.OrderID || notification.userInfo?.OrderID) {
+        const OrderID =
+          notification.data?.OrderID || notification.userInfo?.OrderID;
+        console.log('[TAP] Navigating to order:', OrderID);
+        navigateToOrder(OrderID);
+      }
+      // Handle image notifications (promotional/menu items)
+      else if (
+        notification.bigPictureUrl ||
+        notification.data?.fcm_options?.image ||
+        notification.userInfo?.fcm_options?.image
+      ) {
+        console.log('[TAP] Showing image notification modal');
+
+        const data = notification.data || notification.userInfo || {};
+
+        setstate(prevState => ({
+          ...prevState,
+          Type: data.type || '',
+          Description: notification.message || notification.body || '',
+          More_Description: data.item_description || '',
+          Image:
+            Platform.OS === 'android'
+              ? notification.bigPictureUrl
+              : data.fcm_options?.image || '',
+          ItemCode: data.item_code || '',
+          isVisible: true,
+          isMenuButtonVisible: data.is_visible_Menu_Button || false,
+        }));
+
+        if (data.notification_id) {
+          AsyncStorage.setItem('NID', data.notification_id);
+          console.log('[TAP] Saved notification ID:', data.notification_id);
+        }
+      } else {
+        console.log('[TAP] Unknown notification type');
+      }
+      console.log('═══════════════════════════════════════');
+    }
+
+    // Listen for foreground FCM messages - MODIFIED TO USE FLASH MESSAGE FOR ORDERS
+    console.log('[FCM] Setting up onMessage listener...');
+    // Replace your onMessage listener with this fixed version:
+
+    // Replace your onMessage listener with this fixed version:
+
+    const unsubscribeNotification = messaging().onMessage(
+      async remoteMessage => {
+        console.log('');
+        console.log('═══════════════════════════════════════');
+        console.log('[FCM] FOREGROUND MESSAGE RECEIVED!');
+        console.log('═══════════════════════════════════════');
+        console.log(
+          '[FCM] Full message:',
+          JSON.stringify(remoteMessage, null, 2),
+        );
+
+        const data = remoteMessage.data || {};
+
+        // Handle OTP messages
+        if (data.OTP !== undefined) {
+          console.log('[OTP] OTP message received:', data.OTP);
+          Alert.alert('OTP Verification', data.OTP);
+          return;
+        }
+
+        // CHECK IF THIS IS AN ORDER NOTIFICATION - SHOW FLASH MESSAGE
+        if (data.OrderID || data.Status) {
+          console.log('[ORDER] Order notification - showing FlashMessage');
+
+          const title = remoteMessage.notification?.title || 'Order Update';
+          const body =
+            remoteMessage.notification?.body ||
+            'Your order status has been updated';
+
+          showMessage({
+            autoHide: true,
+            animated: true,
+            floating: true,
+            hideStatusBar: false,
+            duration: 5000,
+            message: title,
+            description: body,
+            type: 'success',
+            titleStyle: {
+              fontSize: 14,
+              fontWeight: 'bold',
+              color: '#000000ff',
+            },
+            textStyle: { fontSize: 12, color: '#000000ff' },
+            backgroundColor: '#ebc16dff',
+            onPress: () => {
+              console.log(
+                '[FLASH] FlashMessage tapped - navigating to order:',
+                data.OrderID,
+              );
+              navigateToOrder(data.OrderID);
+            },
+          });
+
+          return;
+        }
+
+        // PROMOTIONAL/IMAGE NOTIFICATIONS - SHOW NOTIFICATION MODAL
+        try {
+          let imageUrl = '';
+
+          // Get image URL from appropriate location
+          if (Platform.OS === 'ios') {
+            imageUrl = data.fcm_options?.image || data.image || '';
+          } else {
+            imageUrl =
+              remoteMessage.notification?.android?.imageUrl ||
+              data.fcm_options?.image ||
+              data.image ||
+              '';
+          }
+
+          console.log('[PROMO] Image URL found:', imageUrl);
+
+          // If there's an image, show the NotificationModal
+          if (imageUrl) {
+            console.log(
+              '[PROMO] Showing NotificationModal for promotional content',
+            );
+
+            setstate(prevState => ({
+              ...prevState,
+              Type: data.type || '',
+              Description: remoteMessage.notification?.body || '',
+              More_Description: data.item_description || '',
+              Image: imageUrl,
+              ItemCode: data.item_code || '',
+              isVisible: true,
+              isMenuButtonVisible:
+                data.is_visible_Menu_Button === 'true' ||
+                data.is_visible_Menu_Button === true,
+            }));
+
+            // Save notification ID if present
+            if (data.notification_id) {
+              AsyncStorage.setItem('NID', data.notification_id);
+              console.log(
+                '[PROMO] Saved notification ID:',
+                data.notification_id,
+              );
+            }
+          } else {
+            // No image - show simple local notification as fallback
+            console.log(
+              '[NOTIFICATION] No image - showing simple local notification',
+            );
+
+            const title = remoteMessage.notification?.title || 'Notification';
+            const body = remoteMessage.notification?.body || '';
+
+            LocalNotificationService.localNotification(title, body, '', data);
+          }
+
+          console.log('[FCM] Notification handled successfully');
+        } catch (error) {
+          console.error('[FCM] Error handling notification:', error);
+        }
+
+        console.log('═══════════════════════════════════════');
+        console.log('');
+      },
+    );
+    console.log('[FCM] onMessage listener set up');
+
+    // Handle app opened from BACKGROUND by notification tap
+    console.log('[FCM] Setting up onNotificationOpenedApp listener...');
+    const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
+      remoteMessage => {
+        console.log('');
+        console.log('═══════════════════════════════════════');
+        console.log('[BACKGROUND TAP] App opened from background!');
+        console.log('═══════════════════════════════════════');
+
+        if (remoteMessage?.data?.OrderID) {
+          const OrderID = remoteMessage.data.OrderID;
+          console.log('[BACKGROUND TAP] Navigating to order:', OrderID);
+          navigateToOrder(OrderID);
+        } else {
+          const imageUrl =
+            Platform.OS === 'android'
+              ? remoteMessage.notification?.android?.imageUrl
+              : remoteMessage.data?.fcm_options?.image;
+
+          if (imageUrl) {
+            setstate(prevState => ({
+              ...prevState,
+              Type: remoteMessage.data?.type || '',
+              Description: remoteMessage.notification?.body || '',
+              More_Description: remoteMessage.data?.item_description || '',
+              Image: imageUrl,
+              ItemCode: remoteMessage.data?.item_code || '',
+              isVisible: true,
+              isMenuButtonVisible:
+                remoteMessage.data?.is_visible_Menu_Button || false,
+            }));
+
+            if (remoteMessage.data?.notification_id) {
+              AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+            }
+          }
+        }
+        console.log('═══════════════════════════════════════');
+      },
+    );
+
+    // Handle app opened from QUIT STATE
+    console.log('[FCM] Checking for initial notification (quit state)...');
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          console.log('═══════════════════════════════════════');
+          console.log('[QUIT TAP] App opened from quit state!');
+          console.log('═══════════════════════════════════════');
+
+          setTimeout(() => {
+            if (remoteMessage.data?.OrderID) {
+              const OrderID = remoteMessage.data.OrderID;
+              console.log('[QUIT TAP] Navigating to order:', OrderID);
+              navigateToOrder(OrderID);
+            } else {
+              const imageUrl =
+                Platform.OS === 'android'
+                  ? remoteMessage.notification?.android?.imageUrl
+                  : remoteMessage.data?.fcm_options?.image;
+
+              if (imageUrl) {
+                setstate(prevState => ({
+                  ...prevState,
+                  Type: remoteMessage.data?.type || '',
+                  Description: remoteMessage.notification?.body || '',
+                  More_Description: remoteMessage.data?.item_description || '',
+                  Image: imageUrl,
+                  ItemCode: remoteMessage.data?.item_code || '',
+                  isVisible: true,
+                  isMenuButtonVisible:
+                    remoteMessage.data?.is_visible_Menu_Button || false,
+                }));
+
+                if (remoteMessage.data?.notification_id) {
+                  AsyncStorage.setItem(
+                    'NID',
+                    remoteMessage.data.notification_id,
+                  );
+                }
+              }
+            }
+          }, 2000);
+        }
+      });
+
+    // Branch deep links
+    branch
+      .getFirstReferringParams()
+      .then(params => {
+        if (params && params['+clicked_branch_link']) {
+          const emailVerifyUrls = ['https://cafe007.lk/embilipitiya-cafe007/'];
+
+          if (
+            emailVerifyUrls.includes(params.$canonical_url) ||
+            emailVerifyUrls.includes(params.$desktop_url) ||
+            emailVerifyUrls.includes(params.custom_url)
+          ) {
+            UpdateEmailVerify();
+          }
+        }
+      })
+      .catch(error => {
+        console.log('Branch deep link error:', error);
+      });
+
+    // App state changes
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        CheckAppVersion();
+      }
+
+      appState.current = nextAppState;
+      setAppStateVisible(appState.current);
+    });
+
+    return () => {
+      console.log('Cleaning up listeners');
+      branchUnsubscribe();
+      unsubscribeOpenedApp();
+      unsubscribeNotification();
+      LocalNotificationService.unregister();
+      subscription.remove();
+    };
+  }, []);
   const initializeNotifications = async () => {
     console.log('[INIT] Starting notification initialization');
 
-    // Request Android 13+ notification permission FIRST
+    // Request permissions for local notifications (Android 13+)
+    const localPermissionGranted =
+      await LocalNotificationService.requestPermissions();
+    console.log(
+      '[LOCAL] Local notification permission:',
+      localPermissionGranted,
+    );
+
+    // Request Android 13+ notification permission for FCM
     if (Platform.OS === 'android' && Platform.Version >= 33) {
       console.log(
         `[PERMISSION] Android version: ${Platform.Version}, requesting POST_NOTIFICATIONS`,
@@ -1456,12 +1890,6 @@ React.useEffect(() => {
         );
 
         console.log(`[PERMISSION] Permission result: ${granted}`);
-
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('Notification permission granted');
-        } else {
-          console.log('Notification permission denied');
-        }
       } catch (err) {
         console.error('Notification permission error:', err);
       }
@@ -1472,428 +1900,101 @@ React.useEffect(() => {
     await requestPermission();
   };
 
-  // Initialize notifications FIRST
-  initializeNotifications();
-
-  // Then other services
-  const branchUnsubscribe = branch.subscribe(handleBranchLink);
-  registerAppWithFCM();
-  CreatSqlitTable();
-  
-  // Check app version and initialize auth
-  CheckAppVersion();
-
-  // Configure local notifications with callback
-  console.log('[LOCAL] Configuring LocalNotificationService...');
-  LocalNotificationService.configure(onNotificationPop);
-  console.log('[LOCAL] LocalNotificationService configured');
-
-  // Notification tap handler
-  function onNotificationPop(notification) {
-    console.log('═══════════════════════════════════════');
-    console.log('[TAP] Notification tapped!');
-    console.log('═══════════════════════════════════════');
-    console.log(
-      '[TAP] Full notification:',
-      JSON.stringify(notification, null, 2),
-    );
-    console.log('[TAP] userInteraction:', notification.userInteraction);
-    console.log('[TAP] data:', notification.data);
-    console.log('[TAP] userInfo:', notification.userInfo);
-
-    // Handle order status notifications
-    if (notification.data?.OrderID || notification.userInfo?.OrderID) {
-      const OrderID =
-        notification.data?.OrderID || notification.userInfo?.OrderID;
-      console.log('[TAP] Navigating to order:', OrderID);
-      navigate('Orders', {
-        screen: 'OrderDetailsScreen',
-        params: { OrderID: OrderID },
-      });
-    }
-    // Handle image notifications (promotional/menu items)
-    else if (
-      notification.bigPictureUrl ||
-      notification.data?.fcm_options?.image ||
-      notification.userInfo?.fcm_options?.image
-    ) {
-      console.log('[TAP] Showing image notification modal');
-
-      const data = notification.data || notification.userInfo || {};
-
-      setstate(prevState => ({
-        ...prevState,
-        Type: data.type || '',
-        Description: notification.message || notification.body || '',
-        More_Description: data.item_description || '',
-        Image:
-          Platform.OS === 'android'
-            ? notification.bigPictureUrl
-            : data.fcm_options?.image || '',
-        ItemCode: data.item_code || '',
-        isVisible: true,
-        isMenuButtonVisible: data.is_visible_Menu_Button || false,
-      }));
-
-      // Save notification ID
-      if (data.notification_id) {
-        AsyncStorage.setItem('NID', data.notification_id);
-        console.log('[TAP] Saved notification ID:', data.notification_id);
-      }
-    } else {
-      console.log('[TAP] Unknown notification type');
-    }
-    console.log('═══════════════════════════════════════');
-  }
-
-  // Listen for foreground FCM messages
-  console.log('[FCM] Setting up onMessage listener...');
-  const unsubscribeNotification = messaging().onMessage(
-    async remoteMessage => {
-      console.log('');
-      console.log('═══════════════════════════════════════');
-      console.log('[FCM] FOREGROUND MESSAGE RECEIVED!');
-      console.log('═══════════════════════════════════════');
-      console.log(
-        '[FCM] Full message:',
-        JSON.stringify(remoteMessage, null, 2),
-      );
-      console.log('[FCM] Notification:', remoteMessage.notification);
-      console.log('[FCM] Data:', remoteMessage.data);
-
-      const data = remoteMessage.data || {};
-
-      // Handle OTP messages
-      if (data.OTP !== undefined) {
-        console.log('[OTP] OTP message received:', data.OTP);
-        Alert.alert('OTP Verification', data.OTP);
-        return;
-      }
-
-      // Display local notification for other messages
-      try {
-        const title = remoteMessage.notification?.title || 'Notification';
-        const body = remoteMessage.notification?.body || '';
-        let imageUrl = '';
-
-        if (Platform.OS === 'ios') {
-          imageUrl = data.fcm_options?.image || '';
-        } else {
-          imageUrl = remoteMessage.notification?.android?.imageUrl || '';
-        }
-
-        console.log('[LOCAL] Creating local notification...');
-        console.log('[LOCAL] Title:', title);
-        console.log('[LOCAL] Body:', body);
-        console.log('[LOCAL] Image URL:', imageUrl);
-        console.log('[LOCAL] Data to pass:', data);
-
-        // Pass the complete data object
-        LocalNotificationService.localNotification(
-          title,
-          body,
-          imageUrl,
-          data, // This contains OrderID, notification_id, etc.
-        );
-
-        console.log('[LOCAL] Local notification created');
-      } catch (error) {
-        console.error('Error displaying local notification:', error);
-        console.error('[LOCAL] Error stack:', error.stack);
-      }
-
-      console.log('═══════════════════════════════════════');
-      console.log('');
-    },
-  );
-  console.log('[FCM] onMessage listener set up');
-
-  //Handle app opened from BACKGROUND by notification tap
-  console.log('[FCM] Setting up onNotificationOpenedApp listener...');
-  const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
-    remoteMessage => {
-      console.log('');
-      console.log('═══════════════════════════════════════');
-      console.log('[BACKGROUND TAP] App opened from background!');
-      console.log('═══════════════════════════════════════');
-      console.log(
-        '[BACKGROUND TAP] Full message:',
-        JSON.stringify(remoteMessage, null, 2),
-      );
-
-      if (remoteMessage?.data?.OrderID) {
-        const OrderID = remoteMessage.data.OrderID;
-        console.log('[BACKGROUND TAP] Navigating to order:', OrderID);
-        navigate('Orders', {
-          screen: 'OrderDetailsScreen',
-          params: { OrderID: OrderID },
-        });
-      } else {
-        // Handle image notifications
-        const imageUrl =
-          Platform.OS === 'android'
-            ? remoteMessage.notification?.android?.imageUrl
-            : remoteMessage.data?.fcm_options?.image;
-
-        if (imageUrl) {
-          console.log('[BACKGROUND TAP] Showing image notification modal');
-
-          setstate(prevState => ({
-            ...prevState,
-            Type: remoteMessage.data?.type || '',
-            Description: remoteMessage.notification?.body || '',
-            More_Description: remoteMessage.data?.item_description || '',
-            Image: imageUrl,
-            ItemCode: remoteMessage.data?.item_code || '',
-            isVisible: true,
-            isMenuButtonVisible:
-              remoteMessage.data?.is_visible_Menu_Button || false,
-          }));
-
-          if (remoteMessage.data?.notification_id) {
-            AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
-            console.log(
-              '[BACKGROUND TAP] Saved notification ID:',
-              remoteMessage.data.notification_id,
-            );
-          }
-        }
-      }
-      console.log('═══════════════════════════════════════');
-    },
-  );
-  console.log('[FCM] onNotificationOpenedApp listener set up');
-
-  //Handle app opened from QUIT STATE by notification tap
-  console.log('[FCM] Checking for initial notification (quit state)...');
-  messaging()
-    .getInitialNotification()
-    .then(remoteMessage => {
-      if (remoteMessage) {
-        console.log('');
-        console.log('═══════════════════════════════════════');
-        console.log('[QUIT TAP] App opened from quit state!');
-        console.log('═══════════════════════════════════════');
-        console.log(
-          '[QUIT TAP] Full message:',
-          JSON.stringify(remoteMessage, null, 2),
-        );
-
-        // Wait a bit for navigation to be ready
-        setTimeout(() => {
-          if (remoteMessage.data?.OrderID) {
-            const OrderID = remoteMessage.data.OrderID;
-            console.log('[QUIT TAP] Navigating to order:', OrderID);
-            navigate('Orders', {
-              screen: 'OrderDetailsScreen',
-              params: { OrderID: OrderID },
-            });
-          } else {
-            const imageUrl =
-              Platform.OS === 'android'
-                ? remoteMessage.notification?.android?.imageUrl
-                : remoteMessage.data?.fcm_options?.image;
-
-            if (imageUrl) {
-              console.log('[QUIT TAP] Showing image notification modal');
-
-              setstate(prevState => ({
-                ...prevState,
-                Type: remoteMessage.data?.type || '',
-                Description: remoteMessage.notification?.body || '',
-                More_Description: remoteMessage.data?.item_description || '',
-                Image: imageUrl,
-                ItemCode: remoteMessage.data?.item_code || '',
-                isVisible: true,
-                isMenuButtonVisible:
-                  remoteMessage.data?.is_visible_Menu_Button || false,
-              }));
-
-              if (remoteMessage.data?.notification_id) {
-                AsyncStorage.setItem(
-                  'NID',
-                  remoteMessage.data.notification_id,
-                );
-                console.log(
-                  '[QUIT TAP] Saved notification ID:',
-                  remoteMessage.data.notification_id,
-                );
-              }
-            }
-          }
-          console.log('═══════════════════════════════════════');
-        }, 2000); // Wait 2 seconds for navigation to be ready
-      } else {
-        console.log(
-          '[FCM] No initial notification (app not opened from notification)',
-        );
-      }
-    })
-    .catch(error => {
-      console.error('[FCM] Error getting initial notification:', error);
-    });
-
-  // Handle Branch deep links
-  branch
-    .getFirstReferringParams()
-    .then(params => {
-      if (params && params['+clicked_branch_link']) {
-        const emailVerifyUrls = ['https://cafe007.lk/embilipitiya-cafe007/'];
-
-        if (
-          emailVerifyUrls.includes(params.$canonical_url) ||
-          emailVerifyUrls.includes(params.$desktop_url) ||
-          emailVerifyUrls.includes(params.custom_url)
-        ) {
-          UpdateEmailVerify();
-        }
-      }
-    })
-    .catch(error => {
-      console.log('Branch deep link error:', error);
-    });
-
-  // Listen for app state changes
-  const subscription = AppState.addEventListener('change', nextAppState => {
-    console.log(
-      `[APPSTATE] App state: ${appState.current} -> ${nextAppState}`,
-    );
-
-    if (
-      appState.current.match(/inactive|background/) &&
-      nextAppState === 'active'
-    ) {
-      console.log('[APPSTATE] App came to foreground');
-      CheckAppVersion();
-    }
-
-    appState.current = nextAppState;
-    setAppStateVisible(appState.current);
-  });
-
-  //Cleanup function with unsubscribeOpenedApp
-  return () => {
-    console.log('Cleaning up listeners');
-    branchUnsubscribe();
-    unsubscribeOpenedApp();
-    unsubscribeNotification();
-    LocalNotificationService.unregister();
-    subscription.remove();
-  };
-}, []);
-
-const initializeNotifications = async () => {
-  console.log('[INIT] Starting notification initialization');
-
-  // Request permissions for local notifications (Android 13+)
-  const localPermissionGranted = await LocalNotificationService.requestPermissions();
-  console.log('[LOCAL] Local notification permission:', localPermissionGranted);
-
-  // Request Android 13+ notification permission for FCM
-  if (Platform.OS === 'android' && Platform.Version >= 33) {
-    console.log(`[PERMISSION] Android version: ${Platform.Version}, requesting POST_NOTIFICATIONS`);
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-        {
-          title: 'Notification Permission',
-          message: 'Allow notifications to receive order updates and promotions',
-          buttonPositive: 'Allow',
-          buttonNegative: 'Deny',
-        }
-      );
-
-      console.log(`[PERMISSION] Permission result: ${granted}`);
-    } catch (err) {
-      console.error('Notification permission error:', err);
-    }
-  }
-
-  // Request Firebase messaging permissions
-  console.log('[FIREBASE] Requesting Firebase permissions...');
-  await requestPermission();
-};
-
   function onClosePopUp() {
     setstate(prevState => ({ ...prevState, isVisible: false }));
   }
 
   const initialRootRoute = 'SplashScreen';
-
-return (
-  <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-    <SafeAreaView
-      edges={['top']}
-      style={{ flex: 0, backgroundColor: '#F0F0F0' }}
-    />
-    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-      <AuthContext.Provider value={authContext}>
-        <StatusBar
-          animated={true}
-          translucent={false}
-          hidden={false}
-          barStyle="default"
-        />
-        <NavigationContainer ref={navigationRef}>
-          <Provider store={store}>
-            {loginstate.isLoading ? (
-              // Show splash screen while checking auth
-              <RootStack.Navigator screenOptions={{ headerShown: false }}>
-                <RootStack.Screen
-                  name="SplashScreen"
-                  component={AppSplashScreen}
-                />
-              </RootStack.Navigator>
-            ) : loginstate.userToken == null ? (
-              // Show auth flow if not logged in
-              <RootStack.Navigator screenOptions={{ headerShown: false }}>
-                <RootStack.Screen name="Auth">
-                  {() => (
-                    <AuthStackNavigation
-                      isClick={isClick}
-                      isVisible={isOTPVisible}
-                      OTPNotification={OtpNotification}
-                      isLoading={isRegister}
-                      isUpdated={isUpdated}
-                    />
-                  )}
-                </RootStack.Screen>
-              </RootStack.Navigator>
-            ) : (
-              // Show main app if logged in
-              <RootStack.Navigator screenOptions={{ headerShown: false }}>
-                <RootStack.Screen
-                  name="App"
-                  component={BottomTabNavigation}
-                />
-              </RootStack.Navigator>
+  return (
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <SafeAreaView
+        edges={['top']}
+        style={{ flex: 0, backgroundColor: '#F0F0F0' }}
+      />
+      <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+        <AuthContext.Provider value={authContext}>
+          <StatusBar
+            animated={true}
+            translucent={false}
+            hidden={false}
+            barStyle="default"
+          />
+          <NavigationContainer ref={navigationRef}>
+            <Provider store={store}>
+              {loginstate.isLoading ? (
+                <RootStack.Navigator screenOptions={{ headerShown: false }}>
+                  <RootStack.Screen
+                    name="SplashScreen"
+                    component={AppSplashScreen}
+                  />
+                </RootStack.Navigator>
+              ) : loginstate.userToken == null ? (
+                <RootStack.Navigator screenOptions={{ headerShown: false }}>
+                  <RootStack.Screen name="Auth">
+                    {() => (
+                      <AuthStackNavigation
+                        isClick={isClick}
+                        isVisible={isOTPVisible}
+                        OTPNotification={OtpNotification}
+                        isLoading={isRegister}
+                        isUpdated={isUpdated}
+                      />
+                    )}
+                  </RootStack.Screen>
+                </RootStack.Navigator>
+              ) : (
+                <RootStack.Navigator screenOptions={{ headerShown: false }}>
+                  <RootStack.Screen
+                    name="App"
+                    component={BottomTabNavigation}
+                  />
+                </RootStack.Navigator>
+              )}
+            </Provider>
+            {loginstate.userToken && (
+              <PromoCard
+                visible={showPromo}
+                promotionsData={promotionsData}
+                onDismiss={handleDismissPromo}
+                onMoreOptions={handleMoreOptions}
+              />
             )}
-          </Provider>
-          {loginstate.userToken && (
-            <PromoCard
-              visible={showPromo}
-              promotionsData={promotionsData}
-              onDismiss={handleDismissPromo}
-              onMoreOptions={handleMoreOptions}
+          </NavigationContainer>
+        </AuthContext.Provider>
+        <NotificationModal
+          type={state.Type}
+          description={state.Description}
+          more_description={state.More_Description}
+          isMenuButtonVisible={state.isMenuButtonVisible}
+          itemCode={state.ItemCode}
+          image={state.Image}
+          visible={state.isVisible}
+          onItemPress={data => onNotification_Model_Press(data)}
+          onClosePress={() => onClosePopUp()}
+          onMenuPress={data => onNotification_Model_Press(data)}
+        />
+        {/* ADD FLASHMESSAGE COMPONENT HERE - MUST BE LAST */}
+        <FlashMessage
+          position="top"
+          ref={flashMessageRef}
+          style={{ top: Platform.OS === 'android' ? 0 : -50 }}
+          renderFlashMessageIcon={() => (
+            <Image
+              source={require('./assets/cart.png')}
+              style={{
+                width: 28,
+                height: 28,
+                marginLeft: 10,
+                flex: 1,
+                tintColor: '#FFFFFF',
+              }}
+              resizeMode="contain"
             />
           )}
-        </NavigationContainer>
-      </AuthContext.Provider>
-      <NotificationModal
-        type={state.Type}
-        description={state.Description}
-        more_description={state.More_Description}
-        isMenuButtonVisible={state.isMenuButtonVisible}
-        itemCode={state.ItemCode}
-        image={state.Image}
-        visible={state.isVisible}
-        onItemPress={data => onNotification_Model_Press(data)}
-        onClosePress={() => onClosePopUp()}
-        onMenuPress={data => onNotification_Model_Press(data)}
-      />
-    </SafeAreaView>
-  </SafeAreaProvider>
-);
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
 };
 
 export default App;

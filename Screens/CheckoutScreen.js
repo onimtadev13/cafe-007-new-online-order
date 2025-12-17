@@ -18,6 +18,9 @@ import {
   UIManager,
   View,
   Easing,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Card } from 'react-native-paper';
@@ -39,6 +42,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import DatePicker from 'react-native-date-picker';
+import { log } from 'react-native-sqlite-storage/lib/sqlite.core';
 var db = openDatabase({ name: 'UserDatabase.db' });
 
 const HEADER_MAX_HEIGHT = 130;
@@ -92,6 +96,10 @@ class CheckoutScreen extends React.Component {
       isDelivery: false,
       zoomIn: new Animated.Value(1),
       glowAnim: new Animated.Value(0),
+      coupons: [], // Add this line
+      appliedCoupon: null,
+      savedAmount: 0,
+      couponValue: '',
     };
 
     this.touchableInactive = false;
@@ -122,6 +130,7 @@ class CheckoutScreen extends React.Component {
     this._unsubscribe = this.props.navigation.addListener('focus', async () => {
       this.GetRegisterdCreditCard();
     });
+    this.getCoupons();
     this.GetTaxNetTotal('null');
     this.GetAddress();
     this._retrieveData();
@@ -168,37 +177,79 @@ class CheckoutScreen extends React.Component {
   // };
 
   handleApplyPromo = () => {
-    const { promoCode } = this.state;
+    const { promoCode, coupons, subTotal } = this.state;
     console.log('Applying coupon:', promoCode);
 
     if (promoCode.trim() !== '') {
-      const promoDiscounts = {
-        SAVE1000: 1000,
-        SAVE101: 750,
-        SAVE102: 1200,
-        SAVE103: 300,
-      };
+      // Find the coupon in the coupons array
+      const matchedCoupon = coupons.find(c => c.coupon === promoCode);
 
-      const discount = promoDiscounts[promoCode] || 149;
+      if (matchedCoupon) {
+        let discountAmount = 0;
+        const couponValue = matchedCoupon.value;
 
-      this.setState({
-        appliedCoupon: promoCode,
-        savedAmount: discount,
-        isCustomPromo: false,
-      });
+        // Check if it's a percentage or fixed amount
+        if (typeof couponValue === 'string' && couponValue.includes('%')) {
+          // Calculate percentage discount
+          const percentage = parseFloat(couponValue.replace('%', ''));
+          discountAmount = (subTotal * percentage) / 100;
+        } else {
+          // Fixed amount discount
+          discountAmount = parseFloat(couponValue);
+        }
+
+        this.setState(
+          {
+            appliedCoupon: promoCode,
+            savedAmount: discountAmount, // Calculated amount for net total calculation
+            couponValue: couponValue, // ✅ Store original value (10% or 1000)
+            isCustomPromo: false,
+          },
+          () => {
+            this.GetTaxNetTotal(this.state.dineType);
+          },
+        );
+      } else {
+        Alert.alert(
+          'Invalid Coupon',
+          'This coupon code is not valid or has expired.',
+        );
+      }
     }
 
     this.togglePromoModal(false);
   };
+  // 4. Create a helper method to get coupon icon
+  getCouponIcon = coupon => {
+    // You can customize this based on coupon type or description
+    const couponText = (coupon.coupon || '').toLowerCase();
+    const description = (coupon.description || '').toLowerCase();
 
-  handleRemoveCoupon = () => {
-    this.setState({
-      appliedCoupon: null,
-      savedAmount: 0,
-      promoCode: '',
-    });
+    if (couponText.includes('1000') || description.includes('1000')) {
+      return { name: 'bookmark', color: '#ffa363' };
+    } else if (description.includes('spend') || description.includes('above')) {
+      return { name: 'basket-shopping', color: '#7a7a7a' };
+    } else if (description.includes('weekend')) {
+      return { name: 'tag', color: '#7a7a7a' };
+    } else if (description.includes('drink')) {
+      return { name: 'beer-mug-empty', color: '#7a7a7a' };
+    }
+    return { name: 'tag', color: '#7a7a7a' };
   };
 
+  handleRemoveCoupon = () => {
+    this.setState(
+      {
+        appliedCoupon: null,
+        savedAmount: 0,
+        promoCode: '',
+        couponValue: '', // ✅ Clear this too
+      },
+      () => {
+        this.GetTaxNetTotal(this.state.dineType);
+      },
+    );
+  };
   onCardPress = () => {
     this.setState({ paymentType: 'Card' });
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -222,7 +273,6 @@ class CheckoutScreen extends React.Component {
   };
 
   GetTaxNetTotal = async DineType => {
-    // console.log(DineType);
     var mobilenumber = await AsyncStorage.getItem('phonenumber');
     fetch(APIURL, {
       method: 'POST',
@@ -271,13 +321,20 @@ class CheckoutScreen extends React.Component {
         return res.json();
       })
       .then(json => {
+        // Calculate net total with coupon discount
+        let calculatedNetTotal = json.CommonResult.Table[0].NetTotal;
+
+        // Subtract coupon discount from net total
+        if (this.state.savedAmount > 0) {
+          calculatedNetTotal = calculatedNetTotal - this.state.savedAmount;
+        }
+
         this.setState({
           tax: json.CommonResult.Table[0].Tax,
           deliveryCharge: json.CommonResult.Table[0].DeliveryCharge,
           discount: json.CommonResult.Table[0].Discount,
           serviceCharge: json.CommonResult.Table[0].ServiceCharge,
-          netTotal: json.CommonResult.Table[0].NetTotal,
-          // netTotal: this.state.subTotal + json.CommonResult.Table[0].Tax
+          netTotal: calculatedNetTotal,
         });
       })
       .catch(er => {
@@ -385,11 +442,45 @@ class CheckoutScreen extends React.Component {
   };
 
   ApplyCoupon = async () => {
-    const { promoCode, subTotal } = this.state;
+    const { promoCode, subTotal, coupons } = this.state;
     this.togglePromoModal(false);
 
     console.log('Applying coupon via API:', promoCode);
 
+    // First check if coupon exists in the fetched coupons list
+    const matchedCoupon = coupons.find(c => c.coupon === promoCode);
+
+    if (matchedCoupon) {
+      let discountAmount = 0;
+      const couponValue = matchedCoupon.value;
+
+      // Check if it's a percentage or fixed amount
+      if (typeof couponValue === 'string' && couponValue.includes('%')) {
+        // Calculate percentage discount
+        const percentage = parseFloat(couponValue.replace('%', ''));
+        discountAmount = (subTotal * percentage) / 100;
+      } else {
+        // Fixed amount discount
+        discountAmount = parseFloat(couponValue);
+      }
+
+      this.setState(
+        {
+          appliedCoupon: promoCode,
+          savedAmount: discountAmount,
+          couponValue: couponValue,
+          isCustomPromo: false,
+        },
+        () => {
+          this.GetTaxNetTotal(this.state.dineType);
+        },
+      );
+
+      console.log('Coupon applied successfully:', promoCode, couponValue);
+      return;
+    }
+
+    // If not found in local coupons, try API validation (for custom promo codes)
     try {
       const res = await fetch(APIURL, {
         method: 'POST',
@@ -436,21 +527,50 @@ class CheckoutScreen extends React.Component {
         console.log('Coupon API Parsed Result:', result);
 
         if (result.SUCESS === 'SUCESS') {
-          this.setState({
-            appliedCoupon: promoCode,
-            savedAmount: 1000 || 0,
-          });
+          // Get discount value from API response
+          let discountAmount = 0;
+          const apiCouponValue =
+            result.VALUE || result.value || result.Discount;
+
+          if (
+            typeof apiCouponValue === 'string' &&
+            apiCouponValue.includes('%')
+          ) {
+            const percentage = parseFloat(apiCouponValue.replace('%', ''));
+            discountAmount = (subTotal * percentage) / 100;
+          } else {
+            discountAmount = parseFloat(apiCouponValue);
+          }
+
+          this.setState(
+            {
+              appliedCoupon: promoCode,
+              savedAmount: discountAmount,
+              couponValue: apiCouponValue,
+            },
+            () => {
+              this.GetTaxNetTotal(this.state.dineType);
+            },
+          );
+
+          console.log(
+            'Coupon applied successfully:',
+            promoCode,
+            apiCouponValue,
+          );
         } else {
           this.setState({
             appliedCoupon: null,
             savedAmount: 0,
+            couponValue: '',
           });
 
-          alert(result.MSG || 'Invalid coupon');
+          Alert.alert('Invalid Coupon', result.MSG || 'Invalid coupon');
         }
       }
     } catch (error) {
       console.log('Coupon API Error:', error);
+      Alert.alert('Error', 'Failed to validate coupon. Please try again.');
     }
   };
 
@@ -569,6 +689,63 @@ class CheckoutScreen extends React.Component {
       }
     } catch (error) {
       console.log('Delivery API Error:', error);
+    }
+  };
+
+  getCoupons = async () => {
+    try {
+      const phonenumber = await AsyncStorage.getItem('phonenumber');
+      const response = await fetch(APIURL, {
+        method: 'POST',
+        cache: 'no-cache',
+        headers: {
+          'Content-Type': 'application/json',
+          'cache-control': 'no-cache',
+        },
+        body: JSON.stringify({
+          HasReturnData: 'T',
+          Parameters: [
+            {
+              Para_Data: '127',
+              Para_Direction: 'Input',
+              Para_Lenth: 4,
+              Para_Name: '@Iid',
+              Para_Type: 'int',
+            },
+            {
+              Para_Data: phonenumber,
+              Para_Direction: 'Input',
+              Para_Lenth: 50000,
+              Para_Name: '@Text1',
+              Para_Type: 'varchar',
+            },
+            {
+              Para_Data: '',
+              Para_Direction: 'Input',
+              Para_Lenth: 100,
+              Para_Name: '@Text2',
+              Para_Type: 'varchar',
+            },
+          ],
+          SpName: 'sp_Android_Common_API',
+          con: '1',
+        }),
+      });
+
+      const json = await response.json();
+      console.log('Coupons Response:', json);
+
+      if (json.strRturnRes && json.CommonResult.Table.length > 0) {
+        // Store coupons in state
+        this.setState({ coupons: json.CommonResult.Table });
+        console.log('API Coupons:', json.CommonResult.Table);
+      } else {
+        console.log('No coupons available for this user.');
+        this.setState({ coupons: [] });
+      }
+    } catch (error) {
+      console.log('Coupons API Error:', error);
+      this.setState({ coupons: [] });
     }
   };
 
@@ -742,6 +919,8 @@ class CheckoutScreen extends React.Component {
     ) {
       Alert.alert('Warning', 'Please select all required items');
     } else {
+      console.log('write');
+
       if (this.state.paymentType === 'Card') {
         if (!this.touchableInactive) {
           this.touchableInactive = true;
@@ -759,6 +938,8 @@ class CheckoutScreen extends React.Component {
           }
         }
       } else {
+        console.log('2');
+
         if (!this.touchableInactive) {
           this.touchableInactive = true;
           this.OnlineOrderDataSaveBeforPay(false);
@@ -1852,6 +2033,71 @@ class CheckoutScreen extends React.Component {
                 </View>
               ) : null
             ) : null}
+            {this.state.savedAmount > 0 ? (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  marginTop: 5,
+                  marginLeft: 30,
+                  marginRight: 30,
+                }}
+              >
+                <Text
+                  style={{
+                    flex: 1,
+                    fontFamily:
+                      Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                    fontSize: 18,
+                    color: '#28a745',
+                  }}
+                >
+                  Coupon Discount ({this.state.appliedCoupon})
+                </Text>
+                {/* Show percentage or amount based on couponValue */}
+                {this.state.couponValue &&
+                this.state.couponValue.includes('%') ? (
+                  <Text
+                    style={{
+                      flex: 1,
+                      fontFamily:
+                        Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                      fontSize: 18,
+                      textAlign: 'right',
+                      color: '#28a745',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    - {this.state.couponValue}
+                  </Text>
+                ) : (
+                  <NumericFormat
+                    value={this.state.savedAmount}
+                    displayType={'text'}
+                    thousandSeparator={true}
+                    fixedDecimalScale={true}
+                    decimalScale={2}
+                    prefix={'LKR '}
+                    renderText={formattedValue => (
+                      <Text
+                        style={{
+                          flex: 1,
+                          fontFamily:
+                            Platform.OS === 'ios'
+                              ? 'Asap-Regular'
+                              : 'AsapRegular',
+                          fontSize: 18,
+                          textAlign: 'right',
+                          color: '#28a745',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        - {formattedValue}
+                      </Text>
+                    )}
+                  />
+                )}
+              </View>
+            ) : null}
             {this.state.subTotal !== this.state.netTotal ? (
               <View
                 style={{
@@ -1936,253 +2182,82 @@ class CheckoutScreen extends React.Component {
                 marginBottom: 5,
               }}
             >
-              1 Promotions Available
+              {this.state.coupons.length}{' '}
+              {this.state.coupons.length === 1 ? 'Promotion' : 'Promotions'}{' '}
+              Available
             </Text>
-
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ paddingHorizontal: 15 }}
             >
-              <Card
-                cardElevation={3}
-                cardMaxElevation={3}
-                cornerRadius={10}
-                style={{ marginHorizontal: 10, marginVertical: 8 }}
-              >
-                <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, 'SAVE1000', false)}
-                >
-                  <View
-                    style={{
-                      borderWidth: 1,
-                      borderColor: '#ffa363',
-                      borderStyle: 'dashed',
-                      paddingVertical: 12,
-                      paddingHorizontal: 15,
-                      borderRadius: 10,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'flex-start',
-                      minHeight: 50,
-                      backgroundColor: '#F0F0F0',
-                    }}
-                  >
-                    {/* <Ionicons name={'bookmark'} size={18} color={'#ffa363'} /> */}
-                    <FontAwesome6
-                      name="bookmark"
-                      size={18}
-                      color="#ffa363"
-                      solid
-                    />
-                    <Text
-                      style={{
-                        color: '#ffa363',
-                        fontSize: 15,
-                        fontWeight: 'bold',
-                        marginLeft: 6,
-                        fontFamily:
-                          Platform.OS === 'ios'
-                            ? 'Asap-Regular'
-                            : 'AsapRegular',
-                      }}
-                    >
-                      Get Rs.1,000 OFF your next order
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </Card>
+              {/* Render API coupons dynamically */}
+              {this.state.coupons.map((coupon, index) => {
+                const icon = this.getCouponIcon(coupon);
+                const isHighlighted = index === 0; // Highlight first coupon
 
-              <Card
-                cardElevation={3}
-                cardMaxElevation={3}
-                cornerRadius={10}
-                style={{ marginHorizontal: 10, marginVertical: 8 }}
-              >
-                <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, 'SAVE101', false)}
-                >
-                  <View
-                    style={{
-                      borderWidth: 1,
-                      borderColor: '#7a7a7a',
-                      borderStyle: 'dashed',
-                      paddingVertical: 12,
-                      paddingHorizontal: 15,
-                      borderRadius: 10,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'flex-start', // left align with icon
-                      minHeight: 50,
-                      backgroundColor: '#F0F0F0',
-                    }}
-                  >
-                    {/* <Ionicons name={'basket'} size={18} color={'#7a7a7a'} /> */}
-                    <FontAwesome6
-                      name="basket-shopping"
-                      size={18}
-                      color="#7a7a7a"
-                      solid
-                    />
-                    <Text
-                      style={{
-                        color: '#7a7a7a',
-                        fontSize: 15,
-                        fontWeight: 'bold',
-                        marginLeft: 6,
-                        fontFamily:
-                          Platform.OS === 'ios'
-                            ? 'Asap-Regular'
-                            : 'AsapRegular',
-                      }}
-                    >
-                      Get Rs.750 OFF when you spend above Rs.3,000
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </Card>
+                // Format display text
+                const displayText =
+                  coupon.description ||
+                  (typeof coupon.value === 'string' &&
+                  coupon.value.includes('%')
+                    ? `Get ${coupon.value} OFF`
+                    : `Get Rs.${coupon.value} OFF`);
 
-              <Card
-                cardElevation={3}
-                cardMaxElevation={3}
-                cornerRadius={10}
-                style={{ marginHorizontal: 10, marginVertical: 8 }}
-              >
-                <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, 'SAVE102', false)}
-                >
-                  <View
-                    style={{
-                      borderWidth: 1,
-                      borderColor: '#7a7a7a',
-                      borderStyle: 'dashed',
-                      paddingVertical: 12,
-                      paddingHorizontal: 15,
-                      borderRadius: 10,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'flex-start',
-                      minHeight: 50,
-                      backgroundColor: '#F0F0F0',
-                    }}
+                return (
+                  <Card
+                    key={coupon.coupon || index}
+                    cardElevation={3}
+                    cardMaxElevation={3}
+                    cornerRadius={10}
+                    style={{ marginHorizontal: 10, marginVertical: 8 }}
                   >
-                    {/* <Ionicons name={'pricetag'} size={18} color={'#7a7a7a'} /> */}
-                    <FontAwesome6 name="tag" size={18} color="#7a7a7a" solid />
-                    <Text
-                      style={{
-                        color: '#7a7a7a',
-                        fontSize: 15,
-                        fontWeight: 'bold',
-                        marginLeft: 6,
-                        fontFamily:
-                          Platform.OS === 'ios'
-                            ? 'Asap-Regular'
-                            : 'AsapRegular',
-                      }}
+                    <TouchableOpacity
+                      onPress={() =>
+                        this.togglePromoModal(true, coupon.coupon, false)
+                      }
                     >
-                      Get Rs.1,200 OFF on weekend orders
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </Card>
-
-              <Card
-                cardElevation={3}
-                cardMaxElevation={3}
-                cornerRadius={10}
-                style={{ marginHorizontal: 10, marginVertical: 8 }}
-              >
-                <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, 'SAVE103', false)}
-                >
-                  <View
-                    style={{
-                      borderWidth: 1,
-                      borderColor: '#7a7a7a',
-                      borderStyle: 'dashed',
-                      paddingVertical: 12,
-                      paddingHorizontal: 15,
-                      borderRadius: 10,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'flex-start',
-                      minHeight: 50,
-                      backgroundColor: '#F0F0F0',
-                    }}
-                  >
-                    {/* <Ionicons name={'beer'} size={18} color={'#7a7a7a'} /> */}
-                    <FontAwesome6
-                      name="beer-mug-empty"
-                      size={18}
-                      color="#7a7a7a"
-                      solid
-                    />
-                    <Text
-                      style={{
-                        color: '#7a7a7a',
-                        fontSize: 15,
-                        fontWeight: 'bold',
-                        marginLeft: 6,
-                        fontFamily:
-                          Platform.OS === 'ios'
-                            ? 'Asap-Regular'
-                            : 'AsapRegular',
-                      }}
-                    >
-                      Get Rs.300 OFF on drinks
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </Card>
-
-              <Card
-                cardElevation={3}
-                cardMaxElevation={3}
-                cornerRadius={10}
-                style={{ marginHorizontal: 10, marginVertical: 8 }}
-              >
-                <TouchableOpacity
-                  onPress={() => this.togglePromoModal(true, '', true)}
-                >
-                  <View
-                    style={{
-                      borderWidth: 1,
-                      borderColor: '#7a7a7a',
-                      borderStyle: 'dashed',
-                      paddingVertical: 12,
-                      paddingHorizontal: 15,
-                      borderRadius: 10,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'flex-start',
-                      minHeight: 50,
-                      backgroundColor: '#F0F0F0',
-                    }}
-                  >
-                    {/* <Ionicons name={'pricetag'} size={18} color={'#7a7a7a'} /> */}
-                    <FontAwesome6 name="tag" size={18} color="#7a7a7a" solid />
-                    <Text
-                      style={{
-                        color: '#7a7a7a',
-                        fontSize: 15,
-                        fontWeight: 'bold',
-                        marginRight: 6,
-                        marginLeft: 6,
-                        fontFamily:
-                          Platform.OS === 'ios'
-                            ? 'Asap-Regular'
-                            : 'AsapRegular',
-                      }}
-                    >
-                      Have a promo code?...
-                    </Text>
-                    {/* <Ionicons name={'add'} size={18} color={'#7a7a7a'} /> */}
-                    <FontAwesome6 name="plus" size={18} color="#7a7a7a" solid />
-                  </View>
-                </TouchableOpacity>
-              </Card>
+                      <View
+                        style={{
+                          borderWidth: 1,
+                          borderColor: isHighlighted ? '#ffa363' : '#7a7a7a',
+                          borderStyle: 'dashed',
+                          paddingVertical: 12,
+                          paddingHorizontal: 15,
+                          borderRadius: 10,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'flex-start',
+                          minHeight: 50,
+                          backgroundColor: '#F0F0F0',
+                        }}
+                      >
+                        <FontAwesome6
+                          name={icon.name}
+                          size={18}
+                          color={isHighlighted ? '#ffa363' : icon.color}
+                          solid
+                        />
+                        <Text
+                          style={{
+                            color: isHighlighted ? '#ffa363' : '#7a7a7a',
+                            fontSize: 15,
+                            fontWeight: 'bold',
+                            marginLeft: 6,
+                            fontFamily:
+                              Platform.OS === 'ios'
+                                ? 'Asap-Regular'
+                                : 'AsapRegular',
+                          }}
+                        >
+                          {displayText}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </Card>
+                );
+              })}
             </ScrollView>
-
             {/* Show applied coupon & saved amount */}
             {/* {appliedCoupon && (
           <View style={{ padding: 10, alignItems: 'center' }}>
@@ -2217,7 +2292,7 @@ class CheckoutScreen extends React.Component {
                         fontSize: 15,
                       }}
                     >
-                      🎉 YAY! You saved Rs.{this.state.savedAmount} !
+                      🎉 YAY! You saved {this.state.couponValue || ''}!
                     </Text>
                     <Text style={{ fontSize: 13, marginTop: 3, color: '#333' }}>
                       {this.state.appliedCoupon || 'None'} Applied!
@@ -4239,81 +4314,110 @@ class CheckoutScreen extends React.Component {
           animationType="fade"
           onRequestClose={() => this.togglePromoModal(false)}
         >
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'flex-end',
-              backgroundColor: 'rgba(0,0,0,0.4)',
-            }}
-          >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View
               style={{
-                backgroundColor: '#fff',
-                borderTopLeftRadius: 12,
-                borderTopRightRadius: 12,
-                padding: 20,
-                alignItems: 'center',
+                flex: 1,
+                justifyContent: 'flex-end',
+                backgroundColor: 'rgba(0,0,0,0.4)',
               }}
             >
-              <TouchableOpacity
-                onPress={() => this.togglePromoModal(false)}
-                style={{
-                  position: 'absolute',
-                  top: 15,
-                  right: 15,
-                  padding: 5,
-                }}
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
               >
-                {/* <Ionicons name="close" size={22} color="#333" /> */}
-                <FontAwesome6 name="xmark" size={22} color="#333" solid />
-              </TouchableOpacity>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: 'bold',
-                  marginBottom: 15,
-                }}
-              >
-                Enter promo code
-              </Text>
-
-              <TextInput
-                style={{
-                  borderWidth: 1,
-                  borderColor: '#ccc',
-                  borderStyle: 'dashed',
-                  borderRadius: 8,
-                  padding: 12,
-                  width: '100%',
-                  marginBottom: 20,
-                  color: this.state.isCustomPromo ? '#000' : '#666',
-                }}
-                placeholder="Enter promo code"
-                placeholderTextColor="#aaa"
-                value={this.state.promoCode}
-                editable={this.state.isCustomPromo}
-                onChangeText={text => this.setState({ promoCode: text })}
-              />
-
-              <TouchableOpacity
-                style={{
-                  backgroundColor: '#ffcc00',
-                  borderRadius: 8,
-                  paddingVertical: 12,
-                  paddingHorizontal: 40,
-                  alignItems: 'center',
-                  width: '100%',
-                }}
-                onPress={this.ApplyCoupon}
-              >
-                <Text
-                  style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}
+                <View
+                  style={{
+                    backgroundColor: '#fff',
+                    borderTopLeftRadius: 12,
+                    borderTopRightRadius: 12,
+                    padding: 20,
+                    alignItems: 'center',
+                  }}
                 >
-                  Apply
-                </Text>
-              </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => this.togglePromoModal(false)}
+                    style={{
+                      position: 'absolute',
+                      top: 15,
+                      right: 15,
+                      padding: 5,
+                      zIndex: 1,
+                    }}
+                  >
+                    <FontAwesome6 name="xmark" size={22} color="#333" solid />
+                  </TouchableOpacity>
+
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 'bold',
+                      marginBottom: 15,
+                      marginTop: 5,
+                    }}
+                  >
+                    Enter promo code
+                  </Text>
+
+                  <TextInput
+                    style={{
+                      borderWidth: 1,
+                      borderColor: '#ccc',
+                      borderStyle: 'dashed',
+                      borderRadius: 8,
+                      padding: 12,
+                      width: '100%',
+                      marginBottom: 20,
+                      color: this.state.isCustomPromo ? '#000' : '#666',
+                      fontFamily:
+                        Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                    }}
+                    placeholder="Enter promo code"
+                    placeholderTextColor="#aaa"
+                    value={this.state.promoCode}
+                    editable={this.state.isCustomPromo}
+                    onChangeText={text => this.setState({ promoCode: text })}
+                    autoCapitalize="characters"
+                    autoCorrect={false}
+                    returnKeyType="done"
+                    onSubmitEditing={() => {
+                      Keyboard.dismiss();
+                      this.ApplyCoupon();
+                    }}
+                  />
+
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: '#ffcc00',
+                      borderRadius: 8,
+                      paddingVertical: 12,
+                      paddingHorizontal: 40,
+                      alignItems: 'center',
+                      width: '100%',
+                    }}
+                    onPress={() => {
+                      Keyboard.dismiss();
+                      this.ApplyCoupon();
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        color: '#000',
+                        fontFamily:
+                          Platform.OS === 'ios'
+                            ? 'Asap-Regular_SemiBold'
+                            : 'AsapSemiBold',
+                      }}
+                    >
+                      Apply
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </KeyboardAvoidingView>
             </View>
-          </View>
+          </TouchableWithoutFeedback>
         </Modal>
       </View>
     );
@@ -4386,6 +4490,7 @@ class CheckoutScreen extends React.Component {
       default:
         break;
     }
+    console.log(this.state.dineType);
 
     let Order = {
       OrderID: OrderID,
@@ -4404,7 +4509,9 @@ class CheckoutScreen extends React.Component {
       BranchLocation: this.state.locationPressed,
       Items: ItemList,
       isPayment: true,
+      coupon_code: this.state.appliedCoupon,
     };
+    console.log('order', JSON.stringify(Order));
 
     fetch(PLACEORDERURL, {
       method: 'POST',
@@ -4438,11 +4545,14 @@ class CheckoutScreen extends React.Component {
           { cancelable: false },
         );
       });
+
+    console.log('order', JSON.stringify(Order));
   }
 
   async OnlineOrderDataSaveBeforPay(isCard) {
     let DeliveryCharge = 0;
     let ServiceCharge = 0;
+    console.log('call');
 
     let OrderID = await AsyncStorage.getItem('OrderID');
     let Mobile = await AsyncStorage.getItem('phonenumber');
@@ -4485,7 +4595,10 @@ class CheckoutScreen extends React.Component {
       ScheduleTime: this.state.scheduleTime,
       BranchLocation: this.state.locationPressed,
       Items: ItemList,
+      coupon_code: this.state.appliedCoupon,
     };
+    console.log('order', this.state.appliedCoupon);
+    console.log('order', JSON.stringify(Order));
 
     fetch(PLACEORDERURL, {
       method: 'POST',
@@ -4508,6 +4621,8 @@ class CheckoutScreen extends React.Component {
           if (isCard) {
             this.onCardPayment(this.state.DefaultEmail);
           } else {
+            console.log('OnlineOrderDataSave');
+
             this.OnlineOrderDataSave();
           }
         }
