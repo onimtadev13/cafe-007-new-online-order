@@ -16,22 +16,21 @@ class LocalNotificationService {
         channelName: 'My channel',
         channelDescription: 'A channel to categorise your notifications',
         playSound: true,
-        soundName: 'default',
+        soundName: 'newnotification.mp3', // YOUR CUSTOM SOUND
         importance: Importance.HIGH,
         vibrate: true,
       },
       created => console.log(`Default channel created: ${created}`),
     );
 
+    // Optional: Create a separate channel for order notifications
     // PushNotification.createChannel(
     //   {
-    //     // channelId: 'order-channel-id',
-    //     // channelName: 'Order Notifications',
-    //     channelId: 'channel-id', // Match this in your notifications
-    //     channelName: 'My channel',
+    //     channelId: 'order-channel-id',
+    //     channelName: 'Order Notifications',
     //     channelDescription: 'Notifications for order updates',
     //     playSound: true,
-    //     soundName: 'default',
+    //     soundName: 'newnotification.mp3', // YOUR CUSTOM SOUND
     //     importance: Importance.HIGH,
     //     vibrate: true,
     //   },
@@ -112,7 +111,7 @@ class LocalNotificationService {
       title: title || 'Notification',
       message: message || '',
       playSound: true,
-      soundName: 'default',
+      soundName: 'newnotification.mp3', // YOUR CUSTOM SOUND
       importance: 'high',
       priority: 'high',
       vibrate: true,
@@ -130,6 +129,7 @@ class LocalNotificationService {
 
     // iOS specific
     if (Platform.OS === 'ios' && imageUrl) {
+      notification.sound = 'newnotification.mp3'; // iOS custom sound
       notification.attachments = [
         {
           url: imageUrl,
@@ -146,12 +146,12 @@ class LocalNotificationService {
 
     PushNotification.localNotificationSchedule({
       id: this.lastId.toString(),
-      channelId: 'default-channel-id',
+      channelId: 'channel-id',
       title: title || 'Scheduled Notification',
       message: message || '',
       date: date || new Date(Date.now() + 60 * 1000), // 1 minute from now
       playSound: true,
-      soundName: 'default',
+      soundName: 'newnotification.mp3', // YOUR CUSTOM SOUND
       userInfo: data || {},
       data: data || {},
     });

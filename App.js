@@ -31,13 +31,14 @@ import LocalNotificationService from './Services/LocalNotificationService';
 import NotificationModal from './Components/NotificationModal';
 import PromoCard from './Components/PromoCard';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-
+import Sound from 'react-native-sound';
 import {
   SafeAreaProvider,
   SafeAreaView,
   initialWindowMetrics,
 } from 'react-native-safe-area-context';
-
+// Enable playback in silence mode (iOS)
+Sound.setCategory('Playback');
 var db = openDatabase({ name: 'UserDatabase.db' });
 const RootStack = createStackNavigator();
 
@@ -48,6 +49,7 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
 });
 
 const App = () => {
+  const notificationSound = useRef(null);
   const flashMessageRef = useRef(null);
   const [isClick, setClick] = React.useState(false);
   const [isOTPVisible, setOTPVisible] = React.useState(false);
@@ -82,6 +84,7 @@ const App = () => {
       console.warn('[NAVIGATE] navigationRef not ready');
       return;
     }
+    // Initialize notification sound
 
     // If params specify a nested screen (e.g. Orders -> OrderDetailsScreen),
     // use CommonActions.navigate to ensure nested navigators receive the action.
@@ -113,6 +116,25 @@ const App = () => {
       }
     }
   }
+  useEffect(() => {
+    notificationSound.current = new Sound(
+      'newnotification.mp3',
+      Sound.MAIN_BUNDLE,
+      error => {
+        if (error) {
+          console.log('[SOUND] Failed to load sound', error);
+          return;
+        }
+        console.log('[SOUND] Sound loaded successfully');
+      },
+    );
+
+    return () => {
+      if (notificationSound.current) {
+        notificationSound.current.release();
+      }
+    };
+  }, []);
 
   // Dedicated helper for order navigation with timing safety
   function navigateToOrder(orderId) {
@@ -1618,7 +1640,7 @@ const App = () => {
           '[FCM] Full message:',
           JSON.stringify(remoteMessage, null, 2),
         );
-
+        playNotificationSound();
         const data = remoteMessage.data || {};
 
         // Handle OTP messages
@@ -1903,7 +1925,19 @@ const App = () => {
   function onClosePopUp() {
     setstate(prevState => ({ ...prevState, isVisible: false }));
   }
-
+  const playNotificationSound = () => {
+    if (notificationSound.current) {
+      notificationSound.current.stop(() => {
+        notificationSound.current.play(success => {
+          if (success) {
+            console.log('[SOUND] Successfully finished playing');
+          } else {
+            console.log('[SOUND] Playback failed');
+          }
+        });
+      });
+    }
+  };
   const initialRootRoute = 'SplashScreen';
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>

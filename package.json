@@ -67,6 +67,7 @@
     "react-native-shadow-cards": "^1.0.2",
     "react-native-skeleton-placeholder": "^5.2.4",
     "react-native-sms-retriever": "^1.1.1",
+    "react-native-sound": "^0.13.0",
     "react-native-splash-screen": "^3.3.0",
     "react-native-sqlite-storage": "^6.0.0",
     "react-native-star-view": "^1.1.3",
