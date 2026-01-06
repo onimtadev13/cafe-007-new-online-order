@@ -15,11 +15,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {FlatList} from 'react-native-gesture-handler';
+import { FlatList } from 'react-native-gesture-handler';
 // import IonicIcon from 'react-native-vector-icons/Ionicons';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import ItemView from '../Components/ItemView';
-import {APIURL} from '../Data/CloneData';
+import { APIURL } from '../Data/CloneData';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
@@ -54,23 +54,29 @@ class SearchScreen extends React.PureComponent {
     );
 
     //Store both navigation subscriptions separately
-    this.focusSubscription = this.props.navigation.addListener('focus', async () => {
-      this.fadeIn();
-      this._retrieveData();
-    });
+    this.focusSubscription = this.props.navigation.addListener(
+      'focus',
+      async () => {
+        this.fadeIn();
+        this._retrieveData();
+      },
+    );
 
-    this.blurSubscription = this.props.navigation.addListener('blur', async () => {
-      this.fadeOut();
-    });
+    this.blurSubscription = this.props.navigation.addListener(
+      'blur',
+      async () => {
+        this.fadeOut();
+      },
+    );
   }
   _retrieveData = async () => {
     try {
       const value = await AsyncStorage.getItem('LOCA');
       if (value !== null) {
         // We have data!!
-        this.setState({Location: value});
+        this.setState({ Location: value });
       }
-      this.setState({isLoading: true}, () => {
+      this.setState({ isLoading: true }, () => {
         this.LoadProducts(this.state.Location);
       });
     } catch (error) {
@@ -86,7 +92,7 @@ class SearchScreen extends React.PureComponent {
     if (this.blurSubscription) {
       this.blurSubscription();
     }
-    
+
     //Use subscription.remove() instead of removeEventListener
     if (this.backHandlerSubscription) {
       this.backHandlerSubscription.remove();
@@ -97,7 +103,7 @@ class SearchScreen extends React.PureComponent {
     var Type;
     if (this.state.isTextInputPress) {
       Type = true;
-      this.setState({isTextInputPress: false, SearchList: []});
+      this.setState({ isTextInputPress: false, SearchList: [] });
       this.textinputRef.clear();
       this.textinputRef.blur();
       Animated.parallel([
@@ -141,14 +147,14 @@ class SearchScreen extends React.PureComponent {
   };
 
   onRefresh() {
-    this.setState({isFetching: true}, () => {
+    this.setState({ isFetching: true }, () => {
       this.LoadProducts(this.state.Location);
     });
   }
 
   onSearchBackPress = () => {
     if (this.state.isTextInputPress) {
-      this.setState({isTextInputPress: false, SearchList: []});
+      this.setState({ isTextInputPress: false, SearchList: [] });
       this.textinputRef.clear();
       this.textinputRef.blur();
       Keyboard.dismiss();
@@ -176,13 +182,13 @@ class SearchScreen extends React.PureComponent {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      this.setState({isTextInputPress: true});
+      this.setState({ isTextInputPress: true });
     });
   };
 
   onSearch = SearchItem => {
     if (SearchItem === '') {
-      this.setState({SearchList: []});
+      this.setState({ SearchList: [] });
     } else {
       this.setState({
         SearchList: this.state.ItemList.filter(i =>
@@ -200,7 +206,7 @@ class SearchScreen extends React.PureComponent {
       numberOfElementsLastRow !== numColumns &&
       numberOfElementsLastRow !== 0
     ) {
-      data.push({key: `blank-${numberOfElementsLastRow}`, empty: true}); 
+      data.push({ key: `blank-${numberOfElementsLastRow}`, empty: true });
       numberOfElementsLastRow = numberOfElementsLastRow + 1;
     }
 
@@ -217,9 +223,9 @@ class SearchScreen extends React.PureComponent {
     });
   };
 
-  onrenderCategory = ({item, index}) => {
+  onrenderCategory = ({ item, index }) => {
     if (item.empty === true) {
-      return <View style={{backgroundColor: 'transparent'}} />;
+      return <View style={{ backgroundColor: 'transparent' }} />;
     }
     return (
       <TouchableOpacity
@@ -230,15 +236,17 @@ class SearchScreen extends React.PureComponent {
           backgroundColor: '#f0f0f0',
           margin: 5,
         }}
-        onPress={() => this.onCategoryPress(item)}>
+        onPress={() => this.onCategoryPress(item)}
+      >
         <ImageBackground
           resizeMode="cover"
           source={require('../assets/category-placeholder.png')}
-          style={[{flex: 1, justifyContent: 'center'}]}>
+          style={[{ flex: 1, justifyContent: 'center' }]}
+        >
           <View
             style={[
               StyleSheet.absoluteFillObject,
-              {backgroundColor: 'rgba(0,0,0,0.1)'},
+              { backgroundColor: 'rgba(0,0,0,0.1)' },
             ]}
           />
           <Text
@@ -249,7 +257,8 @@ class SearchScreen extends React.PureComponent {
               padding: 10,
               fontSize: 18,
               textAlign: 'center',
-            }}>
+            }}
+          >
             {item}
           </Text>
         </ImageBackground>
@@ -257,7 +266,7 @@ class SearchScreen extends React.PureComponent {
     );
   };
 
-  onrenderItem = ({item, index}) => {
+  onrenderItem = ({ item, index }) => {
     const countTypes = this.props.cartItems.filter(
       product => product.ProductName === item.Prod_Name,
     );
@@ -283,8 +292,9 @@ class SearchScreen extends React.PureComponent {
             flex: 1,
             backgroundColor: '#F0F0F0',
           },
-          {opacity: this.state.isTextInputPress ? 1 : this.state.fadeAnim},
-        ]}>
+          { opacity: this.state.isTextInputPress ? 1 : this.state.fadeAnim },
+        ]}
+      >
         <View
           style={{
             flexDirection: 'row',
@@ -293,19 +303,17 @@ class SearchScreen extends React.PureComponent {
             borderRadius: 50,
             margin: 15,
             marginTop: 20,
-          }}>
+          }}
+        >
           <TouchableOpacity onPress={() => this.onSearchBackPress()}>
-           
-
-<FontAwesome6
-  name={
-    this.state.isTextInputPress ? 'arrow-left' : 'magnifying-glass'
-  }
-  size={25}
-  color="black"
-  style={{ marginLeft: 20 }}
-/>
-
+            <FontAwesome6
+              name={
+                this.state.isTextInputPress ? 'arrow-left' : 'magnifying-glass'
+              }
+              size={25}
+              color="black"
+              style={{ marginLeft: 20 }}
+            />
           </TouchableOpacity>
           <TextInput
             ref={ref => {
@@ -346,7 +354,8 @@ class SearchScreen extends React.PureComponent {
               marginLeft: 15,
               marginRight: 15,
             },
-          ]}>
+          ]}
+        >
           {/* {this.state.isTextInputPress ? ( */}
           <Animated.View
             style={[
@@ -355,8 +364,9 @@ class SearchScreen extends React.PureComponent {
                 marginBottom: 10,
                 position: this.state.isTextInputPress ? 'relative' : 'absolute',
               },
-              {transform: [{translateY: this.state.slideUp}]},
-            ]}>
+              { transform: [{ translateY: this.state.slideUp }] },
+            ]}
+          >
             <FlatList
               showsVerticalScrollIndicator={false}
               data={this.state.SearchList}
@@ -374,8 +384,9 @@ class SearchScreen extends React.PureComponent {
                 marginBottom: 10,
                 position: this.state.isTextInputPress ? 'absolute' : 'relative',
               },
-              {transform: [{translateY: this.state.slideDown}]},
-            ]}>
+              { transform: [{ translateY: this.state.slideDown }] },
+            ]}
+          >
             <FlatList
               refreshing={this.state.isFetching}
               onRefresh={() => this.onRefresh()}
@@ -402,7 +413,8 @@ class SearchScreen extends React.PureComponent {
                     marginLeft: 15,
                     marginRight: 15,
                     marginBottom: 15,
-                  }}>
+                  }}
+                >
                   Categories
                 </Text>
               }
@@ -530,6 +542,7 @@ class SearchScreen extends React.PureComponent {
           isLoading: false,
           isFetching: false,
         });
+        console.log('items:', Productlist);
       })
       .catch(er => {
         console.log(er);
@@ -542,7 +555,7 @@ class SearchScreen extends React.PureComponent {
               onPress: () => this.LoadProducts(this.state.Location),
             },
           ],
-          {cancelable: false},
+          { cancelable: false },
         );
       });
   }

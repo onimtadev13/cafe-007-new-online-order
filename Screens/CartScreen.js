@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import React from 'react';
 import {
@@ -33,22 +32,44 @@ class CartScreen extends React.Component {
   }
 
   componentDidMount() {
+    // Initial calculation
+    this.CaculateAmount();
+
     this._unsubscribe = this.props.navigation.addListener('focus', async () => {
-      this.CaculateAmount();
-      this.fadeIn();
+      // Refresh cart data when screen comes into focus
+      this.refreshCart();
     });
-    this._unsubscribe = this.props.navigation.addListener('blur', async () => {
-      this.fadeOut();
-    });
+
+    this._unsubscribeBlur = this.props.navigation.addListener(
+      'blur',
+      async () => {
+        this.fadeOut();
+      },
+    );
   }
 
   componentWillUnmount() {
-    this._unsubscribe();
+    if (this._unsubscribe) {
+      this._unsubscribe();
+    }
+    if (this._unsubscribeBlur) {
+      this._unsubscribeBlur();
+    }
     clearTimeout(this.CalculateTime);
   }
 
+  refreshCart = () => {
+    // Recalculate amount
+    this.CaculateAmount();
+
+    // Fade in animation
+    this.fadeIn();
+
+    // Force a re-render by updating state
+    this.forceUpdate();
+  };
+
   fadeIn = () => {
-    // Will change fadeAnim value to 1 in 5 seconds
     Animated.timing(this.state.fadeAnim, {
       toValue: 1,
       duration: 500,
@@ -57,7 +78,6 @@ class CartScreen extends React.Component {
   };
 
   fadeOut = () => {
-    // Will change fadeAnim value to 0 in 3 seconds
     Animated.timing(this.state.fadeAnim, {
       toValue: 0,
       duration: 500,
@@ -74,13 +94,6 @@ class CartScreen extends React.Component {
       this.setState({ Amount: price });
     }, 100);
   };
-
-  // onRemoveCartItem = (index, CartItemID) => {
-  //   AsyncStorage.removeItem(CartItemID);
-  //   this.props.removeItemFromCart({index: index});
-  //   this.row[index].close();
-  //   this.CaculateAmount();
-  // };
 
   onRemoveCartItem = async (index, CartItemID) => {
     await AsyncStorage.removeItem(`cart:${CartItemID}`);
@@ -147,10 +160,6 @@ class CartScreen extends React.Component {
   };
 
   renderCartItems = ({ item, index }) => {
-    //     if (!Array.isArray(item) || item.length === 0) {
-    //       console.log("No items...");
-    //   return null;
-    // }
     return (
       <Swipeable
         key={index}
@@ -256,7 +265,7 @@ class CartScreen extends React.Component {
                     >
                       {formattedValue}
                     </Text>
-                  )} // <--- Don't forget this!
+                  )}
                 />
                 {item.isDiscounted && (
                   <Text
@@ -281,14 +290,6 @@ class CartScreen extends React.Component {
               </View>
             </View>
             <View style={{ marginBottom: 10 }}>
-              {/* {item.RequiredItem.name !== undefined ? (
-                                <View style={{ marginLeft: 60 }}>
-                                    <Text style={{ fontFamily: Platform.OS === "ios" ? 'Asap-Regular_Medium' : 'AsapMedium', fontSize: 17, color: '#969696', marginRight: 5 }}>{item.RequiredItem.name}</Text>
-                                </View>
-                            )
-                                :
-                                null
-                            } */}
               {this.renderAddons(item.Addons)}
               {this.renderExtra(item.Extra)}
             </View>
@@ -299,12 +300,8 @@ class CartScreen extends React.Component {
   };
 
   renderAddons(Addons) {
-    console.log('====================================');
-    console.log(Addons);
-    console.log('====================================');
-
     if (!Array.isArray(Addons) || Addons.length === 0) {
-      return null; // or return a <Text>No Addons</Text>
+      return null;
     }
 
     return Addons.map((item, key) => {
@@ -324,15 +321,6 @@ class CartScreen extends React.Component {
           >
             {item.name}
           </Text>
-          {/* <NumericFormat
-                        value={item.price}
-                        displayType={'text'}
-                        thousandSeparator={true}
-                        fixedDecimalScale={true}
-                        decimalScale={2}
-                        prefix={'LKR '}
-                        renderText={formattedValue => <Text style={{ fontFamily: Platform.OS === "ios" ? 'Asap-Regular_Medium' : 'AsapMedium', fontSize: 17, color: '#969696' }}>({formattedValue})</Text>} // <--- Don't forget this!
-                    /> */}
         </View>
       );
     });
@@ -340,7 +328,7 @@ class CartScreen extends React.Component {
 
   renderExtra(Extra) {
     if (!Extra || !Array.isArray(Extra) || Extra.length === 0) {
-      return null; // nothing to render
+      return null;
     }
     return Extra.map((item, key) => {
       return (
@@ -379,7 +367,7 @@ class CartScreen extends React.Component {
               >
                 ({formattedValue})
               </Text>
-            )} // <--- Don't forget this!
+            )}
           />
         </View>
       );
@@ -393,14 +381,6 @@ class CartScreen extends React.Component {
       Alert.alert('Alert', 'No Item Add in Cart');
     } else if (number === null) {
       this.context.CheckSign();
-      // Promise.all([
-      //     this.props.navigation.dispatch(
-      //         CommonActions.reset({
-      //             index: 0,
-      //             routes: [{ name: "Home" }],
-      //         })
-      //     )
-      // ]).then(() => this.context.CheckSign())
     } else {
       this.props.navigation.navigate('CheckoutScreen', {
         Total: this.state.Amount,
@@ -418,7 +398,7 @@ class CartScreen extends React.Component {
     } else {
       try {
         const keys = await AsyncStorage.getAllKeys();
-        [
+        const keepKeys = [
           'address',
           'firstname',
           'lastname',
@@ -429,17 +409,22 @@ class CartScreen extends React.Component {
           'EditStatus',
           'fcmToken',
           'LOCA',
+          'LOCA_NAME',
           'PUSH',
           'NID',
-        ].forEach(p => keys.splice(keys.indexOf(p), 1));
+        ];
 
-        await AsyncStorage.multiRemove(keys).then(() => {
-          this.props.resetCart();
-          this.RBSheet.close();
-          this.CaculateAmount();
-        });
+        const removeKeys = keys.filter(k => !keepKeys.includes(k));
+
+        if (removeKeys.length > 0) {
+          await AsyncStorage.multiRemove(removeKeys);
+        }
+
+        this.props.resetCart();
+        this.RBSheet.close();
+        this.CaculateAmount();
       } catch (error) {
-        // Error retrieving data
+        console.log('Error resetting cart:', error);
       }
     }
   };
@@ -513,7 +498,7 @@ class CartScreen extends React.Component {
                 }}
               >
                 Is it just me or does this meal look more scrumptious because
-                I’m on a diet
+                I'm on a diet
               </Text>
 
               <TouchableOpacity
@@ -562,6 +547,7 @@ class CartScreen extends React.Component {
             renderItem={this.renderCartItems}
             ItemSeparatorComponent={ItemSeperator}
             showsVerticalScrollIndicator={false}
+            extraData={this.state.Amount}
           />
         </View>
 
@@ -597,7 +583,6 @@ class CartScreen extends React.Component {
                 prefix={'LKR '}
                 renderText={formattedValue => (
                   <Text
-                    // allowFontScaling={false}
                     style={{
                       top: 6,
                       color: 'black',
@@ -610,7 +595,7 @@ class CartScreen extends React.Component {
                   >
                     {formattedValue}
                   </Text>
-                )} // <--- Don't forget this!
+                )}
               />
             </View>
             <TouchableOpacity

@@ -182,6 +182,15 @@ const CartStackNavigation = () => {
         options={{
           headerShown: false,
         }}
+        listeners={({ navigation }) => ({
+          // When CartScreen is focused (tabPressed), pop to top
+          tabPress: e => {
+            // Reset the stack to CartScreen when tab is pressed
+            if (navigation.canGoBack()) {
+              navigation.popToTop();
+            }
+          },
+        })}
       />
 
       <Stack.Screen
@@ -238,7 +247,6 @@ const CartStackNavigation = () => {
     </Stack.Navigator>
   );
 };
-
 const OrderStackNavigation = () => {
   return (
     <Stack.Navigator

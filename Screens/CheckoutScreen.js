@@ -112,6 +112,27 @@ class CheckoutScreen extends React.Component {
 
   componentDidMount() {
     this.startGlow();
+    this.initializeScreen();
+
+    this._unsubscribe = this.props.navigation.addListener('focus', async () => {
+      // Check if we're coming from another screen (not from CartScreen)
+      const routes = this.props.navigation.getState()?.routes;
+      const currentRoute = routes[routes.length - 1];
+
+      // If we navigated away and came back, refresh the screen
+      if (currentRoute.name === 'CheckoutScreen') {
+        this.initializeScreen();
+      }
+    });
+
+    // Add blur listener to handle when leaving the screen
+    this._unsubscribeBlur = this.props.navigation.addListener('blur', () => {
+      // When leaving checkout screen, reset any pending operations
+      this.touchableInactive = false;
+      this.RBSheetTouchableInactive = false;
+    });
+  }
+  initializeScreen = () => {
     const list = [];
     this.props.cartItems.forEach(element => {
       list.push({
@@ -125,16 +146,50 @@ class CheckoutScreen extends React.Component {
       });
     });
 
-    this.setState({ isClickList: list });
-
-    this._unsubscribe = this.props.navigation.addListener('focus', async () => {
-      this.GetRegisterdCreditCard();
+    this.setState({
+      isClickList: list,
+      // Reset any applied coupons when returning to screen
+      appliedCoupon: null,
+      savedAmount: 0,
+      promoCode: '',
+      couponValue: '',
     });
+
+    this.GetRegisterdCreditCard();
     this.getCoupons();
     this.GetTaxNetTotal('null');
     this.GetAddress();
     this._retrieveData();
     this.checkDeliveryAvailability();
+  };
+  omponentWillUnmount() {
+    // Clean up listeners
+    if (this._unsubscribe) {
+      this._unsubscribe();
+    }
+    if (this._unsubscribeBlur) {
+      this._unsubscribeBlur();
+    }
+
+    // Clear any timers
+    if (this.CalculateTime) {
+      clearTimeout(this.CalculateTime);
+    }
+
+    // Reset touchable flags
+    this.touchableInactive = false;
+    this.RBSheetTouchableInactive = false;
+
+    // Close any open bottom sheets
+    if (this.RBSheet) {
+      this.RBSheet.close();
+    }
+    if (this.SRBSheet) {
+      this.SRBSheet.close();
+    }
+    if (this.RRBSheet) {
+      this.RRBSheet.close();
+    }
   }
 
   startGlow() {

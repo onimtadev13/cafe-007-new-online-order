@@ -1,6 +1,5 @@
 import React from 'react';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-// import Ionicons from 'react-native-vector-icons/Ionicons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   AccountStackNavigation,
   CartStackNavigation,
@@ -8,9 +7,8 @@ import {
   OrderStackNavigation,
   StackNavigation,
 } from './StackNavigation';
-import {connect} from 'react-redux';
-import {getFocusedRouteNameFromRoute} from '@react-navigation/core';
-// import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
+import { connect } from 'react-redux';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/core';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 const activeTintLabelColor = 'black';
@@ -19,7 +17,6 @@ const Tab = createBottomTabNavigator();
 
 const getTabBarVisible = route => {
   const routeName = getFocusedRouteNameFromRoute(route);
-
   if (routeName === 'CheckoutScreen') {
     return false;
   } else if (routeName === 'CreditCardScreen') {
@@ -44,7 +41,6 @@ const iconMap = {
   Account: { name: 'user' },
 };
 
-
 const BottomTabNavigation = props => {
   return (
     <Tab.Navigator
@@ -53,9 +49,7 @@ const BottomTabNavigation = props => {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           const iconInfo = iconMap[route.name];
-
           if (!iconInfo) return null;
-
           return (
             <FontAwesome6
               name={iconInfo.name}
@@ -87,12 +81,7 @@ const BottomTabNavigation = props => {
           tabBarVisible: getTabBarVisible(route),
         })}
       />
-
-      <Tab.Screen
-        name="Search"
-        component={ItemSearchStackNavigation}
-      />
-
+      <Tab.Screen name="Search" component={ItemSearchStackNavigation} />
       <Tab.Screen
         name="Cart"
         component={CartStackNavigation}
@@ -103,8 +92,25 @@ const BottomTabNavigation = props => {
               ? props.cartItems.length
               : null,
         })}
-      />
+        listeners={({ navigation }) => ({
+          tabPress: e => {
+            // Get the current state
+            const state = navigation.getState();
+            const cartStack = state.routes.find(r => r.name === 'Cart');
 
+            // If we're on CheckoutScreen or any other screen in Cart stack
+            if (cartStack?.state?.index > 0) {
+              // Prevent default behavior
+              e.preventDefault();
+
+              // Navigate to the Cart tab and reset to CartScreen
+              navigation.navigate('Cart', {
+                screen: 'CartScreen',
+              });
+            }
+          },
+        })}
+      />
       <Tab.Screen
         name="Orders"
         component={OrderStackNavigation}
@@ -112,7 +118,6 @@ const BottomTabNavigation = props => {
           tabBarVisible: getTabBarVisible(route),
         })}
       />
-
       <Tab.Screen
         name="Account"
         component={AccountStackNavigation}
