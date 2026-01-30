@@ -109,29 +109,24 @@ class CheckoutScreen extends React.Component {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
   }
-
+  
   componentDidMount() {
-    this.startGlow();
-    this.initializeScreen();
+  this.startGlow();
+  this.initializeScreen();
 
-    this._unsubscribe = this.props.navigation.addListener('focus', async () => {
-      // Check if we're coming from another screen (not from CartScreen)
-      const routes = this.props.navigation.getState()?.routes;
-      const currentRoute = routes[routes.length - 1];
+  this._unsubscribe = this.props.navigation.addListener('focus', () => {
+    // Refresh coupons and recalculate totals whenever screen comes into focus
+    console.log('CheckoutScreen focused - refreshing data');
+    this.getCoupons();
+    this.GetTaxNetTotal(this.state.dineType);
+    this.checkDeliveryAvailability();
+  });
 
-      // If we navigated away and came back, refresh the screen
-      if (currentRoute.name === 'CheckoutScreen') {
-        this.initializeScreen();
-      }
-    });
-
-    // Add blur listener to handle when leaving the screen
-    this._unsubscribeBlur = this.props.navigation.addListener('blur', () => {
-      // When leaving checkout screen, reset any pending operations
-      this.touchableInactive = false;
-      this.RBSheetTouchableInactive = false;
-    });
-  }
+  this._unsubscribeBlur = this.props.navigation.addListener('blur', () => {
+    this.touchableInactive = false;
+    this.RBSheetTouchableInactive = false;
+  });
+}
   initializeScreen = () => {
     const list = [];
     this.props.cartItems.forEach(element => {
@@ -162,7 +157,7 @@ class CheckoutScreen extends React.Component {
     this._retrieveData();
     this.checkDeliveryAvailability();
   };
-  omponentWillUnmount() {
+  componentWillUnmount() {
     // Clean up listeners
     if (this._unsubscribe) {
       this._unsubscribe();
@@ -748,6 +743,7 @@ class CheckoutScreen extends React.Component {
   };
 
   getCoupons = async () => {
+    this.setState({ coupons: [] });
     try {
       const phonenumber = await AsyncStorage.getItem('phonenumber');
       const response = await fetch(APIURL, {
