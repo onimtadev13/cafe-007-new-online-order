@@ -399,6 +399,7 @@ const App = () => {
     var code = generateOTP(4);
     setOtpCode(code);
     otpRef.current = code;
+    console.log('otp', code);
 
     fetch(SENDTESTNOTIFICTION, {
       method: 'POST',
@@ -413,10 +414,12 @@ const App = () => {
       }),
     })
       .then(res => {
+        console.log(JSON.stringify(res));
         return res.json();
       })
       .then(json => {
-        // console.log(JSON.stringify(json));
+        console.log(JSON.stringify(body));
+        console.log(JSON.stringify(json));
       })
       .catch(er => {
         Alert.alert('Warning', 'Required Valid Mobile Number');

@@ -422,40 +422,39 @@ export default class LoginScreen extends React.PureComponent {
                       />
                     </Animated.View>
                     <TouchableOpacity
-                    disabled={!this.props.isUpdated}
-                    style={{
-                      marginLeft: 20,
-                      marginRight: 20,
-                      marginBottom: 20,
-                      marginTop: 10,
-                    }}
-                    onPress={() => this.loginbuttonPress(this.state.mobile)}
-                  >
-                    <View style={styles.buttonview}>
-                      <Text
-                        style={{
-                          fontFamily:
-                            Platform.OS === 'ios'
-                              ? 'Asap-Regular_Medium'
-                              : 'AsapMedium',
-                          textAlign: 'center',
-                          marginLeft: 40,
-                          color: 'white',
-                          fontSize: 19,
-                        }}
-                      >
-                        Get Start
-                      </Text>
-                      <ActivityIndicator
-                        style={{ marginRight: 20 }}
-                        size={20}
-                        animating={this.props.isClick}
-                        color={'white'}
-                      />
-                    </View>
-                  </TouchableOpacity>
+                      disabled={!this.props.isUpdated}
+                      style={{
+                        marginLeft: 20,
+                        marginRight: 20,
+                        marginBottom: 20,
+                        marginTop: 10,
+                      }}
+                      onPress={() => this.loginbuttonPress(this.state.mobile)}
+                    >
+                      <View style={styles.buttonview}>
+                        <Text
+                          style={{
+                            fontFamily:
+                              Platform.OS === 'ios'
+                                ? 'Asap-Regular_Medium'
+                                : 'AsapMedium',
+                            textAlign: 'center',
+                            marginLeft: 40,
+                            color: 'white',
+                            fontSize: 19,
+                          }}
+                        >
+                          SignUp
+                        </Text>
+                        <ActivityIndicator
+                          style={{ marginRight: 20 }}
+                          size={20}
+                          animating={this.props.isClick}
+                          color={'white'}
+                        />
+                      </View>
+                    </TouchableOpacity>
                   </Animated.View>
-                  
                 </Animated.View>
               </Animated.View>
             </View>
@@ -513,199 +512,217 @@ export default class LoginScreen extends React.PureComponent {
               </View>
             </RBSheet>
 
-<Modal
-  visible={this.props.isVisible}
-  transparent={true}
-  animated={true}
-  animationType={'fade'}
->
-  <KeyboardAvoidingView
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    style={{ flex: 1 }}
-  >
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0, 0.7)',
-      }}
-    >
-      <Card
-        style={{ 
-          backgroundColor: 'white', 
-          width: 310, 
-          maxHeight: Platform.OS === 'ios' ? '80%' : 480,
-          height: Platform.OS === 'ios' ? undefined : 480,
-        }}
-        cardElevation={2}
-        cardMaxElevation={2}
-        cornerRadius={10}
-      >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
-          bounces={false}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={{ alignItems: 'flex-end', marginRight: 10 }}>
-            <TouchableOpacity
-              style={{ position: 'relative', marginTop: 10 }}
-              onPress={() => this.onClosePress()}
+            <Modal
+              visible={this.props.isVisible}
+              transparent={true}
+              animated={true}
+              animationType={'fade'}
             >
-              <FontAwesome6 name="circle-xmark" size={35} />
-            </TouchableOpacity>
-          </View>
-
-          <View style={{ flex: 1, alignItems: 'center', paddingBottom: 20 }}>
-            <View
-              style={{
-                margin: 5,
-                width: 55,
-                height: 55,
-                borderRadius: 100 / 2,
-                backgroundColor: '#F4F4F4',
-                marginBottom: 30,
-                marginLeft: 30,
-                marginRight: 30,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <FontAwesome6 name="lock" size={25} color={'black'} />
-            </View>
-
-            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
-              Enter your code
-            </Text>
-            <Text
-              allowFontScaling={false}
-              style={{ textAlign: 'center', marginTop: 10 }}
-            >
-              To continue please enter{'\n'} the verification code we've
-              {'\n'} just send for you
-            </Text>
-
-            <OTPInputView
-              style={{ width: '80%', height: 100 }}
-              pinCount={4}
-              code={this.state.otpcode}
-              autoFocusOnLoad={true}
-              keyboardType="number-pad"
-              codeInputFieldStyle={styles.underlineStyleBase}
-              codeInputHighlightStyle={styles.underlineStyleHighLighted}
-              onCodeChanged={code => this.setState({ otpcode: code })}
-              onCodeFilled={code => {
-                console.log('OTP filled:', code);
-                clearInterval(this.interval);
-                this.setState({ isEnable: false, second: 30 }, () => {
-                  this.context.OTPVerification(
-                    code,
-                    this.state.mobile,
-                    this.props.navigation,
-                  );
-                });
-              }}
-            />
-
-            <TouchableOpacity
-              disabled={this.state.isEnable}
-              style={{ marginVertical: 15 }}
-              onPress={() => {
-                this.resendbuttonPress(this.state.mobile);
-              }}
-            >
-              <View>
-                <Text
-                  allowFontScaling={false}
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}
+              >
+                <View
                   style={{
-                    color: this.state.isEnable ? '#d1d1d1' : 'black',
+                    flex: 1,
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(0,0,0, 0.7)',
                   }}
                 >
-                  Resend Code{' '}
-                  {this.state.isEnable
-                    ? '00:' + this.state.second
-                    : null}
-                </Text>
-              </View>
-            </TouchableOpacity>
+                  <Card
+                    style={{
+                      backgroundColor: 'white',
+                      width: 310,
+                      maxHeight: Platform.OS === 'ios' ? '80%' : 480,
+                      height: Platform.OS === 'ios' ? undefined : 480,
+                    }}
+                    cardElevation={2}
+                    cardMaxElevation={2}
+                    cornerRadius={10}
+                  >
+                    <ScrollView
+                      contentContainerStyle={{ flexGrow: 1 }}
+                      keyboardShouldPersistTaps="handled"
+                      bounces={false}
+                      showsVerticalScrollIndicator={false}
+                    >
+                      <View style={{ alignItems: 'flex-end', marginRight: 10 }}>
+                        <TouchableOpacity
+                          style={{ position: 'relative', marginTop: 10 }}
+                          onPress={() => this.onClosePress()}
+                        >
+                          <FontAwesome6 name="circle-xmark" size={35} />
+                        </TouchableOpacity>
+                      </View>
 
-            <TouchableOpacity
-              style={{
-                width: 150,
-                height: 50,
-                backgroundColor: 'black',
-                borderRadius: 10,
-                marginTop: 10,
-                marginBottom: 15,
-              }}
-              onPress={() =>
-                this.continuebuttonPress(
-                  this.state.otpcode,
-                  this.state.mobile,
-                )
-              }
-            >
-              <View
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flex: 1,
-                }}
-              >
-                <Text
-                  allowFontScaling={false}
-                  style={{
-                    fontSize: 14,
-                    color: 'white',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Continue
-                </Text>
-              </View>
-            </TouchableOpacity>
+                      <View
+                        style={{
+                          flex: 1,
+                          alignItems: 'center',
+                          paddingBottom: 20,
+                        }}
+                      >
+                        <View
+                          style={{
+                            margin: 5,
+                            width: 55,
+                            height: 55,
+                            borderRadius: 100 / 2,
+                            backgroundColor: '#F4F4F4',
+                            marginBottom: 30,
+                            marginLeft: 30,
+                            marginRight: 30,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <FontAwesome6 name="lock" size={25} color={'black'} />
+                        </View>
 
-            <View
-              style={{
-                flexDirection: 'row',
-                marginTop: 10,
-              }}
-            >
-              <Text
-                allowFontScaling={false}
-                style={{
-                  fontFamily:
-                    Platform.OS === 'ios'
-                      ? 'Asap-Regular_Bold'
-                      : 'AsapBold',
-                  textAlign: 'center',
-                }}
-              >
-                Hotline :
-              </Text>
-              <Text
-                onPress={() => Linking.openURL(`tel:${`0707070007`}`)}
-                allowFontScaling={false}
-                style={{
-                  fontFamily:
-                    Platform.OS === 'ios'
-                      ? 'Asap-Regular_Medium'
-                      : 'AsapMedium',
-                  marginLeft: 5,
-                  textAlign: 'center',
-                }}
-              >
-                0707070007
-              </Text>
-            </View>
-          </View>
-        </ScrollView>
-      </Card>
-    </View>
-  </KeyboardAvoidingView>
-</Modal>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
+                          Enter your code
+                        </Text>
+                        <Text
+                          allowFontScaling={false}
+                          style={{ textAlign: 'center', marginTop: 10 }}
+                        >
+                          To continue please enter{'\n'} the verification code
+                          we've
+                          {'\n'} just send for you
+                        </Text>
+
+                        <OTPInputView
+                          style={{ width: '80%', height: 100 }}
+                          pinCount={4}
+                          code={this.state.otpcode}
+                          autoFocusOnLoad={true}
+                          keyboardType="number-pad"
+                          codeInputFieldStyle={styles.underlineStyleBase}
+                          codeInputHighlightStyle={
+                            styles.underlineStyleHighLighted
+                          }
+                          onCodeChanged={code =>
+                            this.setState({ otpcode: code })
+                          }
+                          onCodeFilled={code => {
+                            console.log('OTP filled:', code);
+                            clearInterval(this.interval);
+                            this.setState(
+                              { isEnable: false, second: 30 },
+                              () => {
+                                this.context.OTPVerification(
+                                  code,
+                                  this.state.mobile,
+                                  this.props.navigation,
+                                );
+                              },
+                            );
+                          }}
+                        />
+
+                        <TouchableOpacity
+                          disabled={this.state.isEnable}
+                          style={{ marginVertical: 15 }}
+                          onPress={() => {
+                            this.resendbuttonPress(this.state.mobile);
+                          }}
+                        >
+                          <View>
+                            <Text
+                              allowFontScaling={false}
+                              style={{
+                                color: this.state.isEnable
+                                  ? '#d1d1d1'
+                                  : 'black',
+                              }}
+                            >
+                              Resend Code{' '}
+                              {this.state.isEnable
+                                ? '00:' + this.state.second
+                                : null}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          style={{
+                            width: 150,
+                            height: 50,
+                            backgroundColor: 'black',
+                            borderRadius: 10,
+                            marginTop: 10,
+                            marginBottom: 15,
+                          }}
+                          onPress={() =>
+                            this.continuebuttonPress(
+                              this.state.otpcode,
+                              this.state.mobile,
+                            )
+                          }
+                        >
+                          <View
+                            style={{
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flex: 1,
+                            }}
+                          >
+                            <Text
+                              allowFontScaling={false}
+                              style={{
+                                fontSize: 14,
+                                color: 'white',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              Continue
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            marginTop: 10,
+                          }}
+                        >
+                          <Text
+                            allowFontScaling={false}
+                            style={{
+                              fontFamily:
+                                Platform.OS === 'ios'
+                                  ? 'Asap-Regular_Bold'
+                                  : 'AsapBold',
+                              textAlign: 'center',
+                            }}
+                          >
+                            Hotline :
+                          </Text>
+                          <Text
+                            onPress={() =>
+                              Linking.openURL(`tel:${`0707070007`}`)
+                            }
+                            allowFontScaling={false}
+                            style={{
+                              fontFamily:
+                                Platform.OS === 'ios'
+                                  ? 'Asap-Regular_Medium'
+                                  : 'AsapMedium',
+                              marginLeft: 5,
+                              textAlign: 'center',
+                            }}
+                          >
+                            0707070007
+                          </Text>
+                        </View>
+                      </View>
+                    </ScrollView>
+                  </Card>
+                </View>
+              </KeyboardAvoidingView>
+            </Modal>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

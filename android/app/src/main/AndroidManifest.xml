@@ -1,16 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"  
     xmlns:tools="http://schemas.android.com/tools">
-
-   <uses-permission android:name="android.permission.VIBRATE" />
-<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     
     <application
         android:name=".MainApplication"
@@ -22,17 +18,13 @@
         android:supportsRtl="true"
         tools:replace="android:allowBackup">
         
-        <!-- ADD BRANCH KEY -->
+        <!-- Branch SDK Configuration -->
         <meta-data 
             android:name="io.branch.sdk.BranchKey" 
             android:value="YOUR_BRANCH_LIVE_KEY_HERE" />
-        
-        <!-- ADD BRANCH TEST KEY (OPTIONAL) -->
         <meta-data 
             android:name="io.branch.sdk.BranchKey.test" 
             android:value="YOUR_BRANCH_TEST_KEY_HERE" />
-            
-        <!-- ADD BRANCH AUTO INITIALIZATION -->
         <meta-data 
             android:name="io.branch.sdk.auto_link_disable" 
             android:value="false" />
@@ -45,13 +37,12 @@
             android:windowSoftInputMode="adjustResize"
             android:exported="true">
             
-            <!-- EXISTING LAUNCHER INTENT -->
+            <!-- Launcher intent -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             
-            <!-- ADD BRANCH DEEP LINK INTENT FILTERS -->
             <!-- Custom URL Scheme -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -65,7 +56,9 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="cafe007.lk" />
+                <data 
+                    android:scheme="https" 
+                    android:host="cafe007.lk" />
             </intent-filter>
             
             <!-- Branch Universal Links -->
@@ -73,7 +66,9 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="cafe007.app.link" />
+                <data 
+                    android:scheme="https" 
+                    android:host="cafe007.app.link" />
             </intent-filter>
             
             <!-- Branch Alternate Domain -->
@@ -81,9 +76,10 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="cafe007-alternate.app.link" />
+                <data 
+                    android:scheme="https" 
+                    android:host="cafe007-alternate.app.link" />
             </intent-filter>
-            
         </activity>
     </application>
 </manifest>

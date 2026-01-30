@@ -288,51 +288,51 @@ class AccountScreen extends React.Component {
       });
     }, 500); // 500ms delay
   };
-  checkCameraPermission = async () => {
-    const {
-      check,
-      request,
-      PERMISSIONS,
-      RESULTS,
-    } = require('react-native-permissions');
+  // checkCameraPermission = async () => {
+  //   const {
+  //     check,
+  //     request,
+  //     PERMISSIONS,
+  //     RESULTS,
+  //   } = require('react-native-permissions');
 
-    const cameraPermission =
-      Platform.OS === 'ios'
-        ? PERMISSIONS.IOS.CAMERA
-        : PERMISSIONS.ANDROID.CAMERA;
+  //   const cameraPermission =
+  //     Platform.OS === 'ios'
+  //       ? PERMISSIONS.IOS.CAMERA
+  //       : PERMISSIONS.ANDROID.CAMERA;
 
-    const result = await check(cameraPermission);
+  //   const result = await check(cameraPermission);
 
-    if (result === RESULTS.DENIED) {
-      const requestResult = await request(cameraPermission);
-      return requestResult === RESULTS.GRANTED;
-    }
+  //   if (result === RESULTS.DENIED) {
+  //     const requestResult = await request(cameraPermission);
+  //     return requestResult === RESULTS.GRANTED;
+  //   }
 
-    return result === RESULTS.GRANTED;
-  };
+  //   return result === RESULTS.GRANTED;
+  // };
 
-  checkPhotoLibraryPermission = async () => {
-    const {
-      check,
-      request,
-      PERMISSIONS,
-      RESULTS,
-    } = require('react-native-permissions');
+  // checkPhotoLibraryPermission = async () => {
+  //   const {
+  //     check,
+  //     request,
+  //     PERMISSIONS,
+  //     RESULTS,
+  //   } = require('react-native-permissions');
 
-    const photoPermission =
-      Platform.OS === 'ios'
-        ? PERMISSIONS.IOS.PHOTO_LIBRARY
-        : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+  //   const photoPermission =
+  //     Platform.OS === 'ios'
+  //       ? PERMISSIONS.IOS.PHOTO_LIBRARY
+  //       : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
 
-    const result = await check(photoPermission);
+  //   const result = await check(photoPermission);
 
-    if (result === RESULTS.DENIED) {
-      const requestResult = await request(photoPermission);
-      return requestResult === RESULTS.GRANTED;
-    }
+  //   if (result === RESULTS.DENIED) {
+  //     const requestResult = await request(photoPermission);
+  //     return requestResult === RESULTS.GRANTED;
+  //   }
 
-    return result === RESULTS.GRANTED;
-  };
+  //   return result === RESULTS.GRANTED;
+  // };
   onUploadImage = Image => {
     fetch(APIURL, {
       method: 'POST',
