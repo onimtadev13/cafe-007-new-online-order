@@ -109,24 +109,24 @@ class CheckoutScreen extends React.Component {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
   }
-  
+
   componentDidMount() {
-  this.startGlow();
-  this.initializeScreen();
+    this.startGlow();
+    this.initializeScreen();
 
-  this._unsubscribe = this.props.navigation.addListener('focus', () => {
-    // Refresh coupons and recalculate totals whenever screen comes into focus
-    console.log('CheckoutScreen focused - refreshing data');
-    this.getCoupons();
-    this.GetTaxNetTotal(this.state.dineType);
-    this.checkDeliveryAvailability();
-  });
+    this._unsubscribe = this.props.navigation.addListener('focus', () => {
+      // Refresh coupons and recalculate totals whenever screen comes into focus
+      console.log('CheckoutScreen focused - refreshing data');
+      this.getCoupons();
+      this.GetTaxNetTotal(this.state.dineType);
+      this.checkDeliveryAvailability();
+    });
 
-  this._unsubscribeBlur = this.props.navigation.addListener('blur', () => {
-    this.touchableInactive = false;
-    this.RBSheetTouchableInactive = false;
-  });
-}
+    this._unsubscribeBlur = this.props.navigation.addListener('blur', () => {
+      this.touchableInactive = false;
+      this.RBSheetTouchableInactive = false;
+    });
+  }
   initializeScreen = () => {
     const list = [];
     this.props.cartItems.forEach(element => {
@@ -4574,6 +4574,8 @@ class CheckoutScreen extends React.Component {
       body: JSON.stringify(Order),
     })
       .then(res => {
+        console.log('order res', res);
+
         return res.json();
       })
       .then(json => {

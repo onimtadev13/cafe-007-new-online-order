@@ -22,6 +22,7 @@ import ItemView from '../Components/ItemView';
 import { APIURL } from '../Data/CloneData';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import { log } from 'react-native-sqlite-storage/lib/sqlite.core';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -461,6 +462,7 @@ class SearchScreen extends React.PureComponent {
       }),
     })
       .then(res => {
+        log('response', res);
         return res.json();
       })
       .then(json => {
