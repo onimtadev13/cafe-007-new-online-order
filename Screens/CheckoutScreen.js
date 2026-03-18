@@ -951,9 +951,11 @@ class CheckoutScreen extends React.Component {
         },
         errorData => {
           //Alert.alert('PayHere Error', errorData);
+          this.setState({ isOrderPlaced: false }); 
           this.touchableInactive = false;
         },
         () => {
+          this.setState({ isOrderPlaced: false }); 
           console.log('Payment Dismissed');
           this.touchableInactive = false;
         },
@@ -962,6 +964,7 @@ class CheckoutScreen extends React.Component {
   };
 
   onPlaceorderPress = async () => {
+
     if (
       this.state.dineType == 'null' ||
       this.state.paymentType == '' ||
@@ -969,7 +972,9 @@ class CheckoutScreen extends React.Component {
       this.state.locationPressed === ''
     ) {
       Alert.alert('Warning', 'Please select all required items');
+      return;
     } else {
+          this.setState({ isOrderPlaced: true });
       console.log('write');
 
       if (this.state.paymentType === 'Card') {
@@ -4580,6 +4585,7 @@ class CheckoutScreen extends React.Component {
       })
       .then(json => {
         if (json.strRturnRes === true) {
+           this.setState({ isOrderPlaced: false }); 
           this.RRBSheet.open();
           this.onClearAsync();
         }
@@ -4683,6 +4689,7 @@ class CheckoutScreen extends React.Component {
       .catch(er => {
         console.log('onPlaceorderPress', er);
         this.touchableInactive = false;
+         this.setState({ isOrderPlaced: false });
         Alert.alert(
           'Warning',
           "The operation coundn't be completed.",

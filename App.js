@@ -1,6 +1,6 @@
 // import {NavigationContainer, DefaultTheme as NavigationDefaultTheme, DarkTheme as NavigationDarkTheme} from '@react-navigation/native';
 import { useEffect, useState, useRef } from 'react';
-import { NavigationContainer, CommonActions } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
 import {
   Alert,
@@ -9,8 +9,6 @@ import {
   Platform,
   Linking,
   AppState,
-  PermissionsAndroid,
-  Image,
 } from 'react-native';
 import AuthContext from './Components/Context';
 import BottomTabNavigation from './Routes/BottomTabNavigation';
@@ -20,8 +18,6 @@ import { openDatabase } from 'react-native-sqlite-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthStackNavigation } from './Routes/StackNavigation';
 import { createStackNavigator } from '@react-navigation/stack';
-import SplashScreen from 'react-native-splash-screen';
-import AppSplashScreen from './Screens/SplashScreen';
 import { APIURL, OTPAPIURL, SENDTESTNOTIFICTION } from './Data/CloneData';
 import messaging from '@react-native-firebase/messaging';
 import { firebase } from '@react-native-firebase/app';
@@ -30,27 +26,18 @@ import branch from 'react-native-branch';
 import LocalNotificationService from './Services/LocalNotificationService';
 import NotificationModal from './Components/NotificationModal';
 import PromoCard from './Components/PromoCard';
-import FlashMessage, { showMessage } from 'react-native-flash-message';
-import Sound from 'react-native-sound';
+import SplashScreen from './Screens/SplashScreen';
+
 import {
   SafeAreaProvider,
   SafeAreaView,
   initialWindowMetrics,
 } from 'react-native-safe-area-context';
-// Enable playback in silence mode (iOS)
-Sound.setCategory('Playback');
+
 var db = openDatabase({ name: 'UserDatabase.db' });
 const RootStack = createStackNavigator();
 
-messaging().setBackgroundMessageHandler(async remoteMessage => {
-  console.log('Background message:', remoteMessage);
-  // Handle background notifications here
-  return Promise.resolve();
-});
-
 const App = () => {
-  const notificationSound = useRef(null);
-  const flashMessageRef = useRef(null);
   const [isClick, setClick] = React.useState(false);
   const [isOTPVisible, setOTPVisible] = React.useState(false);
   const [OtpCode, setOtpCode] = React.useState('');
@@ -59,6 +46,7 @@ const App = () => {
   const [isButtonClick, setButtonClick] = React.useState(false);
   const [isRegister, setRegister] = React.useState(false);
   const appState = React.useRef(AppState.currentState);
+  const [showSplash, setShowSplash] = useState(true);
   const [appStateVisible, setAppStateVisible] = React.useState(
     appState.current,
   );
@@ -73,105 +61,16 @@ const App = () => {
     isVisible: false,
   });
 
-  const navigationRef = useRef(null);
+  const navigationRef = React.createRef();
 
   const [showPromo, setShowPromo] = useState(false);
-  const [promotionsData, setPromotionsData] = useState(null);
 
   function navigate(name, params) {
-    const nav = navigationRef.current;
-    if (!nav) {
-      console.warn('[NAVIGATE] navigationRef not ready');
-      return;
-    }
-    // Initialize notification sound
-
-    // If params specify a nested screen (e.g. Orders -> OrderDetailsScreen),
-    // use CommonActions.navigate to ensure nested navigators receive the action.
-    try {
-      console.log('[NAVIGATE] Navigating to', name, 'with params:', params);
-      if (params && params.screen) {
-        console.log(
-          '[NAVIGATE] Using CommonActions for nested screen:',
-          params.screen,
-        );
-        nav.dispatch(
-          CommonActions.navigate({
-            name,
-            params: {
-              screen: params.screen,
-              params: params.params || params.params,
-            },
-          }),
-        );
-      } else {
-        nav.navigate(name, params);
-      }
-    } catch (err) {
-      console.error('[NAVIGATE] Error:', err);
-      try {
-        nav.navigate(name, params);
-      } catch (fallbackErr) {
-        console.error('[NAVIGATE] Fallback also failed:', fallbackErr);
-      }
-    }
-  }
-  useEffect(() => {
-    notificationSound.current = new Sound(
-      'newnotification.mp3',
-      Sound.MAIN_BUNDLE,
-      error => {
-        if (error) {
-          console.log('[SOUND] Failed to load sound', error);
-          return;
-        }
-        console.log('[SOUND] Sound loaded successfully');
-      },
-    );
-
-    return () => {
-      if (notificationSound.current) {
-        notificationSound.current.release();
-      }
-    };
-  }, []);
-
-  // Dedicated helper for order navigation with timing safety
-  function navigateToOrder(orderId) {
-    console.log('[ORDER_NAV] Navigating to order:', orderId);
-    if (!orderId) {
-      console.warn('[ORDER_NAV] No OrderID provided');
-      return;
-    }
-
-    // Use setTimeout to ensure navigation happens after notification callback is complete
-    setTimeout(() => {
-      const nav = navigationRef.current;
-      if (!nav) {
-        console.error('[ORDER_NAV] navigationRef not available');
-        return;
-      }
-
-      try {
-        console.log('[ORDER_NAV] Executing navigation to Orders tab');
-        nav.dispatch(
-          CommonActions.navigate({
-            name: 'Orders',
-            params: {
-              screen: 'OrderDetailsScreen',
-              params: { OrderID: orderId },
-            },
-          }),
-        );
-      } catch (err) {
-        console.error('[ORDER_NAV] Navigation failed:', err);
-      }
-    }, 100);
+    navigationRef.current && navigationRef.current.navigate(name, params);
   }
 
   function replace(name, params) {
-    const nav = navigationRef.current;
-    nav && nav.replace && nav.replace(name, params);
+    navigationRef.current && navigationRef.current.replace(name, params);
   }
 
   const Initialloginstate = {
@@ -399,7 +298,6 @@ const App = () => {
     var code = generateOTP(4);
     setOtpCode(code);
     otpRef.current = code;
-    console.log('otp', code);
 
     fetch(SENDTESTNOTIFICTION, {
       method: 'POST',
@@ -414,12 +312,10 @@ const App = () => {
       }),
     })
       .then(res => {
-        console.log(JSON.stringify(res));
         return res.json();
       })
       .then(json => {
-        console.log(JSON.stringify(body));
-        console.log(JSON.stringify(json));
+        // console.log(JSON.stringify(json));
       })
       .catch(er => {
         Alert.alert('Warning', 'Required Valid Mobile Number');
@@ -574,27 +470,19 @@ const App = () => {
         con: '1',
       }),
     })
-      .then(res => res.json())
-      .then(async json => {
+      .then(res => {
+        return res.json();
+      })
+      .then(json => {
         const Status = json.CommonResult.Table[0].Status;
         var AppURL = json.CommonResult.Table[0].AppURL;
 
         if (Status === 'Exist') {
           setUpdated(true);
-
-          // Check if user is logged in and set token accordingly
-          const phonenumber = await AsyncStorage.getItem('phonenumber');
-          if (phonenumber) {
-            // User has logged in before, verify with server
-            getToken().then(fcmToken => {
-              CheckUserExist(phonenumber);
-            });
-          } else {
-            // No stored credentials, stop loading and show login
-            dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
-          }
+          CheckUserLogin(); // This now handles auth better
         } else {
           setUpdated(false);
+          // SplashScreen.hide();
           Alert.alert(
             'Update is available',
             'An update for the application is available',
@@ -608,91 +496,37 @@ const App = () => {
           );
         }
       })
-      .catch(async er => {
+      .catch(er => {
         console.log('CheckAppVersion', er);
 
         // On error, still try to log user in if they have credentials
-        const phone = await AsyncStorage.getItem('phonenumber');
-        if (phone) {
-          dispatch({ Type: 'RETREIVE_TOKEN', Token: phone });
-        } else {
-          dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
-        }
-
-        Alert.alert(
-          'Warning',
-          "The operation couldn't be completed.",
-          [
-            {
-              text: 'Try Again',
-              onPress: () => CheckAppVersion(),
-            },
-            {
-              text: 'Continue',
-              onPress: () => {},
-            },
-          ],
-          { cancelable: false },
-        );
-      })
-      .finally(() => {
-        setTimeout(() => {
-          SplashScreen.hide();
-        }, 500);
+        AsyncStorage.getItem('phonenumber').then(phone => {
+          if (phone) {
+            dispatch({ Type: 'RETREIVE_TOKEN', Token: phone });
+            // SplashScreen.hide();
+          } else {
+            Alert.alert(
+              'Warning',
+              "The operation couldn't be completed.",
+              [
+                {
+                  text: 'Try Again',
+                  onPress: () => CheckAppVersion(),
+                },
+                {
+                  text: 'Close',
+                  onPress: () => BackHandler.exitApp(),
+                },
+              ],
+              { cancelable: false },
+            );
+          }
+        });
       });
-  };
-
-  const fetchPromotions = async () => {
-    try {
-      const response = await fetch(APIURL, {
-        method: 'POST',
-        cache: 'no-cache',
-        headers: {
-          'content-type': 'application/json',
-          'cache-control': 'no-cache',
-        },
-        body: JSON.stringify({
-          HasReturnData: 'T',
-          Parameters: [
-            {
-              Para_Data: '123',
-              Para_Direction: 'Input',
-              Para_Lenth: 30,
-              Para_Name: '@Iid',
-              Para_Type: 'int',
-            },
-            {
-              Para_Data: '',
-              Para_Direction: 'Input',
-              Para_Lenth: 5000,
-              Para_Name: '@Text1',
-              Para_Type: 'varchar',
-            },
-            {
-              Para_Data: '',
-              Para_Direction: 'Input',
-              Para_Lenth: 100,
-              Para_Name: '@Text2',
-              Para_Type: 'varchar',
-            },
-          ],
-          SpName: 'sp_Android_Common_API',
-          con: '1',
-        }),
-      });
-
-      const json = await response.json();
-      const result = json?.CommonResult?.Table;
-
-      return Array.isArray(result) && result.length > 0 ? result : null;
-    } catch (error) {
-      console.error('Error fetching promotions:', error);
-      return null;
-    }
   };
 
   useEffect(() => {
-    if (!loginstate.userToken) {
+    if (loginstate.userToken) {
       AsyncStorage.removeItem('promoShown');
     }
   }, [loginstate.userToken]);
@@ -702,11 +536,7 @@ const App = () => {
 
     const checkPromo = async () => {
       const hasShown = await AsyncStorage.getItem('promoShown');
-
-      const promoData = await fetchPromotions();
-
-      if (!hasShown && promoData) {
-        setPromotionsData(promoData);
+      if (!hasShown) {
         setShowPromo(true);
         await AsyncStorage.setItem('promoShown', 'true');
       }
@@ -723,14 +553,8 @@ const App = () => {
           loginstate.userToken
         ) {
           await AsyncStorage.removeItem('promoShown');
-
-          const promoData = await fetchPromotions();
-
-          if (promoData) {
-            setPromotionsData(promoData);
-            setShowPromo(true);
-            await AsyncStorage.setItem('promoShown', 'true');
-          }
+          setShowPromo(true);
+          await AsyncStorage.setItem('promoShown', 'true');
         }
         appState.current = nextAppState;
       },
@@ -738,26 +562,6 @@ const App = () => {
 
     return () => subscription.remove();
   }, [loginstate.userToken]);
-
-  // Add this useEffect in App.js
-  // useEffect(() => {
-  //   // Request notification permissions
-  //   const requestNotificationPermission = async () => {
-  //     if (Platform.OS === 'android' && Platform.Version >= 33) {
-  //       const granted = await PermissionsAndroid.request(
-  //         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-  //       );
-
-  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //         console.log('Notification permission granted');
-  //       } else {
-  //         console.log('Notification permission denied');
-  //       }
-  //     }
-  //   };
-
-  //   requestNotificationPermission();
-  // }, []);
 
   const handleDismissPromo = () => {
     setShowPromo(false);
@@ -869,7 +673,7 @@ const App = () => {
     if (!mobilenumber) {
       dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
       setTimeout(() => {
-        SplashScreen.hide();
+        // SplashScreen.hide();
       }, 1000);
       return;
     }
@@ -983,7 +787,7 @@ const App = () => {
         })
         .finally(() => {
           setTimeout(() => {
-            SplashScreen.hide();
+            // SplashScreen.hide();
           }, 1000);
         });
     });
@@ -1268,609 +1072,195 @@ const App = () => {
     }
   };
 
-  // messaging().onNotificationOpenedApp(remoteMessage => {
-  //   console.log(
-  //     '[FCMService] onNotificationOpenedApp Notification caused app to open',
-  //   );
-  //   console.log(remoteMessage.data);
+  messaging().onNotificationOpenedApp(remoteMessage => {
+    console.log(
+      '[FCMService] onNotificationOpenedApp Notification caused app to open',
+    );
+    console.log(remoteMessage.data);
 
-  //   if (remoteMessage) {
-  //     if (remoteMessage.data.OrderID !== undefined) {
-  //       const OrderID = remoteMessage.data.OrderID;
-  //       navigate('Orders', {
-  //         screen: 'OrderDetailsScreen',
-  //         params: { OrderID: OrderID },
-  //       });
-  //     } else if (Platform.OS === 'android') {
-  //       if (remoteMessage.notification.android.imageUrl !== '') {
-  //         setstate(prevState => ({
-  //           ...prevState,
-  //           Type: remoteMessage.data.type,
-  //           Description: remoteMessage.notification.body,
-  //           More_Description: remoteMessage.data.item_description,
-  //           Image: remoteMessage.notification.android.imageUrl,
-  //           ItemCode: remoteMessage.data.item_code,
-  //           isVisible: true,
-  //           isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
-  //         }));
+    if (remoteMessage) {
+      if (remoteMessage.data.OrderID !== undefined) {
+        const OrderID = remoteMessage.data.OrderID;
+        navigate('Orders', {
+          screen: 'OrderDetailsScreen',
+          params: { OrderID: OrderID },
+        });
+      } else if (Platform.OS === 'android') {
+        if (remoteMessage.notification.android.imageUrl !== '') {
+          setstate(prevState => ({
+            ...prevState,
+            Type: remoteMessage.data.type,
+            Description: remoteMessage.notification.body,
+            More_Description: remoteMessage.data.item_description,
+            Image: remoteMessage.notification.android.imageUrl,
+            ItemCode: remoteMessage.data.item_code,
+            isVisible: true,
+            isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
+          }));
 
-  //         AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
-  //       } else {
-  //         setstate(prevState => ({ ...prevState, isVisible: false }));
-  //       }
-  //     } else {
-  //       if (remoteMessage.data.fcm_options.image !== '') {
-  //         setstate(prevState => ({
-  //           ...prevState,
-  //           Type: remoteMessage.data.type,
-  //           Description: remoteMessage.notification.body,
-  //           More_Description: remoteMessage.data.item_description,
-  //           Image: remoteMessage.data.fcm_options.image,
-  //           ItemCode: remoteMessage.data.item_code,
-  //           isVisible: true,
-  //           isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
-  //         }));
+          AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+        } else {
+          setstate(prevState => ({ ...prevState, isVisible: false }));
+        }
+      } else {
+        if (remoteMessage.data.fcm_options.image !== '') {
+          setstate(prevState => ({
+            ...prevState,
+            Type: remoteMessage.data.type,
+            Description: remoteMessage.notification.body,
+            More_Description: remoteMessage.data.item_description,
+            Image: remoteMessage.data.fcm_options.image,
+            ItemCode: remoteMessage.data.item_code,
+            isVisible: true,
+            isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
+          }));
 
-  //         AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
-  //       } else {
-  //         setstate(prevState => ({ ...prevState, isVisible: false }));
-  //       }
-  //     }
-  //   }
-  // });
-
-  // messaging()
-  //   .getInitialNotification()
-  //   .then(remoteMessage => {
-  //     if (remoteMessage) {
-  //       if (remoteMessage.data.OrderID !== undefined) {
-  //         const OrderID = remoteMessage.data.OrderID;
-  //         navigate('Orders', {
-  //           screen: 'OrderDetailsScreen',
-  //           params: { OrderID: OrderID },
-  //         });
-  //       } else if (Platform.OS === 'android') {
-  //         if (remoteMessage.notification.android.imageUrl !== '') {
-  //           setstate(prevState => ({
-  //             ...prevState,
-  //             Type: remoteMessage.data.type,
-  //             Description: remoteMessage.notification.body,
-  //             More_Description: remoteMessage.data.item_description,
-  //             Image: remoteMessage.notification.android.imageUrl,
-  //             ItemCode: remoteMessage.data.item_code,
-  //             isVisible: true,
-  //             isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
-  //           }));
-
-  //           AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
-  //         } else {
-  //           setstate(prevState => ({ ...prevState, isVisible: false }));
-  //         }
-  //       } else {
-  //         if (remoteMessage.data.fcm_options.image !== '') {
-  //           setTimeout(() => {
-  //             setstate(prevState => ({
-  //               ...prevState,
-  //               Type: remoteMessage.data.type,
-  //               Description: remoteMessage.notification.body,
-  //               More_Description: remoteMessage.data.item_description,
-  //               Image: remoteMessage.data.fcm_options.image,
-  //               ItemCode: remoteMessage.data.item_code,
-  //               isVisible: true,
-  //               isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
-  //             }));
-
-  //             AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
-  //           }, 1000);
-  //         } else {
-  //           setTimeout(() => {
-  //             setstate(prevState => ({ ...prevState, isVisible: false }));
-  //           }, 1000);
-  //         }
-  //       }
-  //     }
-  //   });
-
-  // React.useEffect(() => {
-  //   console.log('[APP] Main useEffect started');
-  //   // Request notification permissions
-  //   const initializeNotifications = async () => {
-  //     console.log('[INIT] Starting notification initialization');
-  //     // Request Android 13+ notification permission
-  //     if (Platform.OS === 'android' && Platform.Version >= 33) {
-  //       try {
-  //         const granted = await PermissionsAndroid.request(
-  //           PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-  //           {
-  //             title: 'Notification Permission',
-  //             message: 'Allow notifications to receive order updates and promotions',
-  //             buttonPositive: 'Allow',
-  //             buttonNegative: 'Deny',
-  //           }
-  //         );
-
-  //         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //           console.log('Notification permission granted');
-  //         } else {
-  //           console.log('Notification permission denied');
-  //         }
-  //       } catch (err) {
-  //         console.warn('Notification permission error:', err);
-  //       }
-  //     }
-
-  //     // Request Firebase messaging permissions
-  //     await requestPermission();
-  //   };
-
-  //   // Initialize all services
-  //   initializeNotifications();
-
-  //   const branchUnsubscribe = branch.subscribe(handleBranchLink);
-  //   registerAppWithFCM();
-  //   CreatSqlitTable();
-  //   CheckAppVersion();
-
-  //   // Configure local notifications with callback
-  //   LocalNotificationService.configure(onNotificationPop);
-
-  //   // Notification tap handler
-  //   function onNotificationPop(notification) {
-  //     console.log('START onNotificationPop', notification);
-
-  //     // Handle order status notifications
-  //     if (notification.data?.Status !== undefined) {
-  //       const OrderID = notification.data.OrderID;
-  //       navigate('Orders', {
-  //         screen: 'OrderDetailsScreen',
-  //         params: {OrderID: OrderID},
-  //       });
-  //     }
-  //     // Handle image notifications (promotional/menu items)
-  //     else if (
-  //       notification.bigPictureUrl ||
-  //       notification.data?.fcm_options?.image
-  //     ) {
-  //       setstate(prevState => ({
-  //         ...prevState,
-  //         Type: notification.data?.type || '',
-  //         Description: notification.message || '',
-  //         More_Description: notification.data?.item_description || '',
-  //         Image:
-  //           Platform.OS === 'android'
-  //             ? notification.bigPictureUrl
-  //             : notification.data?.fcm_options?.image || '',
-  //         ItemCode: notification.data?.item_code || '',
-  //         isVisible: true,
-  //         isMenuButtonVisible: notification.data?.is_visible_Menu_Button || false,
-  //       }));
-  //     } else {
-  //       setstate(prevState => ({...prevState, isVisible: false}));
-  //     }
-  //   }
-
-  //   // Listen for foreground FCM messages
-  //   const unsubscribeNotification = messaging().onMessage(
-  //     async remoteMessage => {
-  //       console.log('FCM foreground message received:', remoteMessage);
-
-  //       const data = remoteMessage.data || {};
-
-  //       // Handle OTP messages
-  //       if (data.OTP !== undefined) {
-  //         Alert.alert('OTP Verification', data.OTP);
-  //         return;
-  //       }
-
-  //       // Display local notification for other messages
-  //       try {
-  //         const title = remoteMessage.notification?.title || 'Notification';
-  //         const body = remoteMessage.notification?.body || '';
-  //         let imageUrl = '';
-
-  //         if (Platform.OS === 'ios') {
-  //           imageUrl = data.fcm_options?.image || '';
-  //         } else {
-  //           imageUrl = remoteMessage.notification?.android?.imageUrl || '';
-  //         }
-
-  //         LocalNotificationService.localNotification(
-  //           title,
-  //           body,
-  //           imageUrl,
-  //           data,
-  //         );
-  //       } catch (error) {
-  //         console.error('Error displaying local notification:', error);
-  //       }
-  //     },
-  //   );
-
-  //   // Handle Branch deep links
-  //   branch.getFirstReferringParams().then(params => {
-  //     if (params && params['+clicked_branch_link']) {
-  //       const emailVerifyUrls = [
-  //         'https://cafe007.lk/embilipitiya-cafe007/',
-  //       ];
-
-  //       if (
-  //         emailVerifyUrls.includes(params.$canonical_url) ||
-  //         emailVerifyUrls.includes(params.$desktop_url) ||
-  //         emailVerifyUrls.includes(params.custom_url)
-  //       ) {
-  //         UpdateEmailVerify();
-  //       }
-  //     }
-  //   }).catch(error => {
-  //     console.log('Branch deep link error:', error);
-  //   });
-
-  //   // Listen for app state changes
-  //   const subscription = AppState.addEventListener('change', nextAppState => {
-  //     if (
-  //       appState.current.match(/inactive|background/) &&
-  //       nextAppState === 'active'
-  //     ) {
-  //       CheckAppVersion();
-  //     }
-
-  //     appState.current = nextAppState;
-  //     setAppStateVisible(appState.current);
-  //   });
-
-  //   // Cleanup function
-  //   return () => {
-  //     branchUnsubscribe();
-  //     unsubscribeNotification();
-  //     LocalNotificationService.unregister();
-  //     subscription.remove();
-  //   };
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
-  React.useEffect(() => {
-    console.log('[APP] Main useEffect started');
-
-    const initializeNotifications = async () => {
-      console.log('[INIT] Starting notification initialization');
-
-      if (Platform.OS === 'android' && Platform.Version >= 33) {
-        console.log(
-          `[PERMISSION] Android version: ${Platform.Version}, requesting POST_NOTIFICATIONS`,
-        );
-        try {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-            {
-              title: 'Notification Permission',
-              message:
-                'Allow notifications to receive order updates and promotions',
-              buttonPositive: 'Allow',
-              buttonNegative: 'Deny',
-            },
-          );
-
-          console.log(`[PERMISSION] Permission result: ${granted}`);
-
-          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            console.log('Notification permission granted');
-          } else {
-            console.log('Notification permission denied');
-          }
-        } catch (err) {
-          console.error('Notification permission error:', err);
+          AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+        } else {
+          setstate(prevState => ({ ...prevState, isVisible: false }));
         }
       }
+    }
+  });
 
-      console.log('[FIREBASE] Requesting Firebase permissions...');
-      await requestPermission();
-    };
+  messaging()
+    .getInitialNotification()
+    .then(remoteMessage => {
+      if (remoteMessage) {
+        if (remoteMessage.data.OrderID !== undefined) {
+          const OrderID = remoteMessage.data.OrderID;
+          navigate('Orders', {
+            screen: 'OrderDetailsScreen',
+            params: { OrderID: OrderID },
+          });
+        } else if (Platform.OS === 'android') {
+          if (remoteMessage.notification.android.imageUrl !== '') {
+            setstate(prevState => ({
+              ...prevState,
+              Type: remoteMessage.data.type,
+              Description: remoteMessage.notification.body,
+              More_Description: remoteMessage.data.item_description,
+              Image: remoteMessage.notification.android.imageUrl,
+              ItemCode: remoteMessage.data.item_code,
+              isVisible: true,
+              isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
+            }));
 
-    initializeNotifications();
+            AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+          } else {
+            setstate(prevState => ({ ...prevState, isVisible: false }));
+          }
+        } else {
+          if (remoteMessage.data.fcm_options.image !== '') {
+            setTimeout(() => {
+              setstate(prevState => ({
+                ...prevState,
+                Type: remoteMessage.data.type,
+                Description: remoteMessage.notification.body,
+                More_Description: remoteMessage.data.item_description,
+                Image: remoteMessage.data.fcm_options.image,
+                ItemCode: remoteMessage.data.item_code,
+                isVisible: true,
+                isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
+              }));
 
+              AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
+            }, 1000);
+          } else {
+            setTimeout(() => {
+              setstate(prevState => ({ ...prevState, isVisible: false }));
+            }, 1000);
+          }
+        }
+      }
+    });
+
+  React.useEffect(() => {
+    requestPermission();
     const branchUnsubscribe = branch.subscribe(handleBranchLink);
     registerAppWithFCM();
     CreatSqlitTable();
     CheckAppVersion();
 
-    console.log('[LOCAL] Configuring LocalNotificationService...');
     LocalNotificationService.configure(onNotificationPop);
-    console.log('[LOCAL] LocalNotificationService configured');
 
     function onNotificationPop(notification) {
-      console.log('═══════════════════════════════════════');
-      console.log('[TAP] Notification tapped!');
-      console.log('═══════════════════════════════════════');
-      console.log(
-        '[TAP] Full notification:',
-        JSON.stringify(notification, null, 2),
-      );
+      console.log('START  onNotificationPop');
 
-      // Handle order status notifications
-      if (notification.data?.OrderID || notification.userInfo?.OrderID) {
-        const OrderID =
-          notification.data?.OrderID || notification.userInfo?.OrderID;
-        console.log('[TAP] Navigating to order:', OrderID);
-        navigateToOrder(OrderID);
-      }
-      // Handle image notifications (promotional/menu items)
-      else if (
-        notification.bigPictureUrl ||
-        notification.data?.fcm_options?.image ||
-        notification.userInfo?.fcm_options?.image
+      if (notification.data.Status !== undefined) {
+        const OrderID = notification.data.OrderID;
+        navigate('Orders', {
+          screen: 'OrderDetailsScreen',
+          params: { OrderID: OrderID },
+        });
+      } else if (
+        notification.bigPictureUrl !== '' ||
+        notification.data.fcm_options.image !== ''
       ) {
-        console.log('[TAP] Showing image notification modal');
-
-        const data = notification.data || notification.userInfo || {};
-
         setstate(prevState => ({
           ...prevState,
-          Type: data.type || '',
-          Description: notification.message || notification.body || '',
-          More_Description: data.item_description || '',
+          Type: notification.data.type,
+          Description: notification.message,
+          More_Description: notification.data.item_description,
           Image:
             Platform.OS === 'android'
               ? notification.bigPictureUrl
-              : data.fcm_options?.image || '',
-          ItemCode: data.item_code || '',
+              : notification.data.fcm_options.image,
+          ItemCode: notification.data.item_code,
           isVisible: true,
-          isMenuButtonVisible: data.is_visible_Menu_Button || false,
+          isMenuButtonVisible: notification.data.is_visible_Menu_Button,
         }));
-
-        if (data.notification_id) {
-          AsyncStorage.setItem('NID', data.notification_id);
-          console.log('[TAP] Saved notification ID:', data.notification_id);
-        }
       } else {
-        console.log('[TAP] Unknown notification type');
+        setstate(prevState => ({ ...prevState, isVisible: false }));
       }
-      console.log('═══════════════════════════════════════');
     }
-
-    // Listen for foreground FCM messages - MODIFIED TO USE FLASH MESSAGE FOR ORDERS
-    console.log('[FCM] Setting up onMessage listener...');
-    // Replace your onMessage listener with this fixed version:
-
-    // Replace your onMessage listener with this fixed version:
 
     const unsubscribeNotification = messaging().onMessage(
       async remoteMessage => {
-        console.log('');
-        console.log('═══════════════════════════════════════');
-        console.log('[FCM] FOREGROUND MESSAGE RECEIVED!');
-        console.log('═══════════════════════════════════════');
-        console.log(
-          '[FCM] Full message:',
-          JSON.stringify(remoteMessage, null, 2),
-        );
-        playNotificationSound();
-        const data = remoteMessage.data || {};
-
-        // Handle OTP messages
+        const data = remoteMessage.data;
         if (data.OTP !== undefined) {
-          console.log('[OTP] OTP message received:', data.OTP);
           Alert.alert('OTP Verification', data.OTP);
-          return;
-        }
-
-        // CHECK IF THIS IS AN ORDER NOTIFICATION - SHOW FLASH MESSAGE
-        if (data.OrderID || data.Status) {
-          console.log('[ORDER] Order notification - showing FlashMessage');
-
-          const title = remoteMessage.notification?.title || 'Order Update';
-          const body =
-            remoteMessage.notification?.body ||
-            'Your order status has been updated';
-
-          showMessage({
-            autoHide: true,
-            animated: true,
-            floating: true,
-            hideStatusBar: false,
-            duration: 5000,
-            message: title,
-            description: body,
-            type: 'success',
-            titleStyle: {
-              fontSize: 14,
-              fontWeight: 'bold',
-              color: '#000000ff',
-            },
-            textStyle: { fontSize: 12, color: '#000000ff' },
-            backgroundColor: '#ebc16dff',
-            onPress: () => {
-              console.log(
-                '[FLASH] FlashMessage tapped - navigating to order:',
-                data.OrderID,
-              );
-              navigateToOrder(data.OrderID);
-            },
-          });
-
-          return;
-        }
-
-        // PROMOTIONAL/IMAGE NOTIFICATIONS - SHOW NOTIFICATION MODAL
-        try {
-          let imageUrl = '';
-
-          // Get image URL from appropriate location
-          if (Platform.OS === 'ios') {
-            imageUrl = data.fcm_options?.image || data.image || '';
-          } else {
-            imageUrl =
-              remoteMessage.notification?.android?.imageUrl ||
-              data.fcm_options?.image ||
-              data.image ||
-              '';
-          }
-
-          console.log('[PROMO] Image URL found:', imageUrl);
-
-          // If there's an image, show the NotificationModal
-          if (imageUrl) {
-            console.log(
-              '[PROMO] Showing NotificationModal for promotional content',
-            );
-
-            setstate(prevState => ({
-              ...prevState,
-              Type: data.type || '',
-              Description: remoteMessage.notification?.body || '',
-              More_Description: data.item_description || '',
-              Image: imageUrl,
-              ItemCode: data.item_code || '',
-              isVisible: true,
-              isMenuButtonVisible:
-                data.is_visible_Menu_Button === 'true' ||
-                data.is_visible_Menu_Button === true,
-            }));
-
-            // Save notification ID if present
-            if (data.notification_id) {
-              AsyncStorage.setItem('NID', data.notification_id);
-              console.log(
-                '[PROMO] Saved notification ID:',
-                data.notification_id,
-              );
-            }
-          } else {
-            // No image - show simple local notification as fallback
-            console.log(
-              '[NOTIFICATION] No image - showing simple local notification',
-            );
-
-            const title = remoteMessage.notification?.title || 'Notification';
-            const body = remoteMessage.notification?.body || '';
-
-            LocalNotificationService.localNotification(title, body, '', data);
-          }
-
-          console.log('[FCM] Notification handled successfully');
-        } catch (error) {
-          console.error('[FCM] Error handling notification:', error);
-        }
-
-        console.log('═══════════════════════════════════════');
-        console.log('');
-      },
-    );
-    console.log('[FCM] onMessage listener set up');
-
-    // Handle app opened from BACKGROUND by notification tap
-    console.log('[FCM] Setting up onNotificationOpenedApp listener...');
-    const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
-      remoteMessage => {
-        console.log('');
-        console.log('═══════════════════════════════════════');
-        console.log('[BACKGROUND TAP] App opened from background!');
-        console.log('═══════════════════════════════════════');
-
-        if (remoteMessage?.data?.OrderID) {
-          const OrderID = remoteMessage.data.OrderID;
-          console.log('[BACKGROUND TAP] Navigating to order:', OrderID);
-          navigateToOrder(OrderID);
         } else {
-          const imageUrl =
-            Platform.OS === 'android'
-              ? remoteMessage.notification?.android?.imageUrl
-              : remoteMessage.data?.fcm_options?.image;
-
-          if (imageUrl) {
-            setstate(prevState => ({
-              ...prevState,
-              Type: remoteMessage.data?.type || '',
-              Description: remoteMessage.notification?.body || '',
-              More_Description: remoteMessage.data?.item_description || '',
-              Image: imageUrl,
-              ItemCode: remoteMessage.data?.item_code || '',
-              isVisible: true,
-              isMenuButtonVisible:
-                remoteMessage.data?.is_visible_Menu_Button || false,
-            }));
-
-            if (remoteMessage.data?.notification_id) {
-              AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
-            }
+          if (Platform.OS === 'ios') {
+            LocalNotificationService.localNotification(
+              remoteMessage.notification.title,
+              remoteMessage.notification.body,
+              remoteMessage.data.fcm_options.image,
+              remoteMessage.data,
+            );
+          } else {
+            LocalNotificationService.localNotification(
+              remoteMessage.notification.title,
+              remoteMessage.notification.body,
+              remoteMessage.notification.android.imageUrl,
+              remoteMessage.data,
+            );
           }
         }
-        console.log('═══════════════════════════════════════');
       },
     );
 
-    // Handle app opened from QUIT STATE
-    console.log('[FCM] Checking for initial notification (quit state)...');
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage) {
-          console.log('═══════════════════════════════════════');
-          console.log('[QUIT TAP] App opened from quit state!');
-          console.log('═══════════════════════════════════════');
-
-          setTimeout(() => {
-            if (remoteMessage.data?.OrderID) {
-              const OrderID = remoteMessage.data.OrderID;
-              console.log('[QUIT TAP] Navigating to order:', OrderID);
-              navigateToOrder(OrderID);
-            } else {
-              const imageUrl =
-                Platform.OS === 'android'
-                  ? remoteMessage.notification?.android?.imageUrl
-                  : remoteMessage.data?.fcm_options?.image;
-
-              if (imageUrl) {
-                setstate(prevState => ({
-                  ...prevState,
-                  Type: remoteMessage.data?.type || '',
-                  Description: remoteMessage.notification?.body || '',
-                  More_Description: remoteMessage.data?.item_description || '',
-                  Image: imageUrl,
-                  ItemCode: remoteMessage.data?.item_code || '',
-                  isVisible: true,
-                  isMenuButtonVisible:
-                    remoteMessage.data?.is_visible_Menu_Button || false,
-                }));
-
-                if (remoteMessage.data?.notification_id) {
-                  AsyncStorage.setItem(
-                    'NID',
-                    remoteMessage.data.notification_id,
-                  );
-                }
-              }
-            }
-          }, 2000);
+    branch.getFirstReferringParams().then(params => {
+      if (params && params['+clicked_branch_link']) {
+        if (
+          params.$canonical_url ===
+            'https://cafe007.lk/embilipitiya-cafe007/' ||
+          params.$desktop_url === 'https://cafe007.lk/embilipitiya-cafe007/' ||
+          params.custom_url === 'https://cafe007.lk/embilipitiya-cafe007/'
+        ) {
+          UpdateEmailVerify();
         }
-      });
+      }
+    });
 
-    // Branch deep links
-    branch
-      .getFirstReferringParams()
-      .then(params => {
-        if (params && params['+clicked_branch_link']) {
-          const emailVerifyUrls = ['https://cafe007.lk/embilipitiya-cafe007/'];
-
-          if (
-            emailVerifyUrls.includes(params.$canonical_url) ||
-            emailVerifyUrls.includes(params.$desktop_url) ||
-            emailVerifyUrls.includes(params.custom_url)
-          ) {
-            UpdateEmailVerify();
-          }
-        }
-      })
-      .catch(error => {
-        console.log('Branch deep link error:', error);
-      });
-
-    // App state changes
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
         CheckAppVersion();
+        setShowSplash(true);
+        
       }
 
       appState.current = nextAppState;
@@ -1878,96 +1268,46 @@ const App = () => {
     });
 
     return () => {
-      console.log('Cleaning up listeners');
       branchUnsubscribe();
-      unsubscribeOpenedApp();
       unsubscribeNotification();
       LocalNotificationService.unregister();
       subscription.remove();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const initializeNotifications = async () => {
-    console.log('[INIT] Starting notification initialization');
-
-    // Request permissions for local notifications (Android 13+)
-    const localPermissionGranted =
-      await LocalNotificationService.requestPermissions();
-    console.log(
-      '[LOCAL] Local notification permission:',
-      localPermissionGranted,
-    );
-
-    // Request Android 13+ notification permission for FCM
-    if (Platform.OS === 'android' && Platform.Version >= 33) {
-      console.log(
-        `[PERMISSION] Android version: ${Platform.Version}, requesting POST_NOTIFICATIONS`,
-      );
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-          {
-            title: 'Notification Permission',
-            message:
-              'Allow notifications to receive order updates and promotions',
-            buttonPositive: 'Allow',
-            buttonNegative: 'Deny',
-          },
-        );
-
-        console.log(`[PERMISSION] Permission result: ${granted}`);
-      } catch (err) {
-        console.error('Notification permission error:', err);
-      }
-    }
-
-    // Request Firebase messaging permissions
-    console.log('[FIREBASE] Requesting Firebase permissions...');
-    await requestPermission();
-  };
 
   function onClosePopUp() {
     setstate(prevState => ({ ...prevState, isVisible: false }));
   }
-  const playNotificationSound = () => {
-    if (notificationSound.current) {
-      notificationSound.current.stop(() => {
-        notificationSound.current.play(success => {
-          if (success) {
-            console.log('[SOUND] Successfully finished playing');
-          } else {
-            console.log('[SOUND] Playback failed');
-          }
-        });
-      });
-    }
-  };
-  const initialRootRoute = 'SplashScreen';
+
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <SafeAreaView
-        edges={['top']}
-        style={{ flex: 0, backgroundColor: '#F0F0F0' }}
-      />
-      <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-        <AuthContext.Provider value={authContext}>
-          <StatusBar
-            animated={true}
-            translucent={false}
-            hidden={false}
-            barStyle="default"
-          />
+  <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+    <SafeAreaView
+      edges={['top']}
+      style={{ flex: 0, backgroundColor: '#F0F0F0' }}
+    />
+    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+      <AuthContext.Provider value={authContext}>
+        <StatusBar
+          animated={true}
+          translucent={false}
+          hidden={false}
+          barStyle="default"
+        />
+
+        {/* ✅ ADD THIS — show splash over everything */}
+        {showSplash ? (
+          <SplashScreen onFinish={() => setShowSplash(false)} />
+        ) : (
           <NavigationContainer ref={navigationRef}>
             <Provider store={store}>
-              {loginstate.isLoading ? (
-                <RootStack.Navigator screenOptions={{ headerShown: false }}>
+              <RootStack.Navigator>
+                {loginstate.userToken == null ? (
                   <RootStack.Screen
-                    name="SplashScreen"
-                    component={AppSplashScreen}
-                  />
-                </RootStack.Navigator>
-              ) : loginstate.userToken == null ? (
-                <RootStack.Navigator screenOptions={{ headerShown: false }}>
-                  <RootStack.Screen name="Auth">
+                    key="auth-screen"
+                    name="Auth"
+                    options={{ headerShown: false }}
+                  >
                     {() => (
                       <AuthStackNavigation
                         isClick={isClick}
@@ -1978,60 +1318,35 @@ const App = () => {
                       />
                     )}
                   </RootStack.Screen>
-                </RootStack.Navigator>
-              ) : (
-                <RootStack.Navigator screenOptions={{ headerShown: false }}>
+                ) : (
                   <RootStack.Screen
+                    key="app-screen"
                     name="App"
+                    options={{ headerShown: false }}
                     component={BottomTabNavigation}
                   />
-                </RootStack.Navigator>
-              )}
+                )}
+              </RootStack.Navigator>
             </Provider>
-            {loginstate.userToken && (
-              <PromoCard
-                visible={showPromo}
-                promotionsData={promotionsData}
-                onDismiss={handleDismissPromo}
-                onMoreOptions={handleMoreOptions}
-              />
-            )}
           </NavigationContainer>
-        </AuthContext.Provider>
-        <NotificationModal
-          type={state.Type}
-          description={state.Description}
-          more_description={state.More_Description}
-          isMenuButtonVisible={state.isMenuButtonVisible}
-          itemCode={state.ItemCode}
-          image={state.Image}
-          visible={state.isVisible}
-          onItemPress={data => onNotification_Model_Press(data)}
-          onClosePress={() => onClosePopUp()}
-          onMenuPress={data => onNotification_Model_Press(data)}
-        />
-        {/* ADD FLASHMESSAGE COMPONENT HERE - MUST BE LAST */}
-        <FlashMessage
-          position="top"
-          ref={flashMessageRef}
-          style={{ top: Platform.OS === 'android' ? 0 : -50 }}
-          renderFlashMessageIcon={() => (
-            <Image
-              source={require('./assets/cart.png')}
-              style={{
-                width: 28,
-                height: 28,
-                marginLeft: 10,
-                flex: 1,
-                tintColor: '#FFFFFF',
-              }}
-              resizeMode="contain"
-            />
-          )}
-        />
-      </SafeAreaView>
-    </SafeAreaProvider>
-  );
+        )}
+
+      </AuthContext.Provider>
+      <NotificationModal
+        type={state.Type}
+        description={state.Description}
+        more_description={state.More_Description}
+        isMenuButtonVisible={state.isMenuButtonVisible}
+        itemCode={state.ItemCode}
+        image={state.Image}
+        visible={state.isVisible}
+        onItemPress={data => onNotification_Model_Press(data)}
+        onClosePress={() => onClosePopUp()}
+        onMenuPress={data => onNotification_Model_Press(data)}
+      />
+    </SafeAreaView>
+  </SafeAreaProvider>
+);
 };
 
 export default App;
