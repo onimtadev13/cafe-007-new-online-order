@@ -462,10 +462,11 @@ class SearchScreen extends React.PureComponent {
       }),
     })
       .then(res => {
-        log('response', res);
+      
         return res.json();
       })
       .then(json => {
+          console.log('response', json);
         const Productlist = [];
         var Categorylist = [];
         var Department = json.CommonResult.Table[0].Dept_Name;
@@ -483,6 +484,7 @@ class SearchScreen extends React.PureComponent {
           BestSeller: json.CommonResult.Table[0].isBestSeller,
           Offer: json.CommonResult.Table[0].isOffer,
           isSoldOut: json.CommonResult.Table[0].isSoldOut,
+          isPopuler: json.CommonResult.Table[0].Popular,
         });
 
         json.CommonResult.Table.forEach(element => {
@@ -499,6 +501,7 @@ class SearchScreen extends React.PureComponent {
               BestSeller: element.isBestSeller,
               Offer: element.isOffer,
               isSoldOut: element.isSoldOut,
+              isPopuler: json.CommonResult.Table[0].Popular,
             });
           } else {
             Productlist.push({
@@ -513,6 +516,7 @@ class SearchScreen extends React.PureComponent {
               BestSeller: element.isBestSeller,
               Offer: element.isOffer,
               isSoldOut: element.isSoldOut,
+              isPopuler: json.CommonResult.Table[0].Popular,
             });
             Productlist.push({
               Prod_Code: element.Prod_Code,
@@ -526,6 +530,7 @@ class SearchScreen extends React.PureComponent {
               BestSeller: element.isBestSeller,
               Offer: element.isOffer,
               isSoldOut: element.isSoldOut,
+              isPopuler: json.CommonResult.Table[0].Popular,
             });
             Department = element.Dept_Name;
           }
