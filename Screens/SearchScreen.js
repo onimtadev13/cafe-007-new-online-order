@@ -452,6 +452,7 @@ class SearchScreen extends React.PureComponent {
         return res.json();
       })
       .then(json => {
+        console.log('products :',json);
         const Productlist = [];
         var Categorylist = [];
         var Department = json.CommonResult.Table[0].Dept_Name;
@@ -522,7 +523,7 @@ class SearchScreen extends React.PureComponent {
             Categorylist.push(obj.Prod_Name);
           }
         });
-
+this.LoadPuppularProducts(Loca);
         this.setState({
           ItemList: Productlist.filter(i => i.header === false),
           Productlist: Productlist,
@@ -544,6 +545,67 @@ class SearchScreen extends React.PureComponent {
           ],
           {cancelable: false},
         );
+      });
+  }
+
+  LoadPuppularProducts(Loca) {
+    fetch(APIURL, {
+      method: 'POST',
+      cache: 'no-cache',
+      headers: {
+        'content-type': 'application/json',
+        'cache-control': 'no-cache',
+      },
+      body: JSON.stringify({
+        HasReturnData: 'T',
+        Parameters: [
+          {
+            Para_Data: '130',
+            Para_Direction: 'Input',
+            Para_Lenth: 10,
+            Para_Name: '@Iid',
+            Para_Type: 'int',
+          },
+          {
+            Para_Data: Loca,
+            Para_Direction: 'Input',
+            Para_Lenth: 100,
+            Para_Name: '@Text1',
+            Para_Type: 'VARCHAR',
+          },
+        ],
+        SpName: 'sp_Android_Common_API',
+        con: '1',
+      }),
+    })
+      .then(res => {
+        return res.json();
+      })
+      .then(json => {
+        console.log('populer :',json);
+        
+        // const PuppularList = [];
+        // json.CommonResult.Table.forEach(element => {
+        //   PuppularList.push({
+        //     Prod_Code: element.Prod_Code,
+        //     Prod_Name: element.Prod_Name,
+        //     Dept_Name: element.Dept_Name,
+        //     ImagePath: element.ImagePath,
+        //     More_Descrip: element.More_Descrip,
+        //     Selling_Price: this.numberWithCommas(element.Selling_Price),
+        //     NconvertPrice: element.Selling_Price,
+        //     BestSeller: element.isBestSeller,
+        //     Offer: element.isOffer,
+        //     isSoldOut: element.isSoldOut,
+        //   });
+        // });
+
+        // this.setState({
+        //   PuppularList: PuppularList,
+        // });
+      })
+      .catch(er => {
+        console.log(er);
       });
   }
 }
