@@ -18,7 +18,6 @@ import { openDatabase } from 'react-native-sqlite-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthStackNavigation } from './Routes/StackNavigation';
 import { createStackNavigator } from '@react-navigation/stack';
-import SplashScreen from 'react-native-splash-screen';
 import { APIURL, OTPAPIURL, SENDTESTNOTIFICTION } from './Data/CloneData';
 import messaging from '@react-native-firebase/messaging';
 import { firebase } from '@react-native-firebase/app';
@@ -27,6 +26,7 @@ import branch from 'react-native-branch';
 import LocalNotificationService from './Services/LocalNotificationService';
 import NotificationModal from './Components/NotificationModal';
 import PromoCard from './Components/PromoCard';
+import SplashScreen from './Screens/SplashScreen';
 
 import {
   SafeAreaProvider,
@@ -46,6 +46,7 @@ const App = () => {
   const [isButtonClick, setButtonClick] = React.useState(false);
   const [isRegister, setRegister] = React.useState(false);
   const appState = React.useRef(AppState.currentState);
+  const [showSplash, setShowSplash] = useState(true);
   const [appStateVisible, setAppStateVisible] = React.useState(
     appState.current,
   );
@@ -481,7 +482,7 @@ const App = () => {
           CheckUserLogin(); // This now handles auth better
         } else {
           setUpdated(false);
-          SplashScreen.hide();
+          // SplashScreen.hide();
           Alert.alert(
             'Update is available',
             'An update for the application is available',
@@ -502,7 +503,7 @@ const App = () => {
         AsyncStorage.getItem('phonenumber').then(phone => {
           if (phone) {
             dispatch({ Type: 'RETREIVE_TOKEN', Token: phone });
-            SplashScreen.hide();
+            // SplashScreen.hide();
           } else {
             Alert.alert(
               'Warning',
@@ -672,7 +673,7 @@ const App = () => {
     if (!mobilenumber) {
       dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
       setTimeout(() => {
-        SplashScreen.hide();
+        // SplashScreen.hide();
       }, 1000);
       return;
     }
@@ -786,7 +787,7 @@ const App = () => {
         })
         .finally(() => {
           setTimeout(() => {
-            SplashScreen.hide();
+            // SplashScreen.hide();
           }, 1000);
         });
     });
@@ -1258,6 +1259,8 @@ const App = () => {
         nextAppState === 'active'
       ) {
         CheckAppVersion();
+        setShowSplash(true);
+        
       }
 
       appState.current = nextAppState;
@@ -1278,20 +1281,24 @@ const App = () => {
   }
 
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <SafeAreaView
-        edges={['top']}
-        style={{ flex: 0, backgroundColor: '#F0F0F0' }}
-      />
-      <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-        <AuthContext.Provider value={authContext}>
-          <StatusBar
-            animated={true}
-            translucent={false}
-            hidden={false}
-            barStyle="default"
-          />
+  <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+    <SafeAreaView
+      edges={['top']}
+      style={{ flex: 0, backgroundColor: '#F0F0F0' }}
+    />
+    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+      <AuthContext.Provider value={authContext}>
+        <StatusBar
+          animated={true}
+          translucent={false}
+          hidden={false}
+          barStyle="default"
+        />
 
+        {/* ✅ ADD THIS — show splash over everything */}
+        {showSplash ? (
+          <SplashScreen onFinish={() => setShowSplash(false)} />
+        ) : (
           <NavigationContainer ref={navigationRef}>
             <Provider store={store}>
               <RootStack.Navigator>
@@ -1322,22 +1329,24 @@ const App = () => {
               </RootStack.Navigator>
             </Provider>
           </NavigationContainer>
-        </AuthContext.Provider>
-        <NotificationModal
-          type={state.Type}
-          description={state.Description}
-          more_description={state.More_Description}
-          isMenuButtonVisible={state.isMenuButtonVisible}
-          itemCode={state.ItemCode}
-          image={state.Image}
-          visible={state.isVisible}
-          onItemPress={data => onNotification_Model_Press(data)}
-          onClosePress={() => onClosePopUp()}
-          onMenuPress={data => onNotification_Model_Press(data)}
-        />
-      </SafeAreaView>
-    </SafeAreaProvider>
-  );
+        )}
+
+      </AuthContext.Provider>
+      <NotificationModal
+        type={state.Type}
+        description={state.Description}
+        more_description={state.More_Description}
+        isMenuButtonVisible={state.isMenuButtonVisible}
+        itemCode={state.ItemCode}
+        image={state.Image}
+        visible={state.isVisible}
+        onItemPress={data => onNotification_Model_Press(data)}
+        onClosePress={() => onClosePopUp()}
+        onMenuPress={data => onNotification_Model_Press(data)}
+      />
+    </SafeAreaView>
+  </SafeAreaProvider>
+);
 };
 
 export default App;

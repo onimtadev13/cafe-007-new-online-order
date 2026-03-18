@@ -4516,6 +4516,7 @@ class CheckoutScreen extends React.Component {
   }
   // Method 1: Called when order needs to be saved before payment
   async OnlineOrderDataSaveBeforPay(isCard) {
+    console.log('order placed.........');
     let DeliveryCharge = 0;
     let ServiceCharge = 0;
 

@@ -21,6 +21,7 @@ import OrderScreen from '../Screens/OrderScreen';
 import OrderCancelScreen from '../Screens/OrderCancelScreen';
 import BottomTabNavigation from './BottomTabNavigation';
 import PromotionsScreen from '../Screens/PromotionsScreen';
+import SplashScreen from '../Screens/SplashScreen';
 
 const Stack = createStackNavigator();
 
@@ -33,6 +34,15 @@ const AuthStackNavigation = ({
 }) => {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
+      
+
+      <Stack.Screen
+        name="SplashScreen"
+        component={SplashScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
       
       <Stack.Screen
         name="LoginScreen"

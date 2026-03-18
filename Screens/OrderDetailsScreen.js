@@ -1601,8 +1601,140 @@ export default class OrderDetailsScreen extends React.PureComponent {
     );
   }
 
-  LoadOrderDetail = async () => {
+  // LoadOrderDetail = async () => {
+  //   const Mobile = await AsyncStorage.getItem('phonenumber');
+  //   fetch(ORDERVIEW, {
+  //     method: 'POST',
+  //     cache: 'no-cache',
+  //     headers: {
+  //       'content-type': 'application/json',
+  //       'cache-control': 'no-cache',
+  //     },
+  //     body: JSON.stringify({
+  //       MobileNo: Mobile,
+  //       OrderId: this.state.OrderID,
+  //     }),
+  //   })
+  //     .then(res => {
+  //       return res.json();
+  //     })
+  //     .then(json => {
+  //       const SList = [];
+  //       const Images = [];
+  //       var ImgPath = '';
+  //       const NetTotal = json.NetTotal;
+  //       const DineType = json.DineType;
+  //       const PaymentType = json.PaymentType;
+  //       const DeliveryAddress = json.DeliveryAddress;
+  //       const InsertDate = json.InsertDate;
+  //       const Tax = json.Tax;
+  //       const Discount = json.Discount;
+  //       const DeliveryCharge = json.DeliveryCharge;
+  //       const ServiceCharge = json.ServiceCharge;
+  //       const SubTotal = json.SubTotal;
+  //       const OrderStatus = json.OrderStatus;
+  //       const ScheduleTime = json.ScheduleTime;
+  //       const BranchLocation = json.BranchLocation;
+  //       const Items = json.Items;
+
+  //       json.Items.forEach(element => {
+  //         if (element.ProductIMG === null) {
+  //           ImgPath = '';
+  //         } else {
+  //           ImgPath = element.ProductIMG.trim();
+  //         }
+  //         Images.push({ProductIMG: ImgPath});
+  //       });
+
+  //       // if (DineType === "Delivery") {
+  //       //     if (OrderStatus == "1") {
+  //       //         SList.push("Processing")
+  //       //     } else if (OrderStatus == "2") {
+  //       //         SList.push("Processing", "Accept", "Preparing")
+  //       //     } else if (OrderStatus == "3") {
+  //       //         SList.push("Processing", "Accept", "Preparing", "Delivering")
+  //       //     } else if (OrderStatus == "5") {
+  //       //         SList.push("Processing", "Accept", "Preparing", "Delivering", "Complete")
+  //       //     }
+  //       // } else {
+  //       //     if (OrderStatus == "1") {
+  //       //         SList.push("Processing")
+  //       //     } else if (OrderStatus == "2") {
+  //       //         SList.push("Processing", "Accept", "Preparing")
+  //       //     } else if (OrderStatus == "5") {
+  //       //         SList.push("Processing", "Accept", "Preparing", "Complete")
+  //       //     }
+  //       // }
+
+  //       if (OrderStatus == '1') {
+  //         SList.push('Processing');
+  //       } else if (OrderStatus == '2') {
+  //         SList.push('Processing', 'Accept', 'Preparing');
+  //       } else if (OrderStatus == '3') {
+  //         SList.push('Processing', 'Accept', 'Preparing', 'Delivering');
+  //       } else if (OrderStatus == '4') {
+  //         SList.push('Processing', 'Cancel');
+  //       } else if (OrderStatus == '5') {
+  //         SList.push(
+  //           'Processing',
+  //           'Accept',
+  //           'Preparing',
+  //           'Delivering',
+  //           'Finish',
+  //         );
+  //       }
+
+  //       this.setState({
+  //         InsertDate: InsertDate,
+  //         NetTotal: NetTotal,
+  //         DineType: DineType,
+  //         PaymentType: PaymentType,
+  //         DeliveryAddress: DeliveryAddress,
+  //         Tax: Tax,
+  //         Discount: Discount,
+  //         DeliveryCharge: DeliveryCharge,
+  //         ServiceCharge: ServiceCharge,
+  //         SubTotal: SubTotal,
+  //         OrderStatus: OrderStatus,
+  //         OrderItemList: Items,
+  //         ImageList: Images,
+  //         isLoading: false,
+  //         StatusList: SList,
+  //         ScheduleTime: ScheduleTime,
+  //         BranchLocation: BranchLocation,
+  //         isShowLess:
+  //           OrderStatus === '5' ? false : OrderStatus === '4' ? false : true,
+  //       });
+
+  //       // console.log(OrderStatus);
+  //     })
+  //     .catch(er => {
+  //       console.log('LoadOrderDetail', er);
+  //       Alert.alert(
+  //         'Warning',
+  //         "The operation couldn't be completed.",
+  //         [
+  //           {
+  //             text: 'Try Again',
+  //             onPress: () => this.LoadOrderDetail(),
+  //           },
+  //           {
+  //             text: 'Close',
+  //           },
+  //         ],
+  //         {cancelable: false},
+  //       );
+  //     });
+  // };
+
+
+LoadOrderDetail = async () => {
     const Mobile = await AsyncStorage.getItem('phonenumber');
+    
+    console.log('=== LoadOrderDetail START ===');
+    console.log('Mobile:', Mobile);
+    console.log('OrderID:', this.state.OrderID);
+
     fetch(ORDERVIEW, {
       method: 'POST',
       cache: 'no-cache',
@@ -1616,9 +1748,28 @@ export default class OrderDetailsScreen extends React.PureComponent {
       }),
     })
       .then(res => {
+        console.log('=== RAW RESPONSE ===');
+        console.log('Response status:', res.status);
+        console.log('Response ok:', res.ok);
         return res.json();
       })
       .then(json => {
+        console.log('=== JSON RESPONSE ===');
+        console.log('Full JSON:', JSON.stringify(json, null, 2));
+
+        // Check each field individually
+        console.log('json is null/undefined:', json == null);
+        console.log('json.NetTotal:', json?.NetTotal);
+        console.log('json.DineType:', json?.DineType);
+        console.log('json.PaymentType:', json?.PaymentType);
+        console.log('json.OrderStatus:', json?.OrderStatus);
+        console.log('json.Items:', json?.Items);
+        console.log('json.Items type:', typeof json?.Items);
+        console.log('json.Items is null:', json?.Items === null);
+        console.log('json.Items is undefined:', json?.Items === undefined);
+        console.log('json.Items is array:', Array.isArray(json?.Items));
+        console.log('json.Items length:', json?.Items?.length);
+
         const SList = [];
         const Images = [];
         var ImgPath = '';
@@ -1637,34 +1788,29 @@ export default class OrderDetailsScreen extends React.PureComponent {
         const BranchLocation = json.BranchLocation;
         const Items = json.Items;
 
-        json.Items.forEach(element => {
-          if (element.ProductIMG === null) {
-            ImgPath = '';
-          } else {
-            ImgPath = element.ProductIMG.trim();
-          }
-          Images.push({ProductIMG: ImgPath});
-        });
+        console.log('=== BEFORE forEach ===');
+        console.log('Items variable:', Items);
+        console.log('Items === null:', Items === null);
+        console.log('Items === undefined:', Items === undefined);
+        console.log('Array.isArray(Items):', Array.isArray(Items));
 
-        // if (DineType === "Delivery") {
-        //     if (OrderStatus == "1") {
-        //         SList.push("Processing")
-        //     } else if (OrderStatus == "2") {
-        //         SList.push("Processing", "Accept", "Preparing")
-        //     } else if (OrderStatus == "3") {
-        //         SList.push("Processing", "Accept", "Preparing", "Delivering")
-        //     } else if (OrderStatus == "5") {
-        //         SList.push("Processing", "Accept", "Preparing", "Delivering", "Complete")
-        //     }
-        // } else {
-        //     if (OrderStatus == "1") {
-        //         SList.push("Processing")
-        //     } else if (OrderStatus == "2") {
-        //         SList.push("Processing", "Accept", "Preparing")
-        //     } else if (OrderStatus == "5") {
-        //         SList.push("Processing", "Accept", "Preparing", "Complete")
-        //     }
-        // }
+        // Guard before forEach so the rest of the function still runs
+        if (!Items || !Array.isArray(Items)) {
+          console.warn('!!! Items is null/undefined/not-array — skipping forEach !!!');
+          console.warn('This is the source of your crash. API returned:', JSON.stringify(json));
+        } else {
+          console.log('Items is valid, length:', Items.length);
+          Items.forEach((element, idx) => {
+            console.log(`Item[${idx}]:`, JSON.stringify(element));
+            console.log(`Item[${idx}].ProductIMG:`, element.ProductIMG);
+            if (element.ProductIMG === null) {
+              ImgPath = '';
+            } else {
+              ImgPath = element.ProductIMG.trim();
+            }
+            Images.push({ProductIMG: ImgPath});
+          });
+        }
 
         if (OrderStatus == '1') {
           SList.push('Processing');
@@ -1684,6 +1830,11 @@ export default class OrderDetailsScreen extends React.PureComponent {
           );
         }
 
+        console.log('=== setState ===');
+        console.log('OrderStatus:', OrderStatus);
+        console.log('Images built:', Images);
+        console.log('SList built:', SList);
+
         this.setState({
           InsertDate: InsertDate,
           NetTotal: NetTotal,
@@ -1696,7 +1847,7 @@ export default class OrderDetailsScreen extends React.PureComponent {
           ServiceCharge: ServiceCharge,
           SubTotal: SubTotal,
           OrderStatus: OrderStatus,
-          OrderItemList: Items,
+          OrderItemList: Items ?? [],
           ImageList: Images,
           isLoading: false,
           StatusList: SList,
@@ -1706,10 +1857,13 @@ export default class OrderDetailsScreen extends React.PureComponent {
             OrderStatus === '5' ? false : OrderStatus === '4' ? false : true,
         });
 
-        // console.log(OrderStatus);
+        console.log('=== LoadOrderDetail COMPLETE ===');
       })
       .catch(er => {
-        console.log('LoadOrderDetail', er);
+        console.log('=== LoadOrderDetail ERROR ===');
+        console.log('Error type:', er?.name);
+        console.log('Error message:', er?.message);
+        console.log('Full error:', er);
         Alert.alert(
           'Warning',
           "The operation couldn't be completed.",
@@ -1726,6 +1880,7 @@ export default class OrderDetailsScreen extends React.PureComponent {
         );
       });
   };
+
 
   onSheetClose() {
     console.log('close');

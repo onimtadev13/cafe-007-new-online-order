@@ -3,61 +3,64 @@ import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import RNBranch
-import Firebase  // ✅ ADD THIS IMPORT
+import Firebase
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     var reactNativeDelegate: ReactNativeDelegate?
     var reactNativeFactory: RCTReactNativeFactory?
-    
+
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         // ✅ INITIALIZE FIREBASE FIRST (CRITICAL!)
         FirebaseApp.configure()
-        
+
         // INITIALIZE BRANCH BEFORE REACT NATIVE
         RNBranch.initSession(launchOptions: launchOptions, isReferrable: true)
-        
+
         let delegate = ReactNativeDelegate()
         let factory = RCTReactNativeFactory(delegate: delegate)
         delegate.dependencyProvider = RCTAppDependencyProvider()
+
         reactNativeDelegate = delegate
         reactNativeFactory = factory
+
         window = UIWindow(frame: UIScreen.main.bounds)
         factory.startReactNative(
             withModuleName: "Cafe_007",
             in: window,
             launchOptions: launchOptions
         )
+
+
         return true
     }
-    
+
     // BRANCH URL HANDLING
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         return RNBranch.branch.application(app, open: url, options: options)
     }
-    
+
     // BRANCH UNIVERSAL LINKS HANDLING
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         return RNBranch.continue(userActivity)
     }
-    
-    // BRANCH PUSH NOTIFICATION HANDLING (FIXED)
+
+    // BRANCH PUSH NOTIFICATION HANDLING
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        // Branch handles push notifications internally through the SDK
-        // No need to explicitly call handlePushNotification
         completionHandler(.newData)
     }
 }
 
+// ... ReactNativeDelegate stays exactly the same
 class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
     override func sourceURL(for bridge: RCTBridge) -> URL? {
         self.bundleURL()
     }
-    
+
     override func bundleURL() -> URL? {
         #if DEBUG
         RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
