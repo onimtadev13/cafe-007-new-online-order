@@ -26,26 +26,42 @@ export default class OrderImageSlider extends React.PureComponent {
     direction: '',
   };
 
-  componentDidMount() {
-    this.loopBanners(-1);
+ componentDidMount() {
+  // Don't start loop here — BannerList may be empty
+}
+
+componentDidUpdate(prevProps) {
+  if (
+    prevProps.ImageList !== this.props.ImageList &&
+    this.props.ImageList.length > 0
+  ) {
+    clearInterval(this.myInterval); // clear any existing interval
+    this.setState({ BannerList: this.props.ImageList }, () => {
+      this.loopBanners(-1);
+    });
   }
+}
 
   componentWillUnmount() {
     clearInterval(this.myInterval);
   }
+loopBanners = number => {
+  var ll = this.state.BannerList.length;
+  if (ll === 0) return; // guard: don't start if empty
 
-  loopBanners = number => {
-    var ll = this.state.BannerList.length;
-    var i = number;
-    this.myInterval = setInterval(() => {
-      if (i === ll - 1 && i < ll) {
-        i = 0;
-      } else {
-        i = i + 1;
-      }
-      this.flatref.scrollToIndex({index: i, animated: true, viewOffset: 0});
-    }, 3000);
-  };
+  var i = number;
+  this.myInterval = setInterval(() => {
+    const ll = this.state.BannerList.length; // re-read inside interval
+    if (ll === 0 || !this.flatref) return;   // guard both
+
+    if (i === ll - 1 && i < ll) {
+      i = 0;
+    } else {
+      i = i + 1;
+    }
+    this.flatref.scrollToIndex({index: i, animated: true, viewOffset: 0});
+  }, 3000);
+};
 
   change = ({nativeEvent}) => {
     const slide = Math.ceil(

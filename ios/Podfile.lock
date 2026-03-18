@@ -3601,7 +3601,7 @@ SPEC CHECKSUMS:
   payhere-mobilesdk-reactnative: 6c980080dc03bb823f0f0044696b1c88c46894f3
   payHereSDK: b918a8b15cca0c0f58677b73df3b4b354925df6f
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
+  RCT-Folly: 59ec0ac1f2f39672a0c6e6cecdd39383b764646f
   RCTDeprecation: c0ed3249a97243002615517dff789bf4666cf585
   RCTRequired: 58719f5124f9267b5f9649c08bf23d9aea845b23
   RCTTypeSafety: 4aefa8328ab1f86da273f08517f1f6b343f6c2cc

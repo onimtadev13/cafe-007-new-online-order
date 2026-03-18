@@ -76,7 +76,8 @@ export default class OrderDetailsScreen extends React.PureComponent {
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    await this.LoadOrderDetail();
     if (this.state.PreScreen === 'OrderScreen') {
       this.setState({backStatus: '1'});
       console.log('1');
@@ -84,7 +85,7 @@ export default class OrderDetailsScreen extends React.PureComponent {
       this.setState({backStatus: '0'});
     }
 
-    this.LoadOrderDetail();
+   
     this.localNotification();
   }
 

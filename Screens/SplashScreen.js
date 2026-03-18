@@ -89,19 +89,19 @@ const SplashScreen = ({ onFinish }) => {
     ]).start();
   }, [fadeAnim, scaleAnim]);
 
-  useEffect(() => {
-    runAnimation();
+useEffect(() => {
+  runAnimation();
 
-    const timer = setTimeout(() => {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: false,
-      }).start(() => onFinish());
-    }, 5000);
+  const timer = setTimeout(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 400,
+      useNativeDriver: true, // ✅ was false, must match the driver used above
+    }).start(() => onFinish());
+  }, 5000);
 
-    return () => clearTimeout(timer);
-  }, [fadeAnim, scaleAnim, onFinish, runAnimation]);
+  return () => clearTimeout(timer);
+}, [fadeAnim, scaleAnim, onFinish, runAnimation]);
 
   return (
     <View style={styles.container}>

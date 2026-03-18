@@ -36,13 +36,7 @@ const AuthStackNavigation = ({
     <Stack.Navigator screenOptions={{headerShown: false}}>
       
 
-      <Stack.Screen
-        name="SplashScreen"
-        component={SplashScreen}
-        options={{
-          headerShown: false,
-        }}
-      />
+  
       
       <Stack.Screen
         name="LoginScreen"
