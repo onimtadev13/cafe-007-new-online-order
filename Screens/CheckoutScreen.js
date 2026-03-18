@@ -1684,9 +1684,9 @@ class CheckoutScreen extends React.Component {
                 marginRight: 30,
               }}
             >
-              1. The order price might changed.{'\n'}2. Some of the items in the
-              order will be out of stock and those items will be not delivered.
-              There for total order value will be changed.{' '}
+              1. The order price might change.{'\n'}2. Some items in the
+              order may be out of stock, and those items will not be delivered.
+              Therefore, the total order value will be changed.{' '}
             </Text>
 
             <View

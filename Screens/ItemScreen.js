@@ -16,7 +16,6 @@ import { NumericFormat } from 'react-number-format';
 import { APIURL } from '../Data/CloneData';
 import { connect } from 'react-redux';
 import CheckBox from '@react-native-community/checkbox';
-import Star from 'react-native-star-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RadioGroup from 'react-native-radio-buttons-group';
 import FastImage from 'react-native-fast-image';
@@ -39,6 +38,7 @@ class ItemScreen extends React.PureComponent {
       ProductPrice: this.props.route.params.PPrice,
       ProductIMG: this.props.route.params.IMG,
       isDiscounted: this.props.route.params.isDiscounted,
+      isPopular: this.props.route.params.isPopular,
       scrollY: new Animated.Value(0),
       scrollPosition: 0,
       itemQty: 1,
@@ -879,6 +879,7 @@ class ItemScreen extends React.PureComponent {
           index: this.props.route.params.index,
           LocationDB: this.state.LocationDB,
           isDiscounted: this.state.isDiscounted,
+          isPopular: this.state.isPopular,
         };
 
         if (this.state.userlog !== null) {
@@ -905,6 +906,7 @@ class ItemScreen extends React.PureComponent {
           Extra: Extralist,
           LocationDB: this.state.LocationDB,
           isDiscounted: this.state.isDiscounted,
+          isPopular: this.state.isPopular,
         };
 
         if (this.state.userlog !== null) {
@@ -1095,31 +1097,42 @@ class ItemScreen extends React.PureComponent {
                 </View>
               </View>
 
-              <View
-                style={{ marginRight: 20, alignItems: 'center', marginTop: 20 }}
-              >
-                <Text
-                  style={{
-                    fontFamily:
-                      Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-                    fontSize: 28,
-                  }}
-                >
-                  4.7
-                </Text>
-                <Star score={4.7} style={{ width: 120, height: 25 }} />
-                <Text
-                  style={{
-                    fontFamily:
-                      Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                    fontSize: 15,
-                    color: '#5C5C5C',
-                    marginTop: 5,
-                  }}
-                >
-                  (35 Reviews)
-                </Text>
-              </View>
+              {this.state.isPopular && (
+  <View
+    style={{ marginRight: 20, alignItems: 'center', marginTop: 20 }}
+  >
+    <View
+      style={{
+        backgroundColor: '#FF6900',
+        borderRadius: 10,
+        paddingVertical: 6,
+        paddingHorizontal: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <FontAwesome6
+        name="fire"
+        size={22}
+        color="white"
+        solid
+      />
+      <Text
+        style={{
+          color: 'white',
+          fontSize: 13,
+          marginTop: 5,
+          fontFamily:
+            Platform.OS === 'ios'
+              ? 'Asap-Regular_Bold'
+              : 'AsapBold',
+        }}
+      >
+        Popular
+      </Text>
+    </View>
+  </View>
+)}
             </View>
 
             <View style={{ margin: 20 }}>

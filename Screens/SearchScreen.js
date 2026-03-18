@@ -218,6 +218,7 @@ class SearchScreen extends React.PureComponent {
     const FilterList = this.state.Productlist.filter(
       i => i.Dept_Name === Category && i.Prod_Name !== Category,
     );
+    console.log('filterlist', FilterList);
     this.props.navigation.navigate('ProductListScreen', {
       ItemList: FilterList,
       Title: Category,

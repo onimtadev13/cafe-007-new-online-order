@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import FoodQtyLabel from '../Components/Food&QtyLabel';
-import RatingStarIcon from '../Components/RatingStarIcon';
 
 export default class ItemView extends React.PureComponent {
   render() {
@@ -26,6 +25,7 @@ export default class ItemView extends React.PureComponent {
             PPrice: item.NconvertPrice,
             IMG: item.ImagePath,
             isDiscounted: item.isDiscounted,
+            isPopular: item.isPopular,
           })
         }
       >
@@ -80,7 +80,39 @@ export default class ItemView extends React.PureComponent {
                 {item.Prod_Name}
               </Text>
               {/* <Text numberOfLines={1} style={{ textTransform: 'lowercase', marginBottom: 5, color: '#5C5C5C', fontSize: 14, fontFamily: "AsapRegular" }}>@{item.Prod_Name}</Text> */}
-              <RatingStarIcon rate={4.7} isSoldOut={item.isSoldOut} />
+             {item.isPopular && (
+  <View
+    style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 4,
+    }}
+  >
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FF6900',
+        borderRadius: 6,
+        paddingVertical: 3,
+        paddingHorizontal: 8,
+        alignSelf: 'flex-start',
+      }}
+    >
+      <Text
+        style={{
+          color: 'white',
+          fontSize: 12,
+          fontFamily:
+            Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+          marginRight: 4,
+        }}
+      >
+        Popular
+      </Text>
+    </View>
+  </View>
+)}
               <Text
                 numberOfLines={2}
                 style={{
