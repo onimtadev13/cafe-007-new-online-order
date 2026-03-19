@@ -1567,6 +1567,7 @@ class DashboardScreen extends React.PureComponent {
               }}
             />
             <ScrollView>
+              {/* About us description */}
               <Text
                 allowFontScaling={false}
                 style={{
@@ -1588,8 +1589,8 @@ class DashboardScreen extends React.PureComponent {
                 inspired fast food serving some of the best burgers, sandwiches,
                 wraps, drinks and desserts out of Colombo.
               </Text>
-              {}
 
+              {/* Email */}
               <TouchableOpacity
                 onPress={() => Linking.openURL('mailto:info@cafe007.lk')}
                 accessibilityRole="button"
@@ -1611,6 +1612,7 @@ class DashboardScreen extends React.PureComponent {
                   info@cafe007.lk
                 </Text>
               </TouchableOpacity>
+
               <View
                 style={{
                   height: 1,
@@ -1622,6 +1624,7 @@ class DashboardScreen extends React.PureComponent {
                 }}
               />
 
+              {/* Location contact */}
               <View
                 style={{
                   flexDirection: 'row',
@@ -1631,74 +1634,6 @@ class DashboardScreen extends React.PureComponent {
                   justifyContent: 'center',
                 }}
               >
-                {/* <View style={{ margin: 10, alignItems: 'flex-start' }}>
-                  <Text
-                    allowFontScaling={false}
-                    style={{
-                      fontFamily:
-                        Platform.OS === 'ios'
-                          ? 'Asap-Regular_SemiBold'
-                          : 'AsapSemiBold',
-                      fontSize: 16,
-                      color: 'black',
-                      textAlign: 'left',
-                    }}
-                  >
-                    {this.state.LocationI}
-                  </Text>
-                  <Text
-                    allowFontScaling={false}
-                    style={{
-                      fontFamily:
-                        Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                      fontSize: 16,
-                      color: 'black',
-                      textAlign: 'left',
-                    }}
-                  >
-                    {this.state.LocationIAddress}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() =>
-                      Linking.openURL(`tel:${this.state.LocationIPhone}`)
-                    }
-                  >
-                    <Text
-                      allowFontScaling={false}
-                      style={{
-                        fontFamily:
-                          Platform.OS === 'ios'
-                            ? 'Asap-Regular'
-                            : 'AsapRegular',
-                        fontSize: 16,
-                        color: 'black',
-                        textAlign: 'left',
-                      }}
-                    >
-                      Tel: {this.state.LocationIPhone}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() =>
-                      Linking.openURL(`tel:${this.state.LocationIMobile}`)
-                    }
-                  >
-                    <Text
-                      allowFontScaling={false}
-                      style={{
-                        fontFamily:
-                          Platform.OS === 'ios'
-                            ? 'Asap-Regular'
-                            : 'AsapRegular',
-                        fontSize: 16,
-                        color: 'black',
-                        textAlign: 'left',
-                      }}
-                    >
-                      Tel: {this.state.LocationIMobile}
-                    </Text>
-                  </TouchableOpacity>
-                </View> */}
                 <View style={{ margin: 10, alignItems: 'center' }}>
                   <Text
                     allowFontScaling={false}
@@ -1709,7 +1644,7 @@ class DashboardScreen extends React.PureComponent {
                           : 'AsapSemiBold',
                       fontSize: 16,
                       color: 'black',
-                      textAlign: 'right',
+                      textAlign: 'center',
                     }}
                   >
                     {this.state.LocationII}
@@ -1721,7 +1656,7 @@ class DashboardScreen extends React.PureComponent {
                         Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                       fontSize: 16,
                       color: 'black',
-                      textAlign: 'right',
+                      textAlign: 'center',
                     }}
                   >
                     {this.state.LocationIIAddress}
@@ -1740,7 +1675,7 @@ class DashboardScreen extends React.PureComponent {
                             : 'AsapRegular',
                         fontSize: 16,
                         color: 'black',
-                        textAlign: 'right',
+                        textAlign: 'center',
                       }}
                     >
                       Tel: {this.state.LocationIIPhone}
@@ -1760,7 +1695,7 @@ class DashboardScreen extends React.PureComponent {
                             : 'AsapRegular',
                         fontSize: 16,
                         color: 'black',
-                        textAlign: 'right',
+                        textAlign: 'center',
                       }}
                     >
                       Tel: {this.state.LocationIIMobile}
@@ -1768,6 +1703,7 @@ class DashboardScreen extends React.PureComponent {
                   </TouchableOpacity>
                 </View>
               </View>
+
               <View
                 style={{
                   height: 1,
@@ -1778,91 +1714,102 @@ class DashboardScreen extends React.PureComponent {
                 }}
               />
 
-              <Text
-                style={{
-                  margin: 10,
-                  fontFamily:
-                    Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                  fontSize: 18,
-                  color: 'black',
-                  alignSelf: 'center',
-                }}
-              >
-                version {getVersion()}
-              </Text>
+              {/* Bottom row: powered by (left) | version + social icons (right) */}
+<View
+  style={{
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 15,
+    marginBottom: 20,
+    paddingTop: 5,
+    paddingBottom: 5,
+  }}
+>
+  {/* LEFT: Powered by + logo — fully tappable */}
+  <TouchableOpacity
+    style={{
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      paddingVertical: 10,
+    }}
+    onPress={() => Linking.openURL('http://www.onimtait.com')}
+  >
+    <Text
+      style={{
+        fontFamily:
+          Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+        fontSize: 15,
+        color: 'black',
+        marginBottom: 8,
+      }}
+    >
+      powered by
+    </Text>
+    <Image
+      source={require('../assets/images.png')}
+      style={{ width: 50, height: 50 }}
+    />
+  </TouchableOpacity>
 
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <TouchableOpacity
-                  style={{ marginLeft: 10, marginRight: 10 }}
-                  onPress={() => this.onFacebookPress()}
-                >
-                  {/* <IonicIcon name="logo-facebook" size={25} /> */}
-                  <FontAwesome6 name="facebook" size={25} brand />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{ marginRight: 10 }}
-                  onPress={() => this.onInstagramPress()}
-                >
-                  {/* <IonicIcon name="logo-instagram" size={25} /> */}
-                  <FontAwesome6 name="instagram" size={25} brand />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{ marginRight: 10 }}
-                  onPress={() =>
-                    Linking.openURL('https://cafe007.lk/embilipitiya-cafe007/')
-                  }
-                >
-                  {/* <IonicIcon name="logo-google" size={25} /> */}
-                  <FontAwesome6 name="google" size={25} brand />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{ marginRight: 10 }}
-                  onPress={() => this.onYoutubePress()}
-                >
-                  {/* <IonicIcon name="logo-youtube" size={25} /> */}
-                  <FontAwesome6 name="youtube" size={25} brand />
-                </TouchableOpacity>
-              </View>
-
-              <Text
-                style={{
-                  margin: 10,
-                  fontFamily:
-                    Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-                  fontSize: 18,
-                  color: 'black',
-                  alignSelf: 'center',
-                }}
-              >
-                powered by
-              </Text>
-              <Image
-                source={require('../assets/images.png')}
-                style={{ width: 50, height: 50, alignSelf: 'center' }}
-              />
-              <TouchableOpacity
-                style={{ marginBottom: 20 }}
-                onPress={() => Linking.openURL('http://www.onimtait.com')}
-              >
-                <Text
-                  allowFontScaling={false}
-                  style={{
-                    fontFamily:
-                      Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                    fontSize: 18,
-                    color: 'black',
-                    alignSelf: 'center',
-                  }}
-                >
-                  http://www.onimtait.com
-                </Text>
-              </TouchableOpacity>
+  {/* RIGHT: Version + social icons */}
+  <View
+    style={{
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      paddingVertical: 10,
+    }}
+  >
+    <Text
+      style={{
+        marginBottom: 12,
+        fontFamily:
+          Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+        fontSize: 18,
+        color: 'black',
+      }}
+    >
+      version {getVersion()}
+    </Text>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <TouchableOpacity
+        style={{ marginRight: 12 }}
+        onPress={() => this.onFacebookPress()}
+      >
+        <FontAwesome6 name="facebook" size={25} brand />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{ marginRight: 12 }}
+        onPress={() => this.onInstagramPress()}
+      >
+        <FontAwesome6 name="instagram" size={25} brand />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{ marginRight: 12 }}
+        onPress={() =>
+          Linking.openURL('https://cafe007.lk/embilipitiya-cafe007/')
+        }
+      >
+        <FontAwesome6 name="google" size={25} brand />
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => this.onYoutubePress()}
+      >
+        <FontAwesome6 name="youtube" size={25} brand />
+      </TouchableOpacity>
+    </View>
+  </View>
+</View>
             </ScrollView>
           </View>
         </RBSheet>

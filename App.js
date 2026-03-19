@@ -1,5 +1,5 @@
 // import {NavigationContainer, DefaultTheme as NavigationDefaultTheme, DarkTheme as NavigationDarkTheme} from '@react-navigation/native';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback  } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
 import {
@@ -63,6 +63,8 @@ const App = () => {
 
   const navigationRef = React.createRef();
 
+
+
   const [showPromo, setShowPromo] = useState(false);
 
   function navigate(name, params) {
@@ -77,6 +79,13 @@ const App = () => {
     isLoading: true,
     userToken: null,
   };
+
+  const handleSplashFinish = useCallback(() => {
+  setShowSplash(prev => {
+    if (prev === true) return false; 
+    return prev;
+  });
+}, []);
 
   const LoginReducer = (prevstate, action) => {
     switch (action.Type) {
@@ -544,23 +553,6 @@ const App = () => {
 
     checkPromo();
 
-    const subscription = AppState.addEventListener(
-      'change',
-      async nextAppState => {
-        if (
-          appState.current.match(/inactive|background/) &&
-          nextAppState === 'active' &&
-          loginstate.userToken
-        ) {
-          await AsyncStorage.removeItem('promoShown');
-          setShowPromo(true);
-          await AsyncStorage.setItem('promoShown', 'true');
-        }
-        appState.current = nextAppState;
-      },
-    );
-
-    return () => subscription.remove();
   }, [loginstate.userToken]);
 
   const handleDismissPromo = () => {
@@ -1253,20 +1245,23 @@ const App = () => {
       }
     });
 
-    const subscription = AppState.addEventListener('change', nextAppState => {
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === 'active'
-      ) {
-        CheckAppVersion();
-        setShowSplash(true);
-        
-      }
+    const subscription = AppState.addEventListener('change', async nextAppState => {
+  if (
+    appState.current.match(/inactive|background/) &&
+    nextAppState === 'active'
+  ) {
+    CheckAppVersion(); 
+    
+    if (loginstate.userToken) {
+      await AsyncStorage.removeItem('promoShown');
+      setShowPromo(true);
+      await AsyncStorage.setItem('promoShown', 'true');
+    }
+  }
 
-      appState.current = nextAppState;
-      setAppStateVisible(appState.current);
-    });
-
+  appState.current = nextAppState; 
+  setAppStateVisible(appState.current);
+});
     return () => {
       branchUnsubscribe();
       unsubscribeNotification();
@@ -1295,9 +1290,9 @@ const App = () => {
           barStyle="default"
         />
 
-        {/* ✅ ADD THIS — show splash over everything */}
+        {/* Show splash over everything */}
         {showSplash ? (
-          <SplashScreen onFinish={() => setShowSplash(false)} />
+           <SplashScreen onFinish={handleSplashFinish} />
         ) : (
           <NavigationContainer ref={navigationRef}>
             <Provider store={store}>

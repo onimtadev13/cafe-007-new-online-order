@@ -8,28 +8,28 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import FoodQtyLabel from '../Components/Food&QtyLabel';
+import { NumericFormat } from 'react-number-format';
 
 export default class ItemView extends React.PureComponent {
   render() {
     const { item, navigation, qtycount } = this.props;
     console.log('view items', item);
-    
 
     return (
       <TouchableOpacity
         disabled={item.isSoldOut ? true : false}
-      onPress={() =>
-  navigation.navigate('ItemScreen', {
-    Location: 'Home',
-    PCode: item.Prod_Code,
-    PName: item.Prod_Name,
-    PDescription: item.More_Descrip,
-    PPrice: item.NconvertPrice,
-    IMG: item.ImagePath,
-    isDiscounted: item.isDiscounted,
-    isPopular: item.isPopuler,   // ← map the misspelled field here
-  })
-}
+        onPress={() =>
+          navigation.navigate('ItemScreen', {
+            Location: 'Home',
+            PCode: item.Prod_Code,
+            PName: item.Prod_Name,
+            PDescription: item.More_Descrip,
+            PPrice: item.NconvertPrice,
+            IMG: item.ImagePath,
+            isDiscounted: item.isDiscounted,
+            isPopular: item.isPopuler, // ← map the misspelled field here
+          })
+        }
       >
         <View style={{ width: '100%', height: 170 }}>
           <View style={{ flex: 1, flexDirection: 'row', margin: 10 }}>
@@ -82,37 +82,41 @@ export default class ItemView extends React.PureComponent {
                 {item.Prod_Name}
               </Text>
               {/* <Text numberOfLines={1} style={{ textTransform: 'lowercase', marginBottom: 5, color: '#5C5C5C', fontSize: 14, fontFamily: "AsapRegular" }}>@{item.Prod_Name}</Text> */}
-{item.isPopuler && (
-  <View
-    style={{
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: '#FF6900',
-      borderRadius: 20,
-      paddingVertical: 4,
-      paddingHorizontal: 10,
-      alignSelf: 'flex-start',
-      marginBottom: 6,
-      shadowColor: '#FF6900',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.4,
-      shadowRadius: 4,
-      elevation: 4,
-    }}
-  >
-    <Text style={{ fontSize: 10, marginRight: 3 }}>🔥</Text>
-    <Text
-      style={{
-        color: 'white',
-        fontSize: 11,
-        letterSpacing: 0.8,
-        fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-      }}
-    >
-      POPULAR
-    </Text>
-  </View>
-)}       <Text
+              {item.isPopuler && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#FF6900',
+                    borderRadius: 20,
+                    paddingVertical: 4,
+                    paddingHorizontal: 10,
+                    alignSelf: 'flex-start',
+                    marginBottom: 6,
+                    shadowColor: '#FF6900',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.4,
+                    shadowRadius: 4,
+                    elevation: 4,
+                  }}
+                >
+                  <Text style={{ fontSize: 10, marginRight: 3 }}>🔥</Text>
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontSize: 11,
+                      letterSpacing: 0.8,
+                      fontFamily:
+                        Platform.OS === 'ios'
+                          ? 'Asap-Regular_Bold'
+                          : 'AsapBold',
+                    }}
+                  >
+                    POPULAR
+                  </Text>
+                </View>
+              )}{' '}
+              <Text
                 numberOfLines={2}
                 style={{
                   marginRight: 8,
@@ -124,19 +128,29 @@ export default class ItemView extends React.PureComponent {
                 {item.More_Descrip}
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text
-                  style={{
-                    flex: 1,
-                    color: '#FF6900',
-                    fontSize: 18,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                  }}
-                >
-                  LKR {item.Selling_Price}
-                </Text>
+                <NumericFormat
+                  value={item.Selling_Price}
+                  displayType={'text'}
+                  thousandSeparator={true}
+                  fixedDecimalScale={true}
+                  decimalScale={2}
+                  prefix={'LKR '}
+                  renderText={formattedValue => (
+                    <Text
+                      style={{
+                        flex: 1,
+                        color: '#FF6900',
+                        fontSize: 18,
+                        fontFamily:
+                          Platform.OS === 'ios'
+                            ? 'Asap-Regular_Medium'
+                            : 'AsapMedium',
+                      }}
+                    >
+                      {formattedValue}
+                    </Text>
+                  )}
+                />
                 {item.isDiscounted && (
                   <Text
                     style={{
