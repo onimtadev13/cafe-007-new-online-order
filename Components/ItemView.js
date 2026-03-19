@@ -12,22 +12,24 @@ import FoodQtyLabel from '../Components/Food&QtyLabel';
 export default class ItemView extends React.PureComponent {
   render() {
     const { item, navigation, qtycount } = this.props;
+    console.log('view items', item);
+    
 
     return (
       <TouchableOpacity
         disabled={item.isSoldOut ? true : false}
-        onPress={() =>
-          navigation.navigate('ItemScreen', {
-            Location: 'Home',
-            PCode: item.Prod_Code,
-            PName: item.Prod_Name,
-            PDescription: item.More_Descrip,
-            PPrice: item.NconvertPrice,
-            IMG: item.ImagePath,
-            isDiscounted: item.isDiscounted,
-            isPopular: item.isPopular,
-          })
-        }
+      onPress={() =>
+  navigation.navigate('ItemScreen', {
+    Location: 'Home',
+    PCode: item.Prod_Code,
+    PName: item.Prod_Name,
+    PDescription: item.More_Descrip,
+    PPrice: item.NconvertPrice,
+    IMG: item.ImagePath,
+    isDiscounted: item.isDiscounted,
+    isPopular: item.isPopuler,   // ← map the misspelled field here
+  })
+}
       >
         <View style={{ width: '100%', height: 170 }}>
           <View style={{ flex: 1, flexDirection: 'row', margin: 10 }}>
@@ -80,40 +82,37 @@ export default class ItemView extends React.PureComponent {
                 {item.Prod_Name}
               </Text>
               {/* <Text numberOfLines={1} style={{ textTransform: 'lowercase', marginBottom: 5, color: '#5C5C5C', fontSize: 14, fontFamily: "AsapRegular" }}>@{item.Prod_Name}</Text> */}
-             {item.isPopular && (
+{item.isPopuler && (
   <View
     style={{
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 4,
+      backgroundColor: '#FF6900',
+      borderRadius: 20,
+      paddingVertical: 4,
+      paddingHorizontal: 10,
+      alignSelf: 'flex-start',
+      marginBottom: 6,
+      shadowColor: '#FF6900',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.4,
+      shadowRadius: 4,
+      elevation: 4,
     }}
   >
-    <View
+    <Text style={{ fontSize: 10, marginRight: 3 }}>🔥</Text>
+    <Text
       style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FF6900',
-        borderRadius: 6,
-        paddingVertical: 3,
-        paddingHorizontal: 8,
-        alignSelf: 'flex-start',
+        color: 'white',
+        fontSize: 11,
+        letterSpacing: 0.8,
+        fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
       }}
     >
-      <Text
-        style={{
-          color: 'white',
-          fontSize: 12,
-          fontFamily:
-            Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-          marginRight: 4,
-        }}
-      >
-        Popular
-      </Text>
-    </View>
+      POPULAR
+    </Text>
   </View>
-)}
-              <Text
+)}       <Text
                 numberOfLines={2}
                 style={{
                   marginRight: 8,

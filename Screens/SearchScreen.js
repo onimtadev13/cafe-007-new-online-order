@@ -269,6 +269,7 @@ class SearchScreen extends React.PureComponent {
   };
 
   onrenderItem = ({ item, index }) => {
+    console.log('pressed item', item);
     const countTypes = this.props.cartItems.filter(
       product => product.ProductName === item.Prod_Name,
     );
@@ -502,7 +503,7 @@ class SearchScreen extends React.PureComponent {
               BestSeller: element.isBestSeller,
               Offer: element.isOffer,
               isSoldOut: element.isSoldOut,
-              isPopuler: json.CommonResult.Table[0].Popular,
+            isPopuler: element.Popular, 
             });
           } else {
             Productlist.push({
@@ -517,7 +518,7 @@ class SearchScreen extends React.PureComponent {
               BestSeller: element.isBestSeller,
               Offer: element.isOffer,
               isSoldOut: element.isSoldOut,
-              isPopuler: json.CommonResult.Table[0].Popular,
+              isPopuler: element.Popular, 
             });
             Productlist.push({
               Prod_Code: element.Prod_Code,
@@ -531,7 +532,7 @@ class SearchScreen extends React.PureComponent {
               BestSeller: element.isBestSeller,
               Offer: element.isOffer,
               isSoldOut: element.isSoldOut,
-              isPopuler: json.CommonResult.Table[0].Popular,
+              isPopuler: element.Popular,
             });
             Department = element.Dept_Name;
           }
