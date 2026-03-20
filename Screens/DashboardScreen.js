@@ -34,6 +34,7 @@ import RadioButtonRN from 'radio-buttons-react-native';
 
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
+import LottieView from 'lottie-react-native';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -1287,126 +1288,147 @@ class DashboardScreen extends React.PureComponent {
                 showsHorizontalScrollIndicator={false}
                 style={{ marginVertical: 10 }}
                 contentContainerStyle={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  flexGrow: 1,
-                }}
+                  paddingHorizontal: 5,
+                  alignItems: 'flex-start',}}
               >
-                <Card
-                  style={{
-                    marginRight: 12,
-                    borderRadius: 14,
-                    width: 90,
-                    height: 100,
-                    justifyContent: 'center',
-                    elevation: 3,
-                    backgroundColor: '#e0e5ec9d',
-                    overflow: 'hidden',
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                  }}
-                  mode="contained"
+                {/* Popular */}
+                <TouchableOpacity
+                  onPress={() =>
+                    this.props.navigation.navigate('PopularScreen')
+                  }
+                  style={{ alignItems: 'center', marginRight: 16 }}
                 >
-                  <View style={{ alignItems: 'center', padding: 5 }}>
-                    <Image
-                      source={require('../assets/popular.png')}
-                      style={{
-                        width: 50,
-                        height: 50,
-                        resizeMode: 'contain',
-                      }}
+                  <View
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: 20,
+                      backgroundColor: 'white',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      elevation: 6,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 4,
+                    }}
+                  >
+                    <LottieView
+                      source={require('../assets/lottiejson/popular-signboard.json')}
+                      autoPlay
+                      loop
+                      style={{ width: 132, height: 132 }}
                     />
-
-                    <Text
-                      style={{
-                        marginTop: 6,
-                        fontSize: 12,
-                        fontWeight: '500',
-                        textAlign: 'center',
-                      }}
-                    >
-                      Popular
-                    </Text>
                   </View>
-                </Card>
-                <Card
-                  style={{
-                    marginRight: 12,
-                    borderRadius: 14,
-                    width: 90,
-                    height: 100,
-                    justifyContent: 'center',
-                    elevation: 3,
-                    backgroundColor: '#e0e5ec9d',
-                    overflow: 'hidden',
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                  }}
-                  mode="contained"
+                  <Text
+                    style={{
+                      marginTop: 6,
+                      fontSize: 13,
+                      fontFamily:
+                        Platform.OS === 'ios'
+                          ? 'Asap-Regular_Medium'
+                          : 'AsapMedium',
+                      color: '#1a1a1a',
+                      textAlign: 'center',
+                    }}
+                  >
+                    Popular
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Newly Added */}
+                <TouchableOpacity
+                  onPress={() =>
+                    this.props.navigation.navigate('NewlyAddedScreen')
+                  }
+                  style={{ alignItems: 'center', marginRight: 16 }}
                 >
-                  <View style={{ alignItems: 'center', padding: 5 }}>
-                    <Image
-                      source={require('../assets/new.png')}
-                      style={{
-                        width: 50,
-                        height: 50,
-                        resizeMode: 'contain',
-                      }}
+                  <View
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: 20,
+                      backgroundColor: 'white',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      elevation: 6,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 4,
+                    }}
+                  >
+                    <LottieView
+                      source={require('../assets/lottiejson/new-arrivals.json')}
+                      autoPlay
+                      loop
+                      style={{ width: 92, height: 92 }}
                     />
-
-                    <Text
-                      style={{
-                        marginTop: 6,
-                        fontSize: 12,
-                        fontWeight: '500',
-                        textAlign: 'center',
-                      }}
-                    >
-                      Newly Added
-                    </Text>
                   </View>
-                </Card>
-                <Card
-                  style={{
-                    marginRight: 12,
-                    borderRadius: 14,
-                    width: 90,
-                    height: 100,
-                    justifyContent: 'center',
-                    elevation: 3,
-                    backgroundColor: '#e0e5ec9d',
-                    overflow: 'hidden',
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                  }}
-                  mode="contained"
+                  <Text
+                    style={{
+                      marginTop: 6,
+                      fontSize: 13,
+                      fontFamily:
+                        Platform.OS === 'ios'
+                          ? 'Asap-Regular_Medium'
+                          : 'AsapMedium',
+                      color: '#1a1a1a',
+                      textAlign: 'center',
+                    }}
+                  >
+                    Newly Added
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Trending */}
+                <TouchableOpacity
+                  onPress={() =>
+                    this.props.navigation.navigate('TrendingScreen')
+                  }
+                  style={{ alignItems: 'center', marginRight: 16 }}
                 >
-                  <View style={{ alignItems: 'center', padding: 5 }}>
-                    <Image
-                      source={require('../assets/trending.png')}
-                      style={{
-                        width: 50,
-                        height: 50,
-                        resizeMode: 'contain',
-                      }}
+                  <View
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: 20,
+                      backgroundColor: 'white',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      elevation: 6,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 4,
+                    }}
+                  >
+                    <LottieView
+                      source={require('../assets/lottiejson/trending.json')}
+                      autoPlay
+                      loop
+                      style={{ width: 52, height: 52 }}
                     />
-
-                    <Text
-                      style={{
-                        marginTop: 6,
-                        fontSize: 12,
-                        fontWeight: '500',
-                        textAlign: 'center',
-                      }}
-                    >
-                      Trending
-                    </Text>
                   </View>
-                </Card>
+                  <Text
+                    style={{
+                      marginTop: 6,
+                      fontSize: 13,
+                      fontFamily:
+                        Platform.OS === 'ios'
+                          ? 'Asap-Regular_Medium'
+                          : 'AsapMedium',
+                      color: '#1a1a1a',
+                      textAlign: 'center',
+                    }}
+                  >
+                    Trending
+                  </Text>
+                </TouchableOpacity>
               </ScrollView>
             </View>
 
-            <View
+            {/* <View
               style={{
                 height: 0.9,
                 marginLeft: 25,
@@ -1415,7 +1437,7 @@ class DashboardScreen extends React.PureComponent {
                 backgroundColor: '#5C5C5C',
                 marginBottom: 15,
               }}
-            />
+            /> */}
 
             <View style={{ marginBottom: 0 }}>
               {this.renderOffterItem(this.state.offersList)}
@@ -1715,101 +1737,103 @@ class DashboardScreen extends React.PureComponent {
               />
 
               {/* Bottom row: powered by (left) | version + social icons (right) */}
-<View
-  style={{
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginLeft: 20,
-    marginRight: 20,
-    marginTop: 15,
-    marginBottom: 20,
-    paddingTop: 5,
-    paddingBottom: 5,
-  }}
->
-  {/* LEFT: Powered by + logo — fully tappable */}
-  <TouchableOpacity
-    style={{
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      paddingVertical: 10,
-    }}
-    onPress={() => Linking.openURL('http://www.onimtait.com')}
-  >
-    <Text
-      style={{
-        fontFamily:
-          Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-        fontSize: 15,
-        color: 'black',
-        marginBottom: 8,
-      }}
-    >
-      powered by
-    </Text>
-    <Image
-      source={require('../assets/images.png')}
-      style={{ width: 50, height: 50 }}
-    />
-  </TouchableOpacity>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  marginLeft: 20,
+                  marginRight: 20,
+                  marginTop: 15,
+                  marginBottom: 20,
+                  paddingTop: 5,
+                  paddingBottom: 5,
+                }}
+              >
+                {/* LEFT: Powered by + logo — fully tappable */}
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    paddingVertical: 10,
+                  }}
+                  onPress={() => Linking.openURL('http://www.onimtait.com')}
+                >
+                  <Text
+                    style={{
+                      fontFamily:
+                        Platform.OS === 'ios'
+                          ? 'Asap-Regular_Bold'
+                          : 'AsapBold',
+                      fontSize: 15,
+                      color: 'black',
+                      marginBottom: 8,
+                    }}
+                  >
+                    powered by
+                  </Text>
+                  <Image
+                    source={require('../assets/images.png')}
+                    style={{ width: 50, height: 50 }}
+                  />
+                </TouchableOpacity>
 
-  {/* RIGHT: Version + social icons */}
-  <View
-    style={{
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      paddingVertical: 10,
-    }}
-  >
-    <Text
-      style={{
-        marginBottom: 12,
-        fontFamily:
-          Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-        fontSize: 18,
-        color: 'black',
-      }}
-    >
-      version {getVersion()}
-    </Text>
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <TouchableOpacity
-        style={{ marginRight: 12 }}
-        onPress={() => this.onFacebookPress()}
-      >
-        <FontAwesome6 name="facebook" size={25} brand />
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={{ marginRight: 12 }}
-        onPress={() => this.onInstagramPress()}
-      >
-        <FontAwesome6 name="instagram" size={25} brand />
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={{ marginRight: 12 }}
-        onPress={() =>
-          Linking.openURL('https://cafe007.lk/embilipitiya-cafe007/')
-        }
-      >
-        <FontAwesome6 name="google" size={25} brand />
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => this.onYoutubePress()}
-      >
-        <FontAwesome6 name="youtube" size={25} brand />
-      </TouchableOpacity>
-    </View>
-  </View>
-</View>
+                {/* RIGHT: Version + social icons */}
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    paddingVertical: 10,
+                  }}
+                >
+                  <Text
+                    style={{
+                      marginBottom: 12,
+                      fontFamily:
+                        Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                      fontSize: 18,
+                      color: 'black',
+                    }}
+                  >
+                    version {getVersion()}
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <TouchableOpacity
+                      style={{ marginRight: 12 }}
+                      onPress={() => this.onFacebookPress()}
+                    >
+                      <FontAwesome6 name="facebook" size={25} brand />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ marginRight: 12 }}
+                      onPress={() => this.onInstagramPress()}
+                    >
+                      <FontAwesome6 name="instagram" size={25} brand />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ marginRight: 12 }}
+                      onPress={() =>
+                        Linking.openURL(
+                          'https://cafe007.lk/embilipitiya-cafe007/',
+                        )
+                      }
+                    >
+                      <FontAwesome6 name="google" size={25} brand />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => this.onYoutubePress()}>
+                      <FontAwesome6 name="youtube" size={25} brand />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
             </ScrollView>
           </View>
         </RBSheet>

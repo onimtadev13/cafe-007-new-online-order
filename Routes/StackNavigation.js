@@ -22,6 +22,9 @@ import OrderScreen from '../Screens/OrderScreen';
 import OrderCancelScreen from '../Screens/OrderCancelScreen';
 import BottomTabNavigation from './BottomTabNavigation';
 import PromotionsScreen from '../Screens/PromotionsScreen';
+import PopularScreen from '../Screens/PopularScreen';
+import NewlyAddedScreen from '../Screens/NewlyAddedScreen';
+import TrendingScreen from '../Screens/TrendingScreen';
 
 const Stack = createStackNavigator();
 
@@ -127,6 +130,33 @@ const StackNavigation = () => {
       <Stack.Screen
         name="PromotionsScreen"
         component={PromotionsScreen}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="PopularScreen"
+        component={PopularScreen}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="NewlyAddedScreen"
+        component={NewlyAddedScreen}
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="TrendingScreen"
+        component={TrendingScreen}
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
