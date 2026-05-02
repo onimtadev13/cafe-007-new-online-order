@@ -1286,10 +1286,10 @@ class DashboardScreen extends React.PureComponent {
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                style={{ marginVertical: 10 }}
+                style={{ marginVertical: 10, }}
                 contentContainerStyle={{
                   paddingHorizontal: 5,
-                  alignItems: 'flex-start',}}
+                  alignItems: 'center',justifyContent: 'center',width:'100%'}}
               >
                 {/* Popular */}
                 <TouchableOpacity
@@ -1314,10 +1314,10 @@ class DashboardScreen extends React.PureComponent {
                     }}
                   >
                     <LottieView
-                      source={require('../assets/lottiejson/popular-signboard.json')}
+                      source={require('../assets/lottiejson/Popular Badge.json')}
                       autoPlay
                       loop
-                      style={{ width: 132, height: 132 }}
+                      style={{ width: 80, height: 80 }}
                     />
                   </View>
                   <Text
@@ -1359,10 +1359,10 @@ class DashboardScreen extends React.PureComponent {
                     }}
                   >
                     <LottieView
-                      source={require('../assets/lottiejson/new-arrivals.json')}
+                      source={require('../assets/lottiejson/New button.json')}
                       autoPlay
                       loop
-                      style={{ width: 92, height: 92 }}
+                      style={{ width: 80, height: 80 }}
                     />
                   </View>
                   <Text
@@ -1404,7 +1404,7 @@ class DashboardScreen extends React.PureComponent {
                     }}
                   >
                     <LottieView
-                      source={require('../assets/lottiejson/trending.json')}
+                      source={require('../assets/lottiejson/Untitled file.json')}
                       autoPlay
                       loop
                       style={{ width: 52, height: 52 }}
