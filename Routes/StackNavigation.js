@@ -25,6 +25,7 @@ import PromotionsScreen from '../Screens/PromotionsScreen';
 import PopularScreen from '../Screens/PopularScreen';
 import NewlyAddedScreen from '../Screens/NewlyAddedScreen';
 import TrendingScreen from '../Screens/TrendingScreen';
+import { useTheme } from '../Context/ThemeContext';
 
 const Stack = createStackNavigator();
 
@@ -35,8 +36,15 @@ const AuthStackNavigation = ({
   isLoading,
   isUpdated,
 }) => {
+  const { theme } = useTheme();
+
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        cardStyle: { backgroundColor: theme.bg },
+      }}
+    >
       <Stack.Screen
         name="LoginScreen"
         options={{
@@ -44,6 +52,7 @@ const AuthStackNavigation = ({
           cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS,
           headerShown: false,
           gestureEnabled: true,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       >
         {props => (
@@ -62,6 +71,7 @@ const AuthStackNavigation = ({
         component={DashboardScreen}
         options={{
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
       <Stack.Screen
@@ -69,6 +79,7 @@ const AuthStackNavigation = ({
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       >
         {props => <AddInfoScreen {...props} isLoading={isLoading} />}
@@ -78,25 +89,21 @@ const AuthStackNavigation = ({
 };
 
 const StackNavigation = () => {
+  const { theme } = useTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
         cardStyleInterpolator: CardStyleInterpolators.forFadeFromBottomAndroid,
+        cardStyle: { backgroundColor: theme.bg },
       }}
     >
-      {/*<Stack.Screen*/}
-      {/*    name="BottomTabNavigation"*/}
-      {/*    component={BottomTabNavigation}*/}
-      {/*    options={{*/}
-      {/*        headerShown: false*/}
-      {/*    }}*/}
-      {/*/>*/}
-
       <Stack.Screen
         name="DashboardScreen"
         component={DashboardScreen}
         options={{
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -105,6 +112,7 @@ const StackNavigation = () => {
         component={HomeScreen}
         options={{
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -114,6 +122,7 @@ const StackNavigation = () => {
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -124,6 +133,7 @@ const StackNavigation = () => {
           cardStyleInterpolator:
             CardStyleInterpolators.forRevealFromBottomAndroid,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -133,6 +143,7 @@ const StackNavigation = () => {
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -142,6 +153,7 @@ const StackNavigation = () => {
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -151,6 +163,7 @@ const StackNavigation = () => {
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -160,6 +173,7 @@ const StackNavigation = () => {
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
     </Stack.Navigator>
@@ -167,14 +181,21 @@ const StackNavigation = () => {
 };
 
 const ItemSearchStackNavigation = () => {
+  const { theme } = useTheme();
+
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        cardStyle: { backgroundColor: theme.bg },
+      }}
+    >
       <Stack.Screen
         name="SearchScreen"
         component={SearchScreen}
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -184,6 +205,7 @@ const ItemSearchStackNavigation = () => {
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -193,6 +215,7 @@ const ItemSearchStackNavigation = () => {
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
     </Stack.Navigator>
@@ -200,10 +223,13 @@ const ItemSearchStackNavigation = () => {
 };
 
 const CartStackNavigation = () => {
+  const { theme } = useTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
         cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        cardStyle: { backgroundColor: theme.bg },
       }}
     >
       <Stack.Screen
@@ -211,11 +237,10 @@ const CartStackNavigation = () => {
         component={CartScreen}
         options={{
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
         listeners={({ navigation }) => ({
-          // When CartScreen is focused (tabPressed), pop to top
           tabPress: e => {
-            // Reset the stack to CartScreen when tab is pressed
             if (navigation.canGoBack()) {
               navigation.popToTop();
             }
@@ -226,7 +251,10 @@ const CartStackNavigation = () => {
       <Stack.Screen
         name="ItemScreen"
         component={ItemScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
+        }}
       />
 
       <Stack.Screen
@@ -234,6 +262,7 @@ const CartStackNavigation = () => {
         component={HomeScreen}
         options={{
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -244,6 +273,7 @@ const CartStackNavigation = () => {
           cardStyleInterpolator:
             CardStyleInterpolators.forScaleFromCenterAndroid,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -254,62 +284,88 @@ const CartStackNavigation = () => {
           cardStyleInterpolator:
             CardStyleInterpolators.forScaleFromCenterAndroid,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
       <Stack.Screen
         name="OrderDetailsScreen"
         component={OrderDetailsScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
+        }}
       />
 
       <Stack.Screen
-        name={'OrderCancelScreen'}
+        name="OrderCancelScreen"
         component={OrderCancelScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
+        }}
       />
 
       <Stack.Screen
         name="OrderScreen"
         component={OrderScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
+        }}
       />
     </Stack.Navigator>
   );
 };
+
 const OrderStackNavigation = () => {
+  const { theme } = useTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
         cardStyleInterpolator: CardStyleInterpolators.forScaleFromCenterAndroid,
+        cardStyle: { backgroundColor: theme.bg },
       }}
     >
       <Stack.Screen
         name="OrderScreen"
         component={OrderScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
+        }}
       />
 
       <Stack.Screen
         name="OrderDetailsScreen"
         component={OrderDetailsScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
+        }}
       />
 
       <Stack.Screen
-        name={'OrderCancelScreen'}
+        name="OrderCancelScreen"
         component={OrderCancelScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
+        }}
       />
     </Stack.Navigator>
   );
 };
 
 const AccountStackNavigation = () => {
+  const { theme } = useTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
         cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        cardStyle: { backgroundColor: theme.bg },
       }}
     >
       <Stack.Screen
@@ -318,6 +374,7 @@ const AccountStackNavigation = () => {
         options={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -328,6 +385,7 @@ const AccountStackNavigation = () => {
           cardStyleInterpolator:
             CardStyleInterpolators.forScaleFromCenterAndroid,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
 
@@ -338,6 +396,7 @@ const AccountStackNavigation = () => {
           cardStyleInterpolator:
             CardStyleInterpolators.forScaleFromCenterAndroid,
           headerShown: false,
+          cardStyle: { backgroundColor: theme.bg },
         }}
       />
     </Stack.Navigator>

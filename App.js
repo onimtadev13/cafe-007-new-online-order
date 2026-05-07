@@ -27,6 +27,7 @@ import LocalNotificationService from './Services/LocalNotificationService';
 import NotificationModal from './Components/NotificationModal';
 import PromoCard from './Components/PromoCard';
 import SplashScreen from './Screens/SplashScreen';
+import { ThemeProvider, useTheme } from './Context/ThemeContext';
 
 import {
   SafeAreaProvider,
@@ -36,6 +37,34 @@ import {
 
 var db = openDatabase({ name: 'UserDatabase.db' });
 const RootStack = createStackNavigator();
+
+
+const ThemedApp = ({ children }) => {
+  const { theme, isDark } = useTheme();
+  return (
+    <>
+      <StatusBar
+        animated={true}
+        translucent={false}
+        hidden={false}
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.bg}
+      />
+      {children}
+    </>
+  );
+};
+
+
+const ThemedTopBar = () => {
+  const { theme } = useTheme();
+  return (
+    <SafeAreaView
+      edges={['top']}
+      style={{ flex: 0, backgroundColor: theme.bg }}  // ← theme-aware, not hardcoded
+    />
+  );
+};
 
 const App = () => {
   const [isClick, setClick] = React.useState(false);
@@ -1275,71 +1304,68 @@ const App = () => {
     setstate(prevState => ({ ...prevState, isVisible: false }));
   }
 
-  return (
+return (
   <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-    <SafeAreaView
-      edges={['top']}
-      style={{ flex: 0, backgroundColor: '#F0F0F0' }}
-    />
-    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-      <AuthContext.Provider value={authContext}>
-        <StatusBar
-          animated={true}
-          translucent={false}
-          hidden={false}
-          barStyle="default"
-        />
+    <ThemeProvider>  {/* ← moved outside NavigationContainer */}
+      <ThemedTopBar />  {/* ← see below */}
+      <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+        <AuthContext.Provider value={authContext}>
 
-        {/* Show splash over everything */}
-        {showSplash ? (
-           <SplashScreen onFinish={handleSplashFinish} />
-        ) : (
-          <NavigationContainer ref={navigationRef}>
-            <Provider store={store}>
-              <RootStack.Navigator>
-                {loginstate.userToken == null ? (
-                  <RootStack.Screen
-                    key="auth-screen"
-                    name="Auth"
-                    options={{ headerShown: false }}
+          <ThemedApp>
+            {showSplash ? (
+              <SplashScreen onFinish={handleSplashFinish} />
+            ) : (
+              <NavigationContainer ref={navigationRef}>
+                <Provider store={store}>
+                  <RootStack.Navigator
+                    screenOptions={{ cardStyle: { backgroundColor: undefined } }}
                   >
-                    {() => (
-                      <AuthStackNavigation
-                        isClick={isClick}
-                        isVisible={isOTPVisible}
-                        OTPNotification={OtpNotification}
-                        isLoading={isRegister}
-                        isUpdated={isUpdated}
+                    {loginstate.userToken == null ? (
+                      <RootStack.Screen
+                        key="auth-screen"
+                        name="Auth"
+                        options={{ headerShown: false }}
+                      >
+                        {() => (
+                          <AuthStackNavigation
+                            isClick={isClick}
+                            isVisible={isOTPVisible}
+                            OTPNotification={OtpNotification}
+                            isLoading={isRegister}
+                            isUpdated={isUpdated}
+                          />
+                        )}
+                      </RootStack.Screen>
+                    ) : (
+                      <RootStack.Screen
+                        key="app-screen"
+                        name="App"
+                        options={{ headerShown: false }}
+                        component={BottomTabNavigation}
                       />
                     )}
-                  </RootStack.Screen>
-                ) : (
-                  <RootStack.Screen
-                    key="app-screen"
-                    name="App"
-                    options={{ headerShown: false }}
-                    component={BottomTabNavigation}
-                  />
-                )}
-              </RootStack.Navigator>
-            </Provider>
-          </NavigationContainer>
-        )}
+                  </RootStack.Navigator>
+                </Provider>
+              </NavigationContainer>
+            )}
+          </ThemedApp>
 
-      </AuthContext.Provider>
-      <NotificationModal
-        type={state.Type}
-        description={state.Description}
-        more_description={state.More_Description}
-        isMenuButtonVisible={state.isMenuButtonVisible}
-        itemCode={state.ItemCode}
-        image={state.Image}
-        visible={state.isVisible}
-        onItemPress={data => onNotification_Model_Press(data)}
-        onClosePress={() => onClosePopUp()}
-        onMenuPress={data => onNotification_Model_Press(data)}
-      />
-    </SafeAreaView>
+        </AuthContext.Provider>
+
+        <NotificationModal
+          type={state.Type}
+          description={state.Description}
+          more_description={state.More_Description}
+          isMenuButtonVisible={state.isMenuButtonVisible}
+          itemCode={state.ItemCode}
+          image={state.Image}
+          visible={state.isVisible}
+          onItemPress={data => onNotification_Model_Press(data)}
+          onClosePress={() => onClosePopUp()}
+          onMenuPress={data => onNotification_Model_Press(data)}
+        />
+      </SafeAreaView>
+    </ThemeProvider>
   </SafeAreaProvider>
 );
 };

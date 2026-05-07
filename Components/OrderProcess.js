@@ -1,12 +1,11 @@
-// import {firebase} from '@react-native-firebase/messaging';
 import messaging from '@react-native-firebase/messaging';
 import moment from 'moment';
 import React from 'react';
 import {Animated, Platform, Text, View} from 'react-native';
 import {WaveIndicator} from 'react-native-indicators';
-// import Ionicons from 'react-native-vector-icons/Ionicons';
 import {APIURL} from '../Data/CloneData';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import {LIGHT_THEME} from '../Context/ThemeContext';
 
 export default class OrderProcess extends React.PureComponent {
   constructor(props) {
@@ -30,7 +29,6 @@ export default class OrderProcess extends React.PureComponent {
     this.localNotification();
     this.GetReminderTime();
 
-    // console.log(this.state.statusList);
     if (this.state.statusList.length === 2) {
       this.ProcessAnimate();
       this.AcceptAnimate();
@@ -47,34 +45,6 @@ export default class OrderProcess extends React.PureComponent {
       this.PrepairAnimate();
       this.DeliveryAnimate();
     }
-
-    // if (this.state.dineType === "Delivery") {
-    //     if (this.state.statusList.length === 3) {
-    //         this.ProcessAnimate();
-    //         this.AcceptAnimate();
-    //     } else if (this.state.statusList.length === 4) {
-    //         this.ProcessAnimate();
-    //         this.AcceptAnimate();
-    //         this.PrepairAnimate();
-    //     } else if (this.state.statusList.length === 5) {
-    //         this.ProcessAnimate();
-    //         this.AcceptAnimate();
-    //         this.PrepairAnimate();
-    //         this.DeliveryAnimate();
-    //     }
-    // } else {
-    //     if (this.state.statusList.length === 2) {
-    //         this.ProcessAnimate();
-    //     } else if (this.state.statusList.length === 3) {
-    //         this.ProcessAnimate();
-    //         this.AcceptAnimate();
-    //     } else if (this.state.statusList.length === 4) {
-    //         this.ProcessAnimate();
-    //         this.AcceptAnimate();
-    //         this.PrepairAnimate();
-    //         this.DeliveryAnimate();
-    //     }
-    // }
   }
 
   componentWillUnmount() {
@@ -114,59 +84,40 @@ export default class OrderProcess extends React.PureComponent {
   };
 
   localNotification = () => {
-  this.messageListner = messaging().onMessage(async remoteMessage => {  // ✅ FIXED
-    if (remoteMessage.data?.OrderID === this.state.orderID) {
-      this.setState({orderStatus: remoteMessage.data.Status});
+    this.messageListner = messaging().onMessage(async remoteMessage => {
+      if (remoteMessage.data?.OrderID === this.state.orderID) {
+        this.setState({orderStatus: remoteMessage.data.Status});
 
-          list = this.state.statusList;
-          var index = list.findIndex(i => i === remoteMessage.data.Status);
-          if (index === -1) {
-            list.push(remoteMessage.data.Status);
-            this.setState({statusList: list});
-          }
-
-          // if (this.state.dineType === "Delivery") {
-          //     if (remoteMessage.data.Status === "Preparing") {
-          //         this.ProcessAnimate();
-          //         this.AcceptAnimate();
-          //     } else if (remoteMessage.data.Status === "Delivering") {
-          //         this.PrepairAnimate();
-          //     } else if (remoteMessage.data.Status === "Complete") {
-          //         this.DeliveryAnimate();
-          //     }
-          // } else {
-          //     if (remoteMessage.data.Status === "Preparing") {
-          //         this.ProcessAnimate();
-          //         this.AcceptAnimate();
-          //     } else if (remoteMessage.data.Status === "Complete") {
-          //         this.PrepairAnimate();
-          //         this.DeliveryAnimate();
-          //     }
-          // }
-
-          if (remoteMessage.data.Status === 'Preparing') {
-            list.push('Accept');
-            this.setState({statusList: list});
-            this.ProcessAnimate();
-            this.AcceptAnimate();
-            this.GetReminderTime();
-          } else if (remoteMessage.data.Status === 'Cancel') {
-            list.push('Cancel');
-            this.setState({statusList: list});
-            this.ProcessAnimate();
-            this.AcceptAnimate();
-          } else if (remoteMessage.data.Status === 'Delivering') {
-            this.PrepairAnimate();
-          } else if (remoteMessage.data.Status === 'Finish') {
-            this.DeliveryAnimate();
-          }
-
-          // console.log(this.state.statusList);
+        list = this.state.statusList;
+        var index = list.findIndex(i => i === remoteMessage.data.Status);
+        if (index === -1) {
+          list.push(remoteMessage.data.Status);
+          this.setState({statusList: list});
         }
-      });
+
+        if (remoteMessage.data.Status === 'Preparing') {
+          list.push('Accept');
+          this.setState({statusList: list});
+          this.ProcessAnimate();
+          this.AcceptAnimate();
+          this.GetReminderTime();
+        } else if (remoteMessage.data.Status === 'Cancel') {
+          list.push('Cancel');
+          this.setState({statusList: list});
+          this.ProcessAnimate();
+          this.AcceptAnimate();
+        } else if (remoteMessage.data.Status === 'Delivering') {
+          this.PrepairAnimate();
+        } else if (remoteMessage.data.Status === 'Finish') {
+          this.DeliveryAnimate();
+        }
+      }
+    });
   };
 
   render() {
+    const theme = this.props.theme || LIGHT_THEME;
+
     const OrderProcessing = () => {
       if (this.state.orderStatus === 'Processing') {
         return (
@@ -176,10 +127,9 @@ export default class OrderProcess extends React.PureComponent {
                 animating={true}
                 interaction={true}
                 size={30}
-                color="black"
+                color={theme.accent}
               />
             </View>
-
             <View>
               <Text
                 style={{
@@ -187,6 +137,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                   fontSize: 18,
+                  color: theme.text,
                 }}>
                 Order Processed
               </Text>
@@ -196,6 +147,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
+                  color: theme.textMuted,
                 }}>
                 We are processing your tasty order
               </Text>
@@ -211,15 +163,14 @@ export default class OrderProcess extends React.PureComponent {
                   width: 25,
                   height: 25,
                   borderRadius: 25 / 2,
-                  backgroundColor: 'black',
+                  backgroundColor: theme.accent,
                   marginRight: 30,
                   alignItems: 'center',
                   justifyContent: 'center',
                 },
                 {transform: [{scale: this.state.processAnimate}]},
               ]}>
-              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
-              <FontAwesome6 name="check" size={18} color="white" solid />
+              <FontAwesome6 name="check" size={14} color={theme.pillText} solid />
             </Animated.View>
             <View>
               <Text
@@ -228,6 +179,7 @@ export default class OrderProcess extends React.PureComponent {
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
                   marginRight: 15,
+                  color: theme.text,
                 }}>
                 Order Processed
               </Text>
@@ -237,6 +189,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
+                  color: theme.textMuted,
                 }}>
                 We are processing your tasty order
               </Text>
@@ -260,17 +213,15 @@ export default class OrderProcess extends React.PureComponent {
                   height: 25,
                   borderRadius: 25 / 2,
                   backgroundColor:
-                    this.state.orderStatus === 'Cancel' ? 'red' : 'black',
+                    this.state.orderStatus === 'Cancel' ? '#D9534F' : theme.accent,
                   marginRight: 30,
                   alignItems: 'center',
                   justifyContent: 'center',
                 },
                 {transform: [{scale: this.state.acceptAnimate}]},
               ]}>
-              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
-              <FontAwesome6 name="check" size={18} color="white" solid />
+              <FontAwesome6 name="check" size={14} color={theme.pillText} solid />
             </Animated.View>
-
             <View>
               <Text
                 style={{
@@ -278,7 +229,8 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
-                  color: this.state.orderStatus === 'Cancel' ? 'red' : 'black',
+                  color:
+                    this.state.orderStatus === 'Cancel' ? '#D9534F' : theme.text,
                 }}>
                 {this.state.orderStatus === 'Cancel'
                   ? 'Order Canceled'
@@ -290,11 +242,12 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
-                  color: this.state.orderStatus === 'Cancel' ? 'red' : 'black',
+                  color:
+                    this.state.orderStatus === 'Cancel' ? '#D9534F' : theme.textMuted,
                 }}>
                 {this.state.orderStatus === 'Cancel'
                   ? 'Your order has been canceled'
-                  : 'Awiating accepting...'}
+                  : 'Awaiting accepting...'}
               </Text>
             </View>
           </>
@@ -311,17 +264,15 @@ export default class OrderProcess extends React.PureComponent {
                   width: 25,
                   height: 25,
                   borderRadius: 25 / 2,
-                  backgroundColor: 'black',
+                  backgroundColor: theme.accent,
                   marginRight: 30,
                   alignItems: 'center',
                   justifyContent: 'center',
                 },
                 {transform: [{scale: this.state.acceptAnimate}]},
               ]}>
-              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
-              <FontAwesome6 name="check" size={18} color="white" solid />
+              <FontAwesome6 name="check" size={14} color={theme.pillText} solid />
             </Animated.View>
-
             <View>
               <Text
                 style={{
@@ -329,7 +280,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
-                  color: 'black',
+                  color: theme.text,
                 }}>
                 Order Accepted
               </Text>
@@ -339,9 +290,9 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
-                  color: 'black',
+                  color: theme.textMuted,
                 }}>
-                Awiating accepting...
+                Awaiting accepting...
               </Text>
             </View>
           </>
@@ -355,7 +306,7 @@ export default class OrderProcess extends React.PureComponent {
                 height: 20,
                 borderRadius: 20 / 2,
                 borderWidth: 2,
-                borderColor: '#9c9c9c',
+                borderColor: theme.textMuted,
                 marginRight: 30,
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -365,11 +316,10 @@ export default class OrderProcess extends React.PureComponent {
                   width: 12,
                   height: 12,
                   borderRadius: 12 / 2,
-                  backgroundColor: '#9c9c9c',
+                  backgroundColor: theme.textMuted,
                 }}
               />
             </View>
-
             <View>
               <Text
                 style={{
@@ -377,7 +327,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
-                  color: '#9c9c9c',
+                  color: theme.textMuted,
                 }}>
                 Order Accepted
               </Text>
@@ -387,9 +337,9 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
-                  color: '#9c9c9c',
+                  color: theme.textMuted,
                 }}>
-                Awiating accepting...
+                Awaiting accepting...
               </Text>
             </View>
           </>
@@ -406,10 +356,9 @@ export default class OrderProcess extends React.PureComponent {
                 animating={true}
                 interaction={true}
                 size={30}
-                color="black"
+                color={theme.accent}
               />
             </View>
-
             <View>
               <Text
                 style={{
@@ -417,9 +366,9 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                   fontSize: 18,
-                  color: 'black',
+                  color: theme.text,
                 }}>
-                Order Prepairing
+                Order Preparing
               </Text>
               <Text
                 style={{
@@ -427,9 +376,9 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
-                  color: 'black',
+                  color: theme.textMuted,
                 }}>
-                We are prepairing your tasty order
+                We are preparing your tasty order
               </Text>
             </View>
           </>
@@ -443,17 +392,15 @@ export default class OrderProcess extends React.PureComponent {
                   width: 25,
                   height: 25,
                   borderRadius: 25 / 2,
-                  backgroundColor: 'black',
+                  backgroundColor: theme.accent,
                   marginRight: 30,
                   alignItems: 'center',
                   justifyContent: 'center',
                 },
                 {transform: [{scale: this.state.prepairAnimate}]},
               ]}>
-              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
-              <FontAwesome6 name="check" size={18} color="white" solid />
+              <FontAwesome6 name="check" size={14} color={theme.pillText} solid />
             </Animated.View>
-
             <View>
               <Text
                 style={{
@@ -461,9 +408,9 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
-                  color: 'black',
+                  color: theme.text,
                 }}>
-                Order Prepairing
+                Order Preparing
               </Text>
               <Text
                 style={{
@@ -471,9 +418,9 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
-                  color: 'black',
+                  color: theme.textMuted,
                 }}>
-                We are prepairing your tasty order
+                We are preparing your tasty order
               </Text>
             </View>
           </>
@@ -487,7 +434,7 @@ export default class OrderProcess extends React.PureComponent {
                 height: 20,
                 borderRadius: 20 / 2,
                 borderWidth: 2,
-                borderColor: '#9c9c9c',
+                borderColor: theme.textMuted,
                 marginRight: 30,
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -497,11 +444,10 @@ export default class OrderProcess extends React.PureComponent {
                   width: 12,
                   height: 12,
                   borderRadius: 12 / 2,
-                  backgroundColor: '#9c9c9c',
+                  backgroundColor: theme.textMuted,
                 }}
               />
             </View>
-
             <View>
               <Text
                 style={{
@@ -509,9 +455,9 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
-                  color: '#9c9c9c',
+                  color: theme.textMuted,
                 }}>
-                Order Prepairing
+                Order Preparing
               </Text>
               <Text
                 style={{
@@ -519,9 +465,9 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
-                  color: '#9c9c9c',
+                  color: theme.textMuted,
                 }}>
-                We are prepairing your tasty order
+                We are preparing your tasty order
               </Text>
             </View>
           </>
@@ -538,17 +484,14 @@ export default class OrderProcess extends React.PureComponent {
           DineType = 'Order Dine In';
           Message = 'Awaiting dine in your tasty order';
           break;
-
         case 'PickUp':
           DineType = 'Order Pick Up';
           Message = 'Awaiting pick up your tasty order';
           break;
-
         case 'Delivery':
           DineType = 'Order Delivering';
           Message = 'Awaiting deliver your tasty order';
           break;
-
         default:
           break;
       }
@@ -561,10 +504,9 @@ export default class OrderProcess extends React.PureComponent {
                 animating={true}
                 interaction={true}
                 size={30}
-                color="black"
+                color={theme.accent}
               />
             </View>
-
             <View>
               <Text
                 style={{
@@ -572,7 +514,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                   fontSize: 18,
-                  color: 'black',
+                  color: theme.text,
                 }}>
                 {DineType}
               </Text>
@@ -582,7 +524,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
-                  color: 'black',
+                  color: theme.textMuted,
                 }}>
                 {Message}
               </Text>
@@ -598,17 +540,15 @@ export default class OrderProcess extends React.PureComponent {
                   width: 25,
                   height: 25,
                   borderRadius: 25 / 2,
-                  backgroundColor: 'black',
+                  backgroundColor: theme.accent,
                   marginRight: 30,
                   alignItems: 'center',
                   justifyContent: 'center',
                 },
                 {transform: [{scale: this.state.deliveryAnimate}]},
               ]}>
-              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
-              <FontAwesome6 name="check" size={18} color="white" solid />
+              <FontAwesome6 name="check" size={14} color={theme.pillText} solid />
             </Animated.View>
-
             <View>
               <Text
                 style={{
@@ -616,7 +556,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
-                  color: 'black',
+                  color: theme.text,
                 }}>
                 {DineType}
               </Text>
@@ -626,7 +566,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
-                  color: 'black',
+                  color: theme.textMuted,
                 }}>
                 {Message}
               </Text>
@@ -642,7 +582,7 @@ export default class OrderProcess extends React.PureComponent {
                 height: 20,
                 borderRadius: 20 / 2,
                 borderWidth: 2,
-                borderColor: '#9c9c9c',
+                borderColor: theme.textMuted,
                 marginRight: 30,
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -652,11 +592,10 @@ export default class OrderProcess extends React.PureComponent {
                   width: 12,
                   height: 12,
                   borderRadius: 12 / 2,
-                  backgroundColor: '#9c9c9c',
+                  backgroundColor: theme.textMuted,
                 }}
               />
             </View>
-
             <View>
               <Text
                 style={{
@@ -664,7 +603,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
-                  color: '#9c9c9c',
+                  color: theme.textMuted,
                 }}>
                 {DineType}
               </Text>
@@ -674,7 +613,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
-                  color: '#9c9c9c',
+                  color: theme.textMuted,
                 }}>
                 {Message}
               </Text>
@@ -694,17 +633,15 @@ export default class OrderProcess extends React.PureComponent {
                   width: 25,
                   height: 25,
                   borderRadius: 25 / 2,
-                  backgroundColor: 'black',
+                  backgroundColor: theme.accent,
                   marginRight: 30,
                   alignItems: 'center',
                   justifyContent: 'center',
                 },
                 {transform: [{scale: this.state.deliveryAnimate}]},
               ]}>
-              {/* <Ionicons name={'checkmark'} size={18} color={'white'} /> */}
-              <FontAwesome6 name="check" size={18} color="white" solid />
+              <FontAwesome6 name="check" size={14} color={theme.pillText} solid />
             </Animated.View>
-
             <View>
               <Text
                 style={{
@@ -712,7 +649,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
-                  color: 'black',
+                  color: theme.text,
                 }}>
                 Order Complete
               </Text>
@@ -722,7 +659,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
-                  color: 'black',
+                  color: theme.textMuted,
                 }}>
                 We completed your order
               </Text>
@@ -738,7 +675,7 @@ export default class OrderProcess extends React.PureComponent {
                 height: 20,
                 borderRadius: 20 / 2,
                 borderWidth: 2,
-                borderColor: '#9c9c9c',
+                borderColor: theme.textMuted,
                 marginRight: 30,
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -748,11 +685,10 @@ export default class OrderProcess extends React.PureComponent {
                   width: 12,
                   height: 12,
                   borderRadius: 12 / 2,
-                  backgroundColor: '#9c9c9c',
+                  backgroundColor: theme.textMuted,
                 }}
               />
             </View>
-
             <View>
               <Text
                 style={{
@@ -760,7 +696,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 18,
-                  color: '#9c9c9c',
+                  color: theme.textMuted,
                 }}>
                 Order Complete
               </Text>
@@ -770,7 +706,7 @@ export default class OrderProcess extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   fontSize: 14,
-                  color: '#9c9c9c',
+                  color: theme.textMuted,
                 }}>
                 We completed your order
               </Text>
@@ -782,21 +718,18 @@ export default class OrderProcess extends React.PureComponent {
 
     return (
       <View>
-        <View
-          style={{
-            flexDirection: 'row',
-            marginBottom: 10,
-            alignItems: 'center',
-          }}>
+        {/* ── Processing ── */}
+        <View style={{flexDirection: 'row', marginBottom: 10, alignItems: 'center'}}>
           {OrderProcessing()}
         </View>
 
+        {/* ── Connector + optional reminder time ── */}
         <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
           <View
             style={{
               width: 1,
               height: 40,
-              backgroundColor: '#9c9c9c',
+              backgroundColor: theme.separator,
               marginLeft: 9,
             }}
           />
@@ -808,14 +741,13 @@ export default class OrderProcess extends React.PureComponent {
                 justifyContent: 'center',
                 marginLeft: 45,
               }}>
-              {/* <Ionicons name="notifications" size={20} color={'red'} /> */}
-              <FontAwesome6 name="bell" size={20} color="red" solid />
+              <FontAwesome6 name="bell" size={20} color={theme.accent} solid />
               <Text
                 style={{
                   marginLeft: 10,
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                  color: 'red',
+                  color: theme.accent,
                 }}>
                 {moment
                   .utc(this.state.ReminderTime, 'HH:mm:ss Z')
@@ -825,6 +757,7 @@ export default class OrderProcess extends React.PureComponent {
           ) : null}
         </View>
 
+        {/* ── Accepting ── */}
         <View
           style={{
             flexDirection: 'row',
@@ -839,11 +772,12 @@ export default class OrderProcess extends React.PureComponent {
           style={{
             width: 1,
             height: 40,
-            backgroundColor: '#9c9c9c',
+            backgroundColor: theme.separator,
             marginLeft: 9,
           }}
         />
 
+        {/* ── Preparing ── */}
         <View
           style={{
             flexDirection: 'row',
@@ -858,11 +792,12 @@ export default class OrderProcess extends React.PureComponent {
           style={{
             width: 1,
             height: 40,
-            backgroundColor: '#9c9c9c',
+            backgroundColor: theme.separator,
             marginLeft: 9,
           }}
         />
 
+        {/* ── Delivering ── */}
         <View
           style={{
             flexDirection: 'row',
@@ -877,11 +812,12 @@ export default class OrderProcess extends React.PureComponent {
           style={{
             width: 1,
             height: 40,
-            backgroundColor: '#9c9c9c',
+            backgroundColor: theme.separator,
             marginLeft: 9,
           }}
         />
 
+        {/* ── Complete ── */}
         <View
           style={{
             flexDirection: 'row',
@@ -925,9 +861,7 @@ export default class OrderProcess extends React.PureComponent {
         con: '1',
       }),
     })
-      .then(res => {
-        return res.json();
-      })
+      .then(res => res.json())
       .then(json => {
         if (json.CommonResult.Table.length !== 0) {
           const Time = json.CommonResult.Table[0].Time;

@@ -16,6 +16,8 @@ import { connect } from 'react-redux';
 import AppContext from '../Components/Context';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { Swipeable } from 'react-native-gesture-handler';
+import { useTheme } from '../Context/ThemeContext';
+import ThemeToggle from '../Components/ThemeToggle';
 
 let prevOpenedRow;
 
@@ -160,6 +162,7 @@ class CartScreen extends React.Component {
   };
 
   renderCartItems = ({ item, index }) => {
+    const { theme } = this.props;
     return (
       <Swipeable
         key={index}
@@ -199,7 +202,7 @@ class CartScreen extends React.Component {
               flex: 1,
               margin: 5,
               marginLeft: 10,
-              backgroundColor: '#F0F0F0',
+              backgroundColor: theme.card,
             }}
           >
             <View style={{ flexDirection: 'row' }}>
@@ -207,7 +210,7 @@ class CartScreen extends React.Component {
                 style={{
                   width: 30,
                   height: 30,
-                  backgroundColor: '#e0e0e0',
+                  backgroundColor: theme.surface,
                   alignItems: 'center',
                   margin: 10,
                   justifyContent: 'center',
@@ -216,12 +219,10 @@ class CartScreen extends React.Component {
               >
                 <Text
                   style={{
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    fontSize: 16,
-                    fontWeight: 'bold',
+                    fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+fontSize: 16,
+fontWeight: 'bold',
+color: theme.text, 
                   }}
                 >
                   {item.Qty}
@@ -230,14 +231,12 @@ class CartScreen extends React.Component {
               <Text
                 style={{
                   marginTop: 6,
-                  fontFamily:
-                    Platform.OS === 'ios'
-                      ? 'Asap-Regular_Medium'
-                      : 'AsapMedium',
-                  fontSize: 18,
-                  marginLeft: 10,
-                  flex: 0.85,
-                  fontWeight: '800',
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+fontSize: 18,
+marginLeft: 10,
+flex: 0.85,
+fontWeight: '800',
+color: theme.text, 
                 }}
               >
                 {item.ProductName}{' '}
@@ -253,14 +252,12 @@ class CartScreen extends React.Component {
                   renderText={formattedValue => (
                     <Text
                       style={{
-                        marginTop: 6,
-                        textAlignVertical: 'top',
-                        marginLeft: 15,
-                        fontFamily:
-                          Platform.OS === 'ios'
-                            ? 'Asap-Regular'
-                            : 'AsapRegular',
-                        fontSize: 20,
+                       marginTop: 6,
+textAlignVertical: 'top',
+marginLeft: 15,
+fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+fontSize: 20,
+color: theme.text,
                       }}
                     >
                       {formattedValue}
@@ -300,6 +297,7 @@ class CartScreen extends React.Component {
   };
 
   renderAddons(Addons) {
+    const { theme } = this.props;
     if (!Array.isArray(Addons) || Addons.length === 0) {
       return null;
     }
@@ -315,7 +313,7 @@ class CartScreen extends React.Component {
               fontFamily:
                 Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
               fontSize: 17,
-              color: '#969696',
+             color: theme.textMuted, 
               marginRight: 5,
             }}
           >
@@ -327,6 +325,7 @@ class CartScreen extends React.Component {
   }
 
   renderExtra(Extra) {
+    const { theme } = this.props;
     if (!Extra || !Array.isArray(Extra) || Extra.length === 0) {
       return null;
     }
@@ -341,7 +340,7 @@ class CartScreen extends React.Component {
               fontFamily:
                 Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
               fontSize: 17,
-              color: '#969696',
+              color: theme.textMuted,
               marginRight: 5,
             }}
           >
@@ -362,7 +361,7 @@ class CartScreen extends React.Component {
                       ? 'Asap-Regular_Medium'
                       : 'AsapMedium',
                   fontSize: 17,
-                  color: '#969696',
+                  color: theme.textMuted,
                 }}
               >
                 ({formattedValue})
@@ -430,6 +429,7 @@ class CartScreen extends React.Component {
   };
 
   render() {
+    const { theme } = this.props;
     const ItemSeperator = () => {
       return (
         <View
@@ -438,20 +438,23 @@ class CartScreen extends React.Component {
             margin: 5,
             marginRight: 20,
             marginLeft: 20,
-            backgroundColor: 'black',
+            backgroundColor: theme.separator,
           }}
         />
       );
     };
 
     return (
-      <Animated.View style={[{ flex: 1 }, { opacity: this.state.fadeAnim }]}>
+      <Animated.View style={[{ flex: 1, backgroundColor: theme.bg }, { opacity: this.state.fadeAnim }]}>
         <View style={{ marginLeft: 40, marginTop: 20, marginBottom: 20 }}>
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
               marginRight: 40,
+              marginTop: 20,
+        marginBottom: 20,
+        marginRight: 16,
             }}
           >
             <Text
@@ -460,6 +463,7 @@ class CartScreen extends React.Component {
                 fontFamily:
                   Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                 fontSize: 26,
+                color: theme.text,
               }}
             >
               Cart
@@ -467,11 +471,13 @@ class CartScreen extends React.Component {
 
             {this.props.cartItems.length <= 0 ? null : (
               <View>
-                <TouchableOpacity onPress={() => this.RBSheet.open()}>
-                  <FontAwesome6 name="align-right" size={20} />
+                <TouchableOpacity onPress={() => this.RBSheet.open()}
+                  style={{ marginRight: 12 }} >
+                  <FontAwesome6 name="align-right" size={20} color={theme.text} />
                 </TouchableOpacity>
               </View>
             )}
+            <ThemeToggle style={{ marginRight: 10 }} />
           </View>
           {this.props.cartItems.length <= 0 ? (
             <View>
@@ -495,6 +501,7 @@ class CartScreen extends React.Component {
                   marginLeft: -30,
                   textAlign: 'center',
                   marginTop: 30,
+                  color: theme.text,
                 }}
               >
                 Is it just me or does this meal look more scrumptious because
@@ -518,13 +525,13 @@ class CartScreen extends React.Component {
                     height: 50,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: 'black',
+                    backgroundColor: theme.pill,
                     borderRadius: 50,
                   }}
                 >
                   <Text
                     style={{
-                      color: 'white',
+                      color: theme.pillText,
                       fontFamily:
                         Platform.OS === 'ios'
                           ? 'Asap-Regular_Medium'
@@ -540,7 +547,7 @@ class CartScreen extends React.Component {
           ) : null}
         </View>
 
-        <View style={{ flex: 1, backgroundColor: '#F0F0F0' }}>
+        <View style={{ flex: 1, backgroundColor: theme.bg }}>
           <FlatList
             data={this.props.cartItems}
             keyExtractor={(item, index) => index.toString()}
@@ -556,7 +563,7 @@ class CartScreen extends React.Component {
             style={{
               height: 60,
               justifyContent: 'center',
-              borderTopColor: 'black',
+              borderTopColor: theme.separator,
               borderTopWidth: 0.4,
               margin: 20,
               flexDirection: 'row',
@@ -569,7 +576,7 @@ class CartScreen extends React.Component {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                   fontSize: 16,
-                  color: '#a8a8a8',
+                  color: theme.textMuted,
                 }}
               >
                 Total
@@ -585,7 +592,7 @@ class CartScreen extends React.Component {
                   <Text
                     style={{
                       top: 6,
-                      color: 'black',
+                      color: theme.text,
                       fontSize: 24,
                       fontFamily:
                         Platform.OS === 'ios'
@@ -612,13 +619,13 @@ class CartScreen extends React.Component {
                   height: 45,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: 'black',
+                  backgroundColor: theme.pill,
                   borderRadius: 5,
                 }}
               >
                 <Text
                   style={{
-                    color: 'white',
+                    color: theme.pillText,
                     fontFamily:
                       Platform.OS === 'ios'
                         ? 'Asap-Regular_Medium'
@@ -642,14 +649,11 @@ class CartScreen extends React.Component {
           openDuration={700}
           closeOnDragDown={true}
           closeOnPressMask={true}
-          customStyles={{
-            wrapper: {
-              backgroundColor: 'transparent',
-            },
-            draggableIcon: {
-              backgroundColor: '#000',
-            },
-          }}
+       customStyles={{
+  wrapper: { backgroundColor: 'transparent' },
+  draggableIcon: { backgroundColor: theme.textMuted },
+  container: { backgroundColor: theme.card },  
+}}
         >
           <View style={{ flex: 1 }}>
             <Text
@@ -658,7 +662,7 @@ class CartScreen extends React.Component {
                 fontFamily:
                   Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                 fontSize: 18,
-                color: 'black',
+                color: theme.text,
                 alignSelf: 'center',
               }}
             >
@@ -670,7 +674,7 @@ class CartScreen extends React.Component {
                 fontFamily:
                   Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                 fontSize: 18,
-                color: 'black',
+                color: theme.text,
                 alignSelf: 'center',
               }}
             >
@@ -690,13 +694,13 @@ class CartScreen extends React.Component {
                       height: 45,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: 'black',
+                      backgroundColor: theme.pill,
                       borderRadius: 5,
                     }}
                   >
                     <Text
                       style={{
-                        color: 'white',
+                        color: theme.pillText,
                         fontFamily:
                           Platform.OS === 'ios'
                             ? 'Asap-Regular_Medium'
@@ -720,13 +724,13 @@ class CartScreen extends React.Component {
                       height: 45,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: 'black',
+                      backgroundColor: theme.pill,
                       borderRadius: 5,
                     }}
                   >
                     <Text
                       style={{
-                        color: 'white',
+                        color: theme.pillText,
                         fontFamily:
                           Platform.OS === 'ios'
                             ? 'Asap-Regular_Medium'
@@ -761,4 +765,9 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(CartScreen);
+function CartScreenWrapper(props) {
+  const { theme, isDark, toggleTheme } = useTheme();
+  return <CartScreen {...props} theme={theme} isDark={isDark} toggleTheme={toggleTheme} />;
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(CartScreenWrapper);

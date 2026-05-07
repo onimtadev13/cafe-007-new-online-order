@@ -9,10 +9,11 @@ import {
 import FastImage from 'react-native-fast-image';
 import FoodQtyLabel from '../Components/Food&QtyLabel';
 import { NumericFormat } from 'react-number-format';
+import { withTheme } from '../Context/ThemeContext';
 
-export default class ItemView extends React.PureComponent {
+class ItemView extends React.PureComponent {
   render() {
-    const { item, navigation, qtycount } = this.props;
+   const { item, navigation, qtycount, theme } = this.props; 
     console.log('view items', item);
 
     return (
@@ -27,17 +28,17 @@ export default class ItemView extends React.PureComponent {
             PPrice: item.NconvertPrice,
             IMG: item.ImagePath,
             isDiscounted: item.isDiscounted,
-            isPopular: item.isPopuler, // ← map the misspelled field here
+            isPopular: item.isPopuler, 
           })
         }
       >
-        <View style={{ width: '100%', height: 170 }}>
+        <View style={{ width: '100%', height: 170, backgroundColor: theme.bg }}>
           <View style={{ flex: 1, flexDirection: 'row', margin: 10 }}>
             <View
               style={{
                 width: 160,
                 height: 160,
-                backgroundColor: 'white',
+                backgroundColor: theme.card, 
                 borderRadius: 10,
               }}
             >
@@ -77,6 +78,7 @@ export default class ItemView extends React.PureComponent {
                   fontSize: 18,
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                    color: theme.text, 
                 }}
               >
                 {item.Prod_Name}
@@ -123,6 +125,7 @@ export default class ItemView extends React.PureComponent {
                   fontSize: 15,
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                    color: theme.textSub, 
                 }}
               >
                 {item.More_Descrip}
@@ -188,3 +191,5 @@ export default class ItemView extends React.PureComponent {
     );
   }
 }
+
+export default withTheme(ItemView);

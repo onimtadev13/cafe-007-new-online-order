@@ -32,16 +32,40 @@ export default class FullWidthSlider extends React.PureComponent {
     clearInterval(this.myInterval);
   }
 
-  loopBanners = () => {
-    const ll = this.state.BannerList.length;
-    let i = 0;
-    this.myInterval = setInterval(() => {
-      if (ll > 0) {
-        this.flatRef.scrollToIndex({index: i, animated: true});
-        i = (i + 1) % ll;
-      }
-    }, 7000);
-  };
+  
+// loopBanners = () => {
+//   const ll = this.state.BannerList.length;
+//   let i = 0;
+//   this.myInterval = setInterval(() => {
+//     if (ll > 0) {
+//       this.flatRef.scrollToIndex({index: i, animated: true});
+//       i = (i + 1) % ll;
+//     }
+//   }, 7000);
+// };
+
+  // AFTER
+loopBanners = () => {
+  const ll = this.state.BannerList.length;
+  let i = 0;
+  this.myInterval = setInterval(() => {
+    if (ll > 0) {
+      Animated.timing(this.scrollX, {
+        toValue: i * width,
+        duration: 10000,       // ← sliding animation speed in ms
+                              //   increase for slower, decrease for faster
+                              //   800 = fast, 1200 = medium, 2000 = very slow
+        useNativeDriver: true,
+      }).start(() => {
+        this.flatRef.scrollToOffset({
+          offset: i * width,
+          animated: true,    // ← sync the actual FlatList position silently
+        });
+      });
+      i = (i + 1) % ll;
+    }
+  }, 7000);
+};
 
   renderItem = ({item, index}) => {
     const inputRange = [

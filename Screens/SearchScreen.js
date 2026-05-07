@@ -4,7 +4,6 @@ import {
   Animated,
   BackHandler,
   Dimensions,
-  Image,
   ImageBackground,
   Keyboard,
   Platform,
@@ -16,67 +15,64 @@ import {
   View,
 } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
-// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux';
 import ItemView from '../Components/ItemView';
 import { APIURL } from '../Data/CloneData';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import { log } from 'react-native-sqlite-storage/lib/sqlite.core';
+import ThemeToggle from '../Components/ThemeToggle';
+import { withTheme } from '../Context/ThemeContext';
 
-const width = Dimensions.get('window').width;
+const width  = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
 class SearchScreen extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      fadeAnim: new Animated.Value(0),
-      slideUp: new Animated.Value(height + 550),
-      slideDown: new Animated.Value(0),
-      catlistOpacity: new Animated.Value(1),
-      Productlist: [],
-      Categorylist: [],
-      SearchList: [],
-      ItemList: [],
-      isLoading: true,
-      isTextInputPress: false,
-      isFetching: false,
-      Location: '',
+      fadeAnim:          new Animated.Value(0),
+      slideUp:           new Animated.Value(height + 550),
+      slideDown:         new Animated.Value(0),
+      catlistOpacity:    new Animated.Value(1),
+      searchBarWidth:    new Animated.Value(width - 90),  // ← shorter default
+      Productlist:       [],
+      Categorylist:      [],
+      SearchList:        [],
+      ItemList:          [],
+      isLoading:         true,
+      isTextInputPress:  false,
+      isFetching:        false,
+      Location:          '',
     };
     this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
   }
 
   componentDidMount() {
-    //Store the subscription
     this.backHandlerSubscription = BackHandler.addEventListener(
       'hardwareBackPress',
       this.handleBackButtonClick,
     );
 
-    //Store both navigation subscriptions separately
-    this.focusSubscription = this.props.navigation.addListener(
-      'focus',
-      async () => {
-        this.fadeIn();
-        this._retrieveData();
-      },
-    );
+    this.focusSubscription = this.props.navigation.addListener('focus', async () => {
+      this.fadeIn();
+      this._retrieveData();
+    });
 
-    this.blurSubscription = this.props.navigation.addListener(
-      'blur',
-      async () => {
-        this.fadeOut();
-      },
-    );
+    this.blurSubscription = this.props.navigation.addListener('blur', async () => {
+      this.fadeOut();
+    });
   }
+
+  componentWillUnmount() {
+    if (this.focusSubscription)       this.focusSubscription();
+    if (this.blurSubscription)        this.blurSubscription();
+    if (this.backHandlerSubscription) this.backHandlerSubscription.remove();
+  }
+
   _retrieveData = async () => {
     try {
       const value = await AsyncStorage.getItem('LOCA');
-      if (value !== null) {
-        // We have data!!
-        this.setState({ Location: value });
-      }
+      if (value !== null) this.setState({ Location: value });
       this.setState({ isLoading: true }, () => {
         this.LoadProducts(this.state.Location);
       });
@@ -85,66 +81,25 @@ class SearchScreen extends React.PureComponent {
     }
   };
 
-  componentWillUnmount() {
-    //Clean up navigation subscriptions
-    if (this.focusSubscription) {
-      this.focusSubscription();
-    }
-    if (this.blurSubscription) {
-      this.blurSubscription();
-    }
-
-    //Use subscription.remove() instead of removeEventListener
-    if (this.backHandlerSubscription) {
-      this.backHandlerSubscription.remove();
-    }
-  }
-
   handleBackButtonClick() {
-    var Type;
     if (this.state.isTextInputPress) {
-      Type = true;
-      this.setState({ isTextInputPress: false, SearchList: [] });
-      this.textinputRef.clear();
-      this.textinputRef.blur();
-      Animated.parallel([
-        Animated.spring(this.state.slideUp, {
-          toValue: height + 550,
-          useNativeDriver: true,
-        }),
-        Animated.spring(this.state.slideDown, {
-          toValue: 0,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Type = false;
+      this.onSearchBackPress();
+      return true;
     }
-    return Type;
+    return false;
   }
 
   fadeIn = () => {
-    // Will change fadeAnim value to 1 in 5 seconds
-    Animated.timing(this.state.fadeAnim, {
-      toValue: 1,
-      duration: 600,
-      useNativeDriver: true,
-    }).start();
+    Animated.timing(this.state.fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
   };
 
   fadeOut = () => {
-    // Will change fadeAnim value to 0 in 3 seconds
-    Animated.timing(this.state.fadeAnim, {
-      toValue: 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
+    Animated.timing(this.state.fadeAnim, { toValue: 0, duration: 500, useNativeDriver: true }).start();
   };
 
   numberWithCommas = x => {
     let convertX = x.toString().replace(/\B(?=(\d{1000})+(?!\d))/g, ',');
-    let xFloat = parseFloat(convertX).toFixed(2);
-    return xFloat;
+    return parseFloat(convertX).toFixed(2);
   };
 
   onRefresh() {
@@ -159,29 +114,30 @@ class SearchScreen extends React.PureComponent {
       this.textinputRef.clear();
       this.textinputRef.blur();
       Keyboard.dismiss();
+
+      // Shrink bar back
+      Animated.spring(this.state.searchBarWidth, {
+        toValue: width - 90,
+        useNativeDriver: false,
+      }).start();
+
       Animated.parallel([
-        Animated.spring(this.state.slideUp, {
-          toValue: height + 550,
-          useNativeDriver: true,
-        }),
-        Animated.spring(this.state.slideDown, {
-          toValue: 0,
-          useNativeDriver: true,
-        }),
+        Animated.spring(this.state.slideUp,   { toValue: height + 550, useNativeDriver: true }),
+        Animated.spring(this.state.slideDown, { toValue: 0,            useNativeDriver: true }),
       ]).start();
     }
   };
 
   onSerachPress = () => {
+    // Expand bar to full width
+    Animated.spring(this.state.searchBarWidth, {
+      toValue: width - 30,
+      useNativeDriver: false,
+    }).start();
+
     Animated.parallel([
-      Animated.spring(this.state.slideDown, {
-        toValue: height + 550,
-        useNativeDriver: true,
-      }),
-      Animated.spring(this.state.slideUp, {
-        toValue: 0,
-        useNativeDriver: true,
-      }),
+      Animated.spring(this.state.slideDown, { toValue: height + 550, useNativeDriver: true }),
+      Animated.spring(this.state.slideUp,   { toValue: 0,            useNativeDriver: true }),
     ]).start(() => {
       this.setState({ isTextInputPress: true });
     });
@@ -199,33 +155,19 @@ class SearchScreen extends React.PureComponent {
     }
   };
 
-  formatData = (data, numColumns) => {
-    const numberOfFullRows = Math.floor(data.length / numColumns);
-
-    let numberOfElementsLastRow = data.length - numberOfFullRows * numColumns;
-    while (
-      numberOfElementsLastRow !== numColumns &&
-      numberOfElementsLastRow !== 0
-    ) {
-      data.push({ key: `blank-${numberOfElementsLastRow}`, empty: true });
-      numberOfElementsLastRow = numberOfElementsLastRow + 1;
-    }
-
-    return data;
-  };
-
   onCategoryPress = Category => {
     const FilterList = this.state.Productlist.filter(
       i => i.Dept_Name === Category && i.Prod_Name !== Category,
     );
-    console.log('filterlist', FilterList);
     this.props.navigation.navigate('ProductListScreen', {
       ItemList: FilterList,
-      Title: Category,
+      Title:    Category,
     });
   };
 
   onrenderCategory = ({ item, index }) => {
+    const { theme } = this.props;
+
     if (item.empty === true) {
       return <View style={{ backgroundColor: 'transparent' }} />;
     }
@@ -235,7 +177,7 @@ class SearchScreen extends React.PureComponent {
         style={{
           flex: 1,
           height: 100,
-          backgroundColor: '#f0f0f0',
+          backgroundColor: theme.surface,
           margin: 5,
         }}
         onPress={() => this.onCategoryPress(item)}
@@ -243,19 +185,13 @@ class SearchScreen extends React.PureComponent {
         <ImageBackground
           resizeMode="cover"
           source={require('../assets/category-placeholder.png')}
-          style={[{ flex: 1, justifyContent: 'center' }]}
+          style={{ flex: 1, justifyContent: 'center' }}
         >
-          <View
-            style={[
-              StyleSheet.absoluteFillObject,
-              { backgroundColor: 'rgba(0,0,0,0.1)' },
-            ]}
-          />
+          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.1)' }]} />
           <Text
             style={{
-              fontFamily:
-                Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-              color: 'black',
+              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+              color: theme.text,
               padding: 10,
               fontSize: 18,
               textAlign: 'center',
@@ -269,14 +205,12 @@ class SearchScreen extends React.PureComponent {
   };
 
   onrenderItem = ({ item, index }) => {
-    console.log('pressed item', item);
     const countTypes = this.props.cartItems.filter(
       product => product.ProductName === item.Prod_Name,
     );
     let qtycount = 0;
-    countTypes.forEach(element => {
-      qtycount = qtycount + element.Qty;
-    });
+    countTypes.forEach(element => { qtycount += element.Qty; });
+
     return (
       <ItemView
         key={index}
@@ -288,84 +222,89 @@ class SearchScreen extends React.PureComponent {
   };
 
   render() {
+    const { theme } = this.props;
+    const { isTextInputPress } = this.state;
+
     return (
       <Animated.View
         style={[
-          {
-            flex: 1,
-            backgroundColor: '#F0F0F0',
-          },
-          { opacity: this.state.isTextInputPress ? 1 : this.state.fadeAnim },
+          { flex: 1, backgroundColor: theme.bg },
+          { opacity: isTextInputPress ? 1 : this.state.fadeAnim },
         ]}
       >
+        {/* ── Header row: search bar + ThemeToggle outside ── */}
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: '#e0e0e0',
-            borderRadius: 50,
-            margin: 15,
-            marginTop: 20,
+            flexDirection:  'row',
+            alignItems:     'center',
+            marginHorizontal: 15,
+            marginTop:      20,
+            marginBottom:   5,
           }}
         >
-          <TouchableOpacity onPress={() => this.onSearchBackPress()}>
-            <FontAwesome6
-              name={
-                this.state.isTextInputPress ? 'arrow-left' : 'magnifying-glass'
-              }
-              size={25}
-              color="black"
-              style={{ marginLeft: 20 }}
-            />
-          </TouchableOpacity>
-          <TextInput
-            ref={ref => {
-              this.textinputRef = ref;
-            }}
+          {/* Animated search bar — shrinks to leave room for ThemeToggle */}
+          <Animated.View
             style={{
-              flex: 1,
-              fontSize: 17,
-              fontFamily:
-                Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-              paddingTop: 10,
-              paddingBottom: 10,
-              paddingLeft: 15,
-              marginRight: 20,
-              color: 'black',
+              width:           this.state.searchBarWidth,
+              flexDirection:   'row',
+              alignItems:      'center',
+              backgroundColor: theme.surface,
+              borderRadius:    50,
             }}
-            placeholder={'Search delicious food'}
-            placeholderTextColor={'black'}
-            onChangeText={text => this.onSearch(text)}
-            keyboardType={'default'}
-            onPressIn={() => {
-              this.onSerachPress();
-            }}
-          />
+          >
+            <TouchableOpacity onPress={this.onSearchBackPress}>
+              <FontAwesome6
+                name={isTextInputPress ? 'arrow-left' : 'magnifying-glass'}
+                size={22}
+                color={theme.text}
+                style={{ marginLeft: 18 }}
+              />
+            </TouchableOpacity>
+
+            <TextInput
+              ref={ref => { this.textinputRef = ref; }}
+              style={{
+                flex:          1,
+                fontSize:      17,
+                fontFamily:    Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                paddingTop:    10,
+                paddingBottom: 10,
+                paddingLeft:   15,
+                marginRight:   18,
+                color:         theme.text,
+              }}
+              placeholder="Search delicious food"
+              placeholderTextColor={theme.textMuted}
+              onChangeText={text => this.onSearch(text)}
+              keyboardType="default"
+              onPressIn={this.onSerachPress}
+            />
+          </Animated.View>
+
+          {/* ThemeToggle — always outside the search bar */}
+          {!isTextInputPress && (
+            <View style={{ marginLeft: 10 }}>
+              <ThemeToggle />
+            </View>
+          )}
         </View>
 
-        {/* {this.state.isTextInputPress ?
-                    null :
-                    (
-                        <Text style={{ fontFamily: 'AsapBold', fontSize: 22, margin: 15 }}>Categories</Text>
-                    )} */}
-
+        {/* ── Rest of the screen — unchanged ── */}
         <Animated.View
-          style={[
-            {
-              justifyContent: 'center',
-              flex: 1,
-              marginLeft: 15,
-              marginRight: 15,
-            },
-          ]}
+          style={{
+            justifyContent: 'center',
+            flex:           1,
+            marginLeft:     15,
+            marginRight:    15,
+          }}
         >
-          {/* {this.state.isTextInputPress ? ( */}
+          {/* Search results list — slides up into view */}
           <Animated.View
             style={[
               {
-                flex: 1,
+                flex:         1,
                 marginBottom: 10,
-                position: this.state.isTextInputPress ? 'relative' : 'absolute',
+                position:     isTextInputPress ? 'relative' : 'absolute',
               },
               { transform: [{ translateY: this.state.slideUp }] },
             ]}
@@ -377,15 +316,14 @@ class SearchScreen extends React.PureComponent {
               keyExtractor={(item, index) => index.toString()}
             />
           </Animated.View>
-          {/* )
-                        :
-                        ( */}
+
+          {/* Category grid — slides down out of view during search */}
           <Animated.View
             style={[
               {
-                flex: 1,
+                flex:         1,
                 marginBottom: 10,
-                position: this.state.isTextInputPress ? 'absolute' : 'relative',
+                position:     isTextInputPress ? 'absolute' : 'relative',
               },
               { transform: [{ translateY: this.state.slideDown }] },
             ]}
@@ -396,9 +334,9 @@ class SearchScreen extends React.PureComponent {
               refreshControl={
                 <RefreshControl
                   refreshing={this.state.isLoading}
-                  colors={['red', 'green', 'blue']}
-                  title={'Refreshing'}
-                  titleColor={'black'}
+                  colors={[theme.accent]}
+                  title="Refreshing"
+                  titleColor={theme.textSub}
                 />
               }
               showsVerticalScrollIndicator={false}
@@ -410,12 +348,12 @@ class SearchScreen extends React.PureComponent {
               ListHeaderComponent={
                 <Text
                   style={{
-                    fontFamily:
-                      Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-                    fontSize: 22,
-                    marginLeft: 15,
-                    marginRight: 15,
+                    fontFamily:   Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                    fontSize:     22,
+                    marginLeft:   15,
+                    marginRight:  15,
                     marginBottom: 15,
+                    color:        theme.text,
                   }}
                 >
                   Categories
@@ -423,180 +361,88 @@ class SearchScreen extends React.PureComponent {
               }
             />
           </Animated.View>
-          {/* )} */}
         </Animated.View>
       </Animated.View>
     );
   }
 
-  /**
-   * author shivanka dilshan
-   * Loading product data location wice old iid was 75 new iid is 115
-   * */
   LoadProducts(Loca) {
     fetch(APIURL, {
       method: 'POST',
-      cache: 'no-cache',
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'no-cache',
-      },
+      cache:  'no-cache',
+      headers: { 'content-type': 'application/json', 'cache-control': 'no-cache' },
       body: JSON.stringify({
         HasReturnData: 'T',
         Parameters: [
-          {
-            Para_Data: '115',
-            Para_Direction: 'Input',
-            Para_Lenth: 10,
-            Para_Name: '@Iid',
-            Para_Type: 'int',
-          },
-          {
-            Para_Data: Loca,
-            Para_Direction: 'Input',
-            Para_Lenth: 100,
-            Para_Name: '@Text1',
-            Para_Type: 'VARCHAR',
-          },
+          { Para_Data: '115', Para_Direction: 'Input', Para_Lenth: 10,  Para_Name: '@Iid',   Para_Type: 'int'     },
+          { Para_Data: Loca,  Para_Direction: 'Input', Para_Lenth: 100, Para_Name: '@Text1', Para_Type: 'VARCHAR' },
         ],
         SpName: 'sp_Android_Common_API',
         con: '1',
       }),
     })
-      .then(res => {
-      
-        return res.json();
-      })
+      .then(res => res.json())
       .then(json => {
-          console.log('response', json);
-        const Productlist = [];
-        var Categorylist = [];
-        var Department = json.CommonResult.Table[0].Dept_Name;
-        Productlist.push({
-          Prod_Code: json.CommonResult.Table[0].Prod_Code,
-          Prod_Name: Department,
-          header: true,
-          Dept_Name: Department,
-          ImagePath: json.CommonResult.Table[0].ImagePath,
-          More_Descrip: json.CommonResult.Table[0].More_Descrip,
-          Selling_Price: this.numberWithCommas(
-            json.CommonResult.Table[0].Selling_Price,
-          ),
-          NconvertPrice: json.CommonResult.Table[0].Selling_Price,
-          BestSeller: json.CommonResult.Table[0].isBestSeller,
-          Offer: json.CommonResult.Table[0].isOffer,
-          isSoldOut: json.CommonResult.Table[0].isSoldOut,
-          isPopuler: json.CommonResult.Table[0].Popular,
+        const Productlist  = [];
+        const Categorylist = [];
+        let Department = json.CommonResult.Table[0].Dept_Name;
+
+        const mapItem = (element, header) => ({
+          Prod_Code:     element.Prod_Code,
+          Prod_Name:     header ? element.Dept_Name : element.Prod_Name,
+          header,
+          Dept_Name:     element.Dept_Name,
+          ImagePath:     element.ImagePath,
+          More_Descrip:  element.More_Descrip,
+          Selling_Price: this.numberWithCommas(element.Selling_Price),
+          NconvertPrice: element.Selling_Price,
+          BestSeller:    element.isBestSeller,
+          Offer:         element.isOffer,
+          isSoldOut:     element.isSoldOut,
+          isPopuler:     element.Popular,
+          isDiscounted:  element.isDiscounted,
         });
 
+        Productlist.push(mapItem(json.CommonResult.Table[0], true));
+
         json.CommonResult.Table.forEach(element => {
-          if (Department == element.Dept_Name) {
-            Productlist.push({
-              Prod_Code: element.Prod_Code,
-              Prod_Name: element.Prod_Name,
-              header: false,
-              Dept_Name: element.Dept_Name,
-              ImagePath: element.ImagePath,
-              More_Descrip: element.More_Descrip,
-              Selling_Price: this.numberWithCommas(element.Selling_Price),
-              NconvertPrice: element.Selling_Price,
-              BestSeller: element.isBestSeller,
-              Offer: element.isOffer,
-              isSoldOut: element.isSoldOut,
-            isPopuler: element.Popular, 
-            });
+          if (Department === element.Dept_Name) {
+            Productlist.push(mapItem(element, false));
           } else {
-            Productlist.push({
-              Prod_Code: element.Prod_Code,
-              Prod_Name: element.Dept_Name,
-              header: true,
-              Dept_Name: element.Dept_Name,
-              ImagePath: element.ImagePath,
-              More_Descrip: element.More_Descrip,
-              Selling_Price: this.numberWithCommas(element.Selling_Price),
-              NconvertPrice: element.Selling_Price,
-              BestSeller: element.isBestSeller,
-              Offer: element.isOffer,
-              isSoldOut: element.isSoldOut,
-              isPopuler: element.Popular, 
-            });
-            Productlist.push({
-              Prod_Code: element.Prod_Code,
-              Prod_Name: element.Prod_Name,
-              header: false,
-              Dept_Name: element.Dept_Name,
-              ImagePath: element.ImagePath,
-              More_Descrip: element.More_Descrip,
-              Selling_Price: this.numberWithCommas(element.Selling_Price),
-              NconvertPrice: element.Selling_Price,
-              BestSeller: element.isBestSeller,
-              Offer: element.isOffer,
-              isSoldOut: element.isSoldOut,
-              isPopuler: element.Popular,
-            });
+            Productlist.push(mapItem(element, true));
+            Productlist.push(mapItem(element, false));
             Department = element.Dept_Name;
           }
         });
 
         Productlist.forEach(obj => {
-          if (obj.header) {
-            Categorylist.push(obj.Prod_Name);
-          }
+          if (obj.header) Categorylist.push(obj.Prod_Name);
         });
 
         this.setState({
-          ItemList: Productlist.filter(i => i.header === false),
-          Productlist: Productlist,
-          Categorylist: Categorylist,
-          isLoading: false,
+          ItemList:   Productlist.filter(i => !i.header),
+          Productlist,
+          Categorylist,
+          isLoading:  false,
           isFetching: false,
         });
-        console.log('items:', Productlist);
       })
       .catch(er => {
         console.log(er);
         Alert.alert(
           'Warning',
           "The operation couldn't be completed.",
-          [
-            {
-              text: 'Try Again',
-              onPress: () => this.LoadProducts(this.state.Location),
-            },
-          ],
+          [{ text: 'Try Again', onPress: () => this.LoadProducts(this.state.Location) }],
           { cancelable: false },
         );
       });
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    cartItems: state,
-  };
-};
+const mapStateToProps = state => ({ cartItems: state });
 
 const styles = StyleSheet.create({
-  gridView: {
-    marginTop: 10,
-    flex: 1,
-  },
-  itemContainer: {
-    justifyContent: 'flex-end',
-    borderRadius: 5,
-    padding: 10,
-    height: 150,
-  },
-  itemName: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '600',
-  },
-  itemCode: {
-    fontWeight: '600',
-    fontSize: 12,
-    color: '#fff',
-  },
+  gridView: { marginTop: 10, flex: 1 },
 });
 
-export default connect(mapStateToProps, null)(SearchScreen);
+export default connect(mapStateToProps, null)(withTheme(SearchScreen));

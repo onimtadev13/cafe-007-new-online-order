@@ -6,30 +6,28 @@ import {
   FlatList,
   Platform,
   RefreshControl,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {APIURL} from '../Data/CloneData';
-// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import moment from 'moment';
 import {NumericFormat} from 'react-number-format';
-// import {firebase} from '@react-native-firebase/messaging';
 import messaging from '@react-native-firebase/messaging';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-// import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import {withTheme} from '../Context/ThemeContext';
+import ThemeToggle from '../Components/ThemeToggle';
 
 const height = Dimensions.get('window').height;
 const Tab = createMaterialTopTabNavigator();
 
-export default class OrderScreen extends React.PureComponent {
+class OrderScreen extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      fadeAnim: new Animated.Value(1),
+      fadeAnim: new Animated.Value(0),
       sliderUp: new Animated.Value(height),
       ongoing_orderlist: [],
       complete_orderlist: [],
@@ -40,45 +38,41 @@ export default class OrderScreen extends React.PureComponent {
   }
 
   componentDidMount() {
+    this.fadeIn();
+
     this._unsubscribe = this.props.navigation.addListener('focus', async () => {
       this.fadeIn();
       this.setState({isLoading: true});
       this.onGetOrderHeader();
     });
-    this._unsubscribe = this.props.navigation.addListener('blur', async () => {
-      this.fadeOut();
-    });
+
+    this._unsubscribeBlur = this.props.navigation.addListener(
+      'blur',
+      async () => {
+        this.fadeOut();
+      },
+    );
+
     this.onGetOrderHeader();
     this.localNotification();
   }
 
   componentWillUnmount() {
-    this._unsubscribe();
-    this.messageListner();
+    if (this._unsubscribe) this._unsubscribe();
+    if (this._unsubscribeBlur) this._unsubscribeBlur();
+    if (this.messageListner) this.messageListner();
   }
 
-  // localNotification = () => {
-  //   this.messageListner = firebase
-  //     .messaging()
-  //     .onMessage(async remoteMessage => {
-  //       if (remoteMessage.data.Status === 'Finish') {
-  //         this.setState({isLoading: true});
-  //         this.onGetOrderHeader();
-  //       }
-  //     });
-  // };
-
   localNotification = () => {
-  this.messageListner = messaging().onMessage(async remoteMessage => {  // ✅ FIXED
-    if (remoteMessage.data?.Status === 'Finish') {
-      this.setState({isLoading: true});
-      this.onGetOrderHeader();
-    }
-  });
-};
+    this.messageListner = messaging().onMessage(async remoteMessage => {
+      if (remoteMessage.data?.Status === 'Finish') {
+        this.setState({isLoading: true});
+        this.onGetOrderHeader();
+      }
+    });
+  };
 
   fadeIn = () => {
-    // Will change fadeAnim value to 1 in 5 seconds
     Animated.timing(this.state.fadeAnim, {
       toValue: 1,
       duration: 500,
@@ -87,7 +81,6 @@ export default class OrderScreen extends React.PureComponent {
   };
 
   fadeOut = () => {
-    // Will change fadeAnim value to 0 in 3 seconds
     Animated.timing(this.state.fadeAnim, {
       toValue: 0,
       duration: 500,
@@ -96,7 +89,6 @@ export default class OrderScreen extends React.PureComponent {
   };
 
   sliderUp = () => {
-    // Will change sliderUp value to 0 in 3 seconds
     Animated.spring(this.state.sliderUp, {
       toValue: 0,
       useNativeDriver: true,
@@ -134,49 +126,37 @@ export default class OrderScreen extends React.PureComponent {
         con: '1',
       }),
     })
-      .then(res => {
-        return res.json();
-      })
+      .then(res => res.json())
       .then(json => {
         const ongoing_orderlist = [];
         const complete_orderlist = [];
 
         json.CommonResult.Table.forEach(element => {
+          const order = {
+            OrderID: element.OrderID,
+            NetTotal: element.NetTotal,
+            DineType: element.DineType,
+            DeliveryAddress: element.DeliveryAddress,
+            PaymentType: element.PaymentType,
+            InsertDate: element.InsertDate,
+            Tax: element.Tax,
+            Discount: element.Discount,
+            DeliveryCharge: element.DeliveryCharge,
+            ServiceCharge: element.ServiceCharge,
+            SubTotal: element.SubTotal,
+            OrderStatus: element.OrderStatus,
+          };
+
           if (element.OrderStatus === '5' || element.OrderStatus === '4') {
-            complete_orderlist.push({
-              OrderID: element.OrderID,
-              NetTotal: element.NetTotal,
-              DineType: element.DineType,
-              DeliveryAddress: element.DeliveryAddress,
-              PaymentType: element.PaymentType,
-              InsertDate: element.InsertDate,
-              Tax: element.Tax,
-              Discount: element.Discount,
-              DeliveryCharge: element.DeliveryCharge,
-              ServiceCharge: element.ServiceCharge,
-              SubTotal: element.SubTotal,
-              OrderStatus: element.OrderStatus,
-            });
+            complete_orderlist.push(order);
           } else {
-            ongoing_orderlist.push({
-              OrderID: element.OrderID,
-              NetTotal: element.NetTotal,
-              DineType: element.DineType,
-              DeliveryAddress: element.DeliveryAddress,
-              PaymentType: element.PaymentType,
-              InsertDate: element.InsertDate,
-              Tax: element.Tax,
-              Discount: element.Discount,
-              DeliveryCharge: element.DeliveryCharge,
-              ServiceCharge: element.ServiceCharge,
-              SubTotal: element.SubTotal,
-              OrderStatus: element.OrderStatus,
-            });
+            ongoing_orderlist.push(order);
           }
         });
+
         this.setState({
-          ongoing_orderlist: ongoing_orderlist,
-          complete_orderlist: complete_orderlist,
+          ongoing_orderlist,
+          complete_orderlist,
           refresh: false,
           isLoading: false,
         });
@@ -186,12 +166,7 @@ export default class OrderScreen extends React.PureComponent {
         Alert.alert(
           'Warning',
           "The operation couldn't be completed.",
-          [
-            {
-              text: 'Try Again',
-              onPress: () => this.onGetOrderHeader(),
-            },
-          ],
+          [{text: 'Try Again', onPress: () => this.onGetOrderHeader()}],
           {cancelable: false},
         );
       })
@@ -202,64 +177,52 @@ export default class OrderScreen extends React.PureComponent {
   };
 
   onrenderOrder = ({item, index}) => {
-    let Icon = '';
+    const {theme} = this.props;
 
+    let Icon = '';
     switch (item.DineType) {
       case 'EatIn':
         Icon = 'utensils';
         break;
-
       case 'PickUp':
         Icon = 'basket-shopping';
         break;
-
       case 'Delivery':
         Icon = 'car';
         break;
-
       default:
         break;
     }
 
     let Status = '';
-
     switch (item.OrderStatus) {
       case '1':
         Status = 'Processing';
         break;
-
       case '2':
         Status = 'Prepairing';
         break;
-
       case '3':
         switch (item.DineType) {
           case 'EatIn':
             Status = 'DineIn';
             break;
-
           case 'PickUp':
             Status = 'Pick Up';
             break;
-
           case 'Delivery':
             Status = 'Delevery';
             break;
-
           default:
             break;
         }
-
         break;
-
       case '4':
         Status = 'Cancel';
         break;
-
       case '5':
         Status = 'Complete';
         break;
-
       default:
         break;
     }
@@ -268,7 +231,7 @@ export default class OrderScreen extends React.PureComponent {
       <Animated.View
         style={[
           {
-            backgroundColor: 'white',
+            backgroundColor: theme.card,
             borderRadius: 10,
             marginLeft: 20,
             marginRight: 20,
@@ -276,6 +239,7 @@ export default class OrderScreen extends React.PureComponent {
           },
           {transform: [{translateY: this.state.sliderUp}]},
         ]}>
+        {/* Order ID row */}
         <View
           style={{
             flexDirection: 'row',
@@ -292,7 +256,7 @@ export default class OrderScreen extends React.PureComponent {
                 Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
               fontSize: 20,
               marginLeft: 20,
-              color: 'black',
+              color: theme.text,
             }}>
             Order ID
           </Text>
@@ -303,15 +267,20 @@ export default class OrderScreen extends React.PureComponent {
                 Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
               fontSize: 20,
               textAlign: 'right',
-              color: '#9c9c9c',
+              color: theme.textMuted,
               marginRight: 20,
             }}>
             {item.OrderID}
           </Text>
         </View>
 
+        {/* Date + Status row */}
         <View
-          style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginRight: 20,
+          }}>
           <Text
             style={{
               flex: 1,
@@ -320,7 +289,7 @@ export default class OrderScreen extends React.PureComponent {
               fontSize: 14,
               marginLeft: 40,
               marginBottom: 10,
-              color: '#9c9c9c',
+              color: theme.textMuted,
             }}>
             {moment(item.InsertDate).format('YYYY-MM-DD hh:mm:ss A ')}
           </Text>
@@ -334,7 +303,7 @@ export default class OrderScreen extends React.PureComponent {
               fontSize: 15,
               marginRight: 20,
               marginBottom: 10,
-              color: Status === 'Cancel' ? 'red' : 'black',
+              color: Status === 'Cancel' ? '#D9534F' : theme.text,
               textAlign: 'right',
             }}>
             {Status}
@@ -347,10 +316,11 @@ export default class OrderScreen extends React.PureComponent {
             marginLeft: 20,
             marginRight: 20,
             marginBottom: 20,
-            backgroundColor: 'black',
+            backgroundColor: theme.separator,
           }}
         />
 
+        {/* Payment Type */}
         <View
           style={{
             flexDirection: 'row',
@@ -362,7 +332,7 @@ export default class OrderScreen extends React.PureComponent {
             style={{
               width: 55,
               height: 55,
-              backgroundColor: '#f2f2f2',
+              backgroundColor: theme.surface,
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 10,
@@ -370,7 +340,7 @@ export default class OrderScreen extends React.PureComponent {
             <FontAwesome6
               name={item.PaymentType === 'Cash' ? 'money-bill' : 'credit-card'}
               size={30}
-              color={'#FF6900'}
+              color={theme.accent}
             />
           </View>
           <View style={{marginLeft: 20}}>
@@ -381,6 +351,7 @@ export default class OrderScreen extends React.PureComponent {
                     ? 'Asap-Regular_SemiBold'
                     : 'AsapSemiBold',
                 fontSize: 18,
+                color: theme.text,
               }}>
               Payment Type
             </Text>
@@ -391,25 +362,30 @@ export default class OrderScreen extends React.PureComponent {
                     ? 'Asap-Regular_SemiBold'
                     : 'AsapSemiBold',
                 fontSize: 16,
-                color: '#828282',
+                color: theme.textSub,
               }}>
               {item.PaymentType}
             </Text>
           </View>
         </View>
 
+        {/* Dine Type */}
         <View
-          style={{flexDirection: 'row', alignItems: 'center', marginLeft: 40}}>
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginLeft: 40,
+          }}>
           <View
             style={{
               width: 55,
               height: 55,
-              backgroundColor: '#f2f2f2',
+              backgroundColor: theme.surface,
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 10,
             }}>
-            <FontAwesome6 name={Icon} size={30} color={'#FF6900'} />
+            <FontAwesome6 name={Icon} size={30} color={theme.accent} />
           </View>
           <View style={{marginLeft: 20}}>
             <Text
@@ -419,6 +395,7 @@ export default class OrderScreen extends React.PureComponent {
                     ? 'Asap-Regular_SemiBold'
                     : 'AsapSemiBold',
                 fontSize: 18,
+                color: theme.text,
               }}>
               Dine Type
             </Text>
@@ -429,15 +406,22 @@ export default class OrderScreen extends React.PureComponent {
                     ? 'Asap-Regular_SemiBold'
                     : 'AsapSemiBold',
                 fontSize: 16,
-                color: '#828282',
+                color: theme.textSub,
               }}>
               {item.DineType}
             </Text>
           </View>
         </View>
 
-        <View style={{height: 0.8, margin: 20, backgroundColor: 'black'}} />
+        <View
+          style={{
+            height: 0.8,
+            margin: 20,
+            backgroundColor: theme.separator,
+          }}
+        />
 
+        {/* Total + View Order */}
         <View
           style={{
             flexDirection: 'row',
@@ -452,7 +436,7 @@ export default class OrderScreen extends React.PureComponent {
                 fontFamily:
                   Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                 fontSize: 16,
-                color: '#9c9c9c',
+                color: theme.textMuted,
               }}>
               NetTotal
             </Text>
@@ -471,10 +455,11 @@ export default class OrderScreen extends React.PureComponent {
                         ? 'Asap-Regular_SemiBold'
                         : 'AsapSemiBold',
                     fontSize: 20,
+                    color: theme.text,
                   }}>
                   {formattedValue}
                 </Text>
-              )} // <--- Don't forget this!
+              )}
             />
           </View>
 
@@ -487,16 +472,16 @@ export default class OrderScreen extends React.PureComponent {
             }>
             <View
               style={{
-                backgroundColor: 'black',
+                backgroundColor: theme.pill,
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: 50,
-                borderColor: 'black',
+                borderColor: theme.pill,
                 borderWidth: 1.5,
               }}>
               <Text
                 style={{
-                  color: 'white',
+                  color: theme.pillText,
                   fontFamily:
                     Platform.OS === 'ios'
                       ? 'Asap-Regular_SemiBold'
@@ -517,172 +502,217 @@ export default class OrderScreen extends React.PureComponent {
   };
 
   render() {
-    const ItemSeperator = () => {
-      return (
-        <View
+    const {theme} = this.props;
+
+    const EmptyList = () => (
+  <View
+    style={{
+      flex: 1,
+      backgroundColor: theme.bg,
+      minHeight: height * 0.6,
+    }}>
+    <View style={{alignItems: 'center', marginTop: 130}}>
+      {/* No image in your current code but space kept for consistency */}
+    </View>
+    <Text
+      style={{
+        fontFamily:
+          Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+        fontSize: 24,
+        textAlign: 'center',
+        color: theme.text,
+      }}>
+      No order yet
+    </Text>
+    <Text
+      style={{
+        margin: 20,
+        fontFamily:
+          Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+        fontSize: 17,
+        textAlign: 'center',
+        marginLeft: 40,
+        marginRight: 40,
+        color: theme.textSub,
+      }}>
+      When you place your first order, it will appear here
+    </Text>
+    <TouchableOpacity
+      style={{
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 30,
+        marginLeft: 10,
+        marginRight: 40,
+        marginBottom: 30,
+      }}
+      onPress={() => this.props.navigation.navigate('Home')}>
+      <View
+        style={{
+          width: '40%',
+          height: 50,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: theme.pill,
+          borderRadius: 50,
+        }}>
+        <Text
           style={{
-            height: 0.5,
-            margin: 5,
-            marginRight: 20,
-            marginLeft: 20,
-            backgroundColor: 'black',
+            color: theme.pillText,
+            fontFamily:
+              Platform.OS === 'ios'
+                ? 'Asap-Regular_Medium'
+                : 'AsapMedium',
+            fontSize: 18,
+          }}>
+          Find Food
+        </Text>
+      </View>
+    </TouchableOpacity>
+  </View>
+);
+
+    // Renders only when list has items — gives top spacing without
+    // exposing white background when the list is empty
+    const TopSpacer = () => (
+      <View style={{height: 20, backgroundColor: theme.bg}} />
+    );
+
+    const OngoingOrder = () => (
+      <View style={{flex: 1, backgroundColor: theme.bg}}>
+        <FlatList
+          extraData={this.state}
+          style={{flex: 1, backgroundColor: theme.bg}}
+          contentContainerStyle={{
+            flexGrow: 1,
+            backgroundColor: theme.bg,
           }}
+          ListHeaderComponent={
+            this.state.ongoing_orderlist.length > 0 ? TopSpacer : null
+          }
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.isLoading}
+              colors={[theme.accent]}
+              tintColor={theme.accent}
+              title={'Refreshing'}
+              titleColor={theme.textSub}
+            />
+          }
+          data={this.state.ongoing_orderlist}
+          renderItem={this.onrenderOrder}
+          keyExtractor={(item, index) => index.toString()}
+          refreshing={this.state.refresh}
+          onRefresh={() => this.onGetOrderHeader()}
+          ListEmptyComponent={EmptyList}
+          showsVerticalScrollIndicator={false}
         />
-      );
-    };
+      </View>
+    );
 
-    const EmptyList = () => {
-      return (
-        <View style={{justifyContent: 'center', flex: 1, marginTop: 130}}>
-          <Text
-            style={{
-              fontFamily:
-                Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-              fontSize: 24,
-              textAlign: 'center',
-            }}>
-            No order yet
-          </Text>
-          <Text
-            style={{
-              margin: 20,
-              fontFamily:
-                Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-              fontSize: 17,
-              textAlign: 'center',
-              marginLeft: 40,
-              marginRight: 40,
-            }}>
-            When you place your first order, it will appear here
-          </Text>
-          <TouchableOpacity
-            style={{
-              alignItems: 'center',
-              marginTop: 10,
-              marginLeft: 40,
-              marginRight: 40,
-              marginBottom: 30,
-            }}
-            onPress={() => this.props.navigation.navigate('Home')}>
-            <View
-              style={{
-                width: '40%',
-                height: 50,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'black',
-                borderRadius: 50,
-              }}>
-              <Text
-                style={{
-                  color: 'white',
-                  fontFamily:
-                    Platform.OS === 'ios'
-                      ? 'Asap-Regular_Medium'
-                      : 'AsapMedium',
-                  fontSize: 18,
-                }}>
-                Find Food
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-      );
-    };
-
-    const OngoingOrder = () => {
-      return (
-        <View style={{flex: 1, marginTop: 20}}>
-          <FlatList
-            extraData={this.state}
-            refreshControl={
-              <RefreshControl
-                refreshing={this.state.isLoading}
-                colors={['red', 'green', 'blue']}
-                title={'Refreshing'}
-                titleColor={'black'}
-              />
-            }
-            data={this.state.ongoing_orderlist}
-            renderItem={this.onrenderOrder}
-            keyExtractor={(item, index) => index.toString()}
-            refreshing={this.state.refresh}
-            onRefresh={() => this.onGetOrderHeader()}
-            ListEmptyComponent={EmptyList}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-      );
-    };
-
-    const CompleteOrder = () => {
-      return (
-        <View style={{flex: 1, marginTop: 20}}>
-          <FlatList
-            extraData={this.state}
-            refreshControl={
-              <RefreshControl
-                refreshing={this.state.isLoading}
-                colors={['red', 'green', 'blue']}
-                title={'Refreshing'}
-                titleColor={'black'}
-              />
-            }
-            data={this.state.complete_orderlist}
-            renderItem={this.onrenderOrder}
-            keyExtractor={(item, index) => index.toString()}
-            refreshing={this.state.refresh}
-            onRefresh={() => this.onGetOrderHeader()}
-            ListEmptyComponent={EmptyList}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-      );
-    };
+    const CompleteOrder = () => (
+      <View style={{flex: 1, backgroundColor: theme.bg}}>
+        <FlatList
+          extraData={this.state}
+          style={{flex: 1, backgroundColor: theme.bg}}
+          contentContainerStyle={{
+            flexGrow: 1,
+            backgroundColor: theme.bg,
+          }}
+          ListHeaderComponent={
+            this.state.complete_orderlist.length > 0 ? TopSpacer : null
+          }
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.isLoading}
+              colors={[theme.accent]}
+              tintColor={theme.accent}
+              title={'Refreshing'}
+              titleColor={theme.textSub}
+            />
+          }
+          data={this.state.complete_orderlist}
+          renderItem={this.onrenderOrder}
+          keyExtractor={(item, index) => index.toString()}
+          refreshing={this.state.refresh}
+          onRefresh={() => this.onGetOrderHeader()}
+          ListEmptyComponent={EmptyList}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+    );
 
     return (
-      <Animated.View style={[{flex: 1}, {opacity: this.state.fadeAnim}]}>
-        {/* <View style={{ backgroundColor: 'white', alignItems: 'center' }}> */}
-        <Text
-          style={{
-            fontFamily:
-              Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-            fontSize: 26,
-            marginLeft: 30,
-            marginTop: 25,
-            marginBottom: 10,
-          }}>
-          My Orders
-        </Text>
-        <Text
-          style={{
-            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-            fontSize: 15,
-            marginLeft: 30,
-            marginRight: 40,
-            marginBottom: 20,
-          }}>
-          When you place your first order, it will appear here
-        </Text>
-        {/* </View> */}
+      // Solid backdrop prevents any white flash during fade animation
+      <View style={{flex: 1, backgroundColor: theme.bg}}>
+        <Animated.View
+          style={[
+            {flex: 1, backgroundColor: theme.bg},
+            {opacity: this.state.fadeAnim},
+          ]}>
+          {/* Header */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginLeft: 30,
+              marginTop: 25,
+              marginRight: 16,
+              marginBottom: 10,
+            }}>
+            <View style={{flex: 1}}>
+              <Text
+                style={{
+                  fontFamily:
+                    Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                  fontSize: 26,
+                  color: theme.text,
+                }}>
+                My Orders
+              </Text>
+              <Text
+                style={{
+                  fontFamily:
+                    Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                  fontSize: 15,
+                  marginRight: 40,
+                  marginTop: 6,
+                  marginBottom: 10,
+                  color: theme.textSub,
+                }}>
+                When you place your first order, it will appear here
+              </Text>
+            </View>
+            <ThemeToggle />
+          </View>
 
-        <Tab.Navigator
-          keyboardDismissMode="auto"
-          screenOptions={{
-            keyboardHidesTabBar: true,
-            tabBarLabelStyle: {
-              fontSize: 16,
-              fontFamily:
-                Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-            },
-            tabBarIndicatorStyle: {backgroundColor: 'black'},
-            tabBarStyle: {backgroundColor: 'transparent'},
-            tabBarShowIcon: true,
-          }}>
-          <Tab.Screen name="Ongoing" children={OngoingOrder} />
-          <Tab.Screen name="Completed" children={CompleteOrder} />
-        </Tab.Navigator>
-      </Animated.View>
+          {/* Tab Navigator */}
+          <Tab.Navigator
+            keyboardDismissMode="auto"
+            style={{backgroundColor: theme.bg}}
+            sceneContainerStyle={{backgroundColor: theme.bg}}
+            screenOptions={{
+              keyboardHidesTabBar: true,
+              tabBarLabelStyle: {
+                fontSize: 16,
+                fontFamily:
+                  Platform.OS === 'ios'
+                    ? 'Asap-Regular_Medium'
+                    : 'AsapMedium',
+              },
+              tabBarActiveTintColor: theme.text,
+              tabBarInactiveTintColor: theme.textMuted,
+              tabBarIndicatorStyle: {backgroundColor: theme.accent},
+              tabBarStyle: {backgroundColor: theme.bg},
+              tabBarShowIcon: true,
+            }}>
+            <Tab.Screen name="Ongoing" children={OngoingOrder} />
+            <Tab.Screen name="Completed" children={CompleteOrder} />
+          </Tab.Navigator>
+        </Animated.View>
+      </View>
     );
   }
 }
+
+export default withTheme(OrderScreen);

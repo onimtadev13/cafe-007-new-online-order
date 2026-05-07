@@ -1,23 +1,23 @@
 import React from 'react';
-import { Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
-// import IonicIcon from 'react-native-vector-icons/Ionicons';
-// import { FontAwesome6 } from "@react-native-vector-icons/fontawesome6";
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { connect } from 'react-redux';
 import ItemView from '../Components/ItemView';
+import { withTheme } from '../Context/ThemeContext';
 
 class ProductListScreen extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       ItemList: this.props.route.params.ItemList,
-      Title: this.props.route.params.Title,
+      Title:    this.props.route.params.Title,
     };
   }
 
   onrenderItem = ({ item, index }) => {
+    const { theme } = this.props;
+
     const countTypes = this.props.cartItems.filter(
       product => product.ProductName === item.Prod_Name,
     );
@@ -25,78 +25,126 @@ class ProductListScreen extends React.PureComponent {
     countTypes.forEach(element => {
       qtycount = qtycount + element.Qty;
     });
+
     return (
-      <ItemView
-        key={index}
-        item={item}
-        navigation={this.props.navigation}
-        qtycount={qtycount}
-      />
+      <View
+        style={{
+          marginHorizontal: 15,
+          marginBottom: 12,
+          backgroundColor: theme.card,
+          borderRadius: 16,
+          overflow: 'hidden',
+          elevation: 4,
+          shadowColor: theme.shadow.shadowColor,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: theme.shadow.shadowOpacity,
+          shadowRadius: 6,
+        }}
+      >
+        <ItemView
+          key={index}
+          item={item}
+          navigation={this.props.navigation}
+          qtycount={qtycount}
+        />
+      </View>
     );
   };
 
   render() {
+    const { theme } = this.props;
+
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: theme.bg }}>
+        <StatusBar
+          barStyle={theme.statusBar}
+          backgroundColor={theme.bg}
+          translucent={false}
+        />
+
+        {/* Header */}
         <View
           style={{
-            flexDirection: 'row',
-            backgroundColor: 'white',
-            alignItems: 'center',
+            flexDirection:   'row',
+            alignItems:      'center',
+            paddingTop:      Platform.OS === 'ios' ? 54 : 16,
+            paddingBottom:   12,
+            paddingHorizontal: 16,
+            backgroundColor: theme.bg,
+            borderBottomWidth: 0.6,
+            borderBottomColor: theme.separator,
           }}
         >
-          <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-            {/* <IonicIcon
-              name={'arrow-back'}
-              size={25}
-              color="black"
-              style={{
-                marginLeft: 15,
-                marginRight: 15,
-                marginTop: Platform.OS === 'ios' ? 30 : 20,
-                marginBottom: 15,
-              }}
-            /> */}
+          <TouchableOpacity
+            onPress={() => this.props.navigation.goBack()}
+            style={{
+              width:           38,
+              height:          38,
+              borderRadius:    19,
+              backgroundColor: theme.card,
+              justifyContent:  'center',
+              alignItems:      'center',
+              elevation:       3,
+              shadowColor:     theme.shadow.shadowColor,
+              shadowOffset:    { width: 0, height: 1 },
+              shadowOpacity:   theme.shadow.shadowOpacity,
+              shadowRadius:    3,
+            }}
+          >
             <FontAwesome6
               name="arrow-left"
-              size={25}
-              color="black"
-              style={{
-                marginLeft: 15,
-                marginRight: 15,
-                marginTop: Platform.OS === 'ios' ? 30 : 20,
-                marginBottom: 15,
-              }}
-              solid
+              size={16}
+              color={theme.text}
             />
           </TouchableOpacity>
+
           <Text
             style={{
-              fontFamily:
-                Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-              fontSize: 18,
-              marginTop: Platform.OS === 'ios' ? 30 : 20,
-              marginBottom: 15,
+              flex:       1,
+              textAlign:  'center',
+              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+              fontSize:   20,
+              color:      theme.text,
+              marginRight: 38, // balances the back button
             }}
           >
             {this.state.Title}
           </Text>
         </View>
+
+        {/* Product list */}
         <FlatList
-          style={{ marginBottom: 10 }}
           data={this.state.ItemList}
           renderItem={this.onrenderItem}
           keyExtractor={(item, index) => index.toString()}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingTop: 10, paddingBottom: 30 }}
+          ListEmptyComponent={
+            <View style={{ alignItems: 'center', marginTop: 80 }}>
+              <FontAwesome6
+                name="bowl-food"
+                size={44}
+                color={theme.textMuted}
+              />
+              <Text
+                style={{
+                  marginTop:  16,
+                  fontSize:   16,
+                  color:      theme.textSub,
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                }}
+              >
+                No items in this category
+              </Text>
+            </View>
+          }
         />
       </View>
     );
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    cartItems: state,
-  };
-};
+const mapStateToProps = state => ({ cartItems: state });
 
-export default connect(mapStateToProps, null)(ProductListScreen);
+// withTheme before connect — same pattern as all other screens
+export default connect(mapStateToProps, null)(withTheme(ProductListScreen));

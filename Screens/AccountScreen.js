@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as ImagePicker from 'react-native-image-picker';
-// import IonicIcon from 'react-native-vector-icons/Ionicons';
 import { openDatabase } from 'react-native-sqlite-storage';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,9 +22,10 @@ import AppContext from '../Components/Context';
 import { connect } from 'react-redux';
 import { CommonActions } from '@react-navigation/routers';
 import { APIURL } from '../Data/CloneData';
-// import dynamicLinks from '@react-native-firebase/dynamic-links';
 import branch from 'react-native-branch';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import { withTheme } from '../Context/ThemeContext';   // ← NEW
+import ThemeToggle from '../Components/ThemeToggle';   // ← NEW
 
 const Tab = createMaterialTopTabNavigator();
 var db = openDatabase({ name: 'UserDatabase.db' });
@@ -50,7 +50,7 @@ class AccountScreen extends React.Component {
       number_verified: false,
       userlog: null,
       logstatus: false,
-      isLoading: true, // Changed "true"
+      isLoading: true,
     };
   }
 
@@ -69,7 +69,6 @@ class AccountScreen extends React.Component {
     });
     AsyncStorage.setItem('EditStatus', 'false');
     this.CheckUserLog();
-    // this.unsubscribe = dynamicLinks().onLink(this.handleDynamicLink);
     this.branchUnsubscribe = branch.subscribe(this.handleBranchLink);
     if (Platform.OS === 'ios') {
       console.log('iOS Platform detected');
@@ -77,14 +76,12 @@ class AccountScreen extends React.Component {
   }
 
   componentWillUnmount() {
-    // this.unsubscribe();
     if (this.branchUnsubscribe) {
       this.branchUnsubscribe();
     }
   }
 
   fadeIn = () => {
-    // Will change fadeAnim value to 1 in 5 seconds
     Animated.timing(this.state.fadeAnim, {
       toValue: 1,
       duration: 600,
@@ -93,7 +90,6 @@ class AccountScreen extends React.Component {
   };
 
   fadeOut = () => {
-    // Will change fadeAnim value to 0 in 3 seconds
     Animated.timing(this.state.fadeAnim, {
       toValue: 0,
       duration: 500,
@@ -101,20 +97,9 @@ class AccountScreen extends React.Component {
     }).start();
   };
 
-  // handleDynamicLink = link => {
-  //   // Handle dynamic link inside your own application
-  //   if (link.url === 'https://cafe007.lk/embilipitiya-cafe007/') {
-  //     // ...navigate to your offers screen
-  //     this.CheckUserLog();
-  //   }
-  // };
-
   handleBranchLink = params => {
     console.log('Branch link params:', params);
-
-    // Check if this is a clicked branch link
     if (params && params['+clicked_branch_link']) {
-      // Handle your specific email verification link
       if (
         params.$canonical_url === 'https://cafe007.lk/embilipitiya-cafe007/' ||
         params.$desktop_url === 'https://cafe007.lk/embilipitiya-cafe007/' ||
@@ -122,41 +107,14 @@ class AccountScreen extends React.Component {
       ) {
         this.CheckUserLog();
       }
-
-      // You can add more link handling logic here
-      // For example: navigate to specific screens based on link parameters
       if (params.action === 'profile_update') {
         this.CheckUserLog();
       }
     }
   };
 
-  // chooseImage = () => {
-  //   this.RBSheet.close();
-  //   ImagePicker.launchImageLibrary(
-  //     {
-  //       mediaType: 'photo',
-  //       includeBase64: true,
-  //       maxHeight: 200,
-  //       maxWidth: 200,
-  //     },
-  //     response => {
-  //       if (response.didCancel) {
-  //         if (this.state.fileData === null) {
-  //           this.setState({ fileData: null });
-  //         }
-  //       } else {
-  //         this.onUploadImage(response.assets[0].base64);
-  //       }
-  //     },
-  //   );
-  // };
-
   takePhoto = () => {
-    // Close bottom sheet first
     this.RBSheet.close();
-
-    // Add a delay before opening camera (important for iOS)
     setTimeout(() => {
       const options = {
         cameraType: 'front',
@@ -166,27 +124,18 @@ class AccountScreen extends React.Component {
         maxWidth: 200,
         quality: 0.8,
         saveToPhotos: false,
-        presentationStyle: 'fullScreen', // Important for iOS
+        presentationStyle: 'fullScreen',
       };
-
       ImagePicker.launchCamera(options, response => {
         console.log('Camera Response:', response);
-
-        // Handle cancellation
         if (response.didCancel) {
           console.log('User cancelled camera');
-          // Force re-render to unfreeze UI
           this.setState({ isLoading: false });
           return;
         }
-
-        // Handle errors
         if (response.errorCode) {
           console.log('Camera Error:', response.errorCode);
-
-          // Force re-render to unfreeze UI
           this.setState({ isLoading: false });
-
           let errorMessage = 'Failed to take photo';
           if (response.errorCode === 'permission') {
             errorMessage = 'Please grant camera access in Settings';
@@ -195,10 +144,7 @@ class AccountScreen extends React.Component {
               'Go to Settings > Cafe_007 > Camera and enable access',
               [
                 { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Open Settings',
-                  onPress: () => Linking.openSettings(),
-                },
+                { text: 'Open Settings', onPress: () => Linking.openSettings() },
               ],
             );
           } else if (response.errorCode === 'camera_unavailable') {
@@ -209,8 +155,6 @@ class AccountScreen extends React.Component {
           }
           return;
         }
-
-        // Handle success
         if (response.assets && response.assets.length > 0) {
           const asset = response.assets[0];
           if (asset.base64) {
@@ -222,14 +166,11 @@ class AccountScreen extends React.Component {
           }
         }
       });
-    }, 500); // 500ms delay is crucial for iOS
+    }, 500);
   };
 
   chooseImage = () => {
-    // Close bottom sheet first
     this.RBSheet.close();
-
-    // Add a delay before opening gallery
     setTimeout(() => {
       const options = {
         mediaType: 'photo',
@@ -238,43 +179,32 @@ class AccountScreen extends React.Component {
         maxWidth: 200,
         quality: 0.8,
         selectionLimit: 1,
-        presentationStyle: 'fullScreen', // Important for iOS
+        presentationStyle: 'fullScreen',
       };
-
       ImagePicker.launchImageLibrary(options, response => {
         console.log('Gallery Response:', response);
-
         if (response.didCancel) {
           console.log('User cancelled image picker');
           this.setState({ isLoading: false });
           return;
         }
-
         if (response.errorCode) {
           console.log('Gallery Error:', response.errorCode);
           this.setState({ isLoading: false });
-
           if (response.errorCode === 'permission') {
             Alert.alert(
               'Photo Library Permission Required',
               'Go to Settings > Cafe_007 > Photos and enable access',
               [
                 { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Open Settings',
-                  onPress: () => Linking.openSettings(),
-                },
+                { text: 'Open Settings', onPress: () => Linking.openSettings() },
               ],
             );
           } else {
-            Alert.alert(
-              'Error',
-              response.errorMessage || 'Failed to pick image',
-            );
+            Alert.alert('Error', response.errorMessage || 'Failed to pick image');
           }
           return;
         }
-
         if (response.assets && response.assets.length > 0) {
           const asset = response.assets[0];
           if (asset.base64) {
@@ -286,53 +216,9 @@ class AccountScreen extends React.Component {
           }
         }
       });
-    }, 500); // 500ms delay
+    }, 500);
   };
-  // checkCameraPermission = async () => {
-  //   const {
-  //     check,
-  //     request,
-  //     PERMISSIONS,
-  //     RESULTS,
-  //   } = require('react-native-permissions');
 
-  //   const cameraPermission =
-  //     Platform.OS === 'ios'
-  //       ? PERMISSIONS.IOS.CAMERA
-  //       : PERMISSIONS.ANDROID.CAMERA;
-
-  //   const result = await check(cameraPermission);
-
-  //   if (result === RESULTS.DENIED) {
-  //     const requestResult = await request(cameraPermission);
-  //     return requestResult === RESULTS.GRANTED;
-  //   }
-
-  //   return result === RESULTS.GRANTED;
-  // };
-
-  // checkPhotoLibraryPermission = async () => {
-  //   const {
-  //     check,
-  //     request,
-  //     PERMISSIONS,
-  //     RESULTS,
-  //   } = require('react-native-permissions');
-
-  //   const photoPermission =
-  //     Platform.OS === 'ios'
-  //       ? PERMISSIONS.IOS.PHOTO_LIBRARY
-  //       : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
-
-  //   const result = await check(photoPermission);
-
-  //   if (result === RESULTS.DENIED) {
-  //     const requestResult = await request(photoPermission);
-  //     return requestResult === RESULTS.GRANTED;
-  //   }
-
-  //   return result === RESULTS.GRANTED;
-  // };
   onUploadImage = Image => {
     fetch(APIURL, {
       method: 'POST',
@@ -344,35 +230,15 @@ class AccountScreen extends React.Component {
       body: JSON.stringify({
         HasReturnData: 'F',
         Parameters: [
-          {
-            Para_Data: '95',
-            Para_Direction: 'Input',
-            Para_Lenth: 10,
-            Para_Name: '@Iid',
-            Para_Type: 'int',
-          },
-          {
-            Para_Data: Image,
-            Para_Direction: 'Input',
-            Para_Lenth: 50000,
-            Para_Name: '@Text1',
-            Para_Type: 'varchar',
-          },
-          {
-            Para_Data: this.state.phonenumber,
-            Para_Direction: 'Input',
-            Para_Lenth: 100,
-            Para_Name: '@Text2',
-            Para_Type: 'varchar',
-          },
+          { Para_Data: '95',                    Para_Direction: 'Input', Para_Lenth: 10,    Para_Name: '@Iid',   Para_Type: 'int'     },
+          { Para_Data: Image,                   Para_Direction: 'Input', Para_Lenth: 50000, Para_Name: '@Text1', Para_Type: 'varchar' },
+          { Para_Data: this.state.phonenumber,  Para_Direction: 'Input', Para_Lenth: 100,   Para_Name: '@Text2', Para_Type: 'varchar' },
         ],
         SpName: 'sp_Android_Common_API',
         con: '1',
       }),
     })
-      .then(res => {
-        return res.json();
-      })
+      .then(res => res.json())
       .then(json => {
         if (json.strRturnRes) {
           this.setState({ fileData: Image });
@@ -456,109 +322,59 @@ class AccountScreen extends React.Component {
       body: JSON.stringify({
         HasReturnData: 'T',
         Parameters: [
-          {
-            Para_Data: '93',
-            Para_Direction: 'Input',
-            Para_Lenth: 10,
-            Para_Name: '@Iid',
-            Para_Type: 'int',
-          },
-          {
-            Para_Data: mobilenumber,
-            Para_Direction: 'Input',
-            Para_Lenth: 100,
-            Para_Name: '@Text1',
-            Para_Type: 'varchar',
-          },
+          { Para_Data: '93',          Para_Direction: 'Input', Para_Lenth: 10,  Para_Name: '@Iid',   Para_Type: 'int'     },
+          { Para_Data: mobilenumber,  Para_Direction: 'Input', Para_Lenth: 100, Para_Name: '@Text1', Para_Type: 'varchar' },
         ],
         SpName: 'sp_Android_Common_API',
         con: '1',
       }),
     })
-      .then(res => {
-        return res.json();
-      })
+      .then(res => res.json())
       .then(json => {
         this.setState({
-          Firstname: json.CommonResult.Table[0].FirstName,
-          Lastname: json.CommonResult.Table[0].LastName,
-          phonenumber: json.CommonResult.Table[0].Mobile,
-          email: json.CommonResult.Table[0].Email,
+          Firstname:       json.CommonResult.Table[0].FirstName,
+          Lastname:        json.CommonResult.Table[0].LastName,
+          phonenumber:     json.CommonResult.Table[0].Mobile,
+          email:           json.CommonResult.Table[0].Email,
           number_verified: json.CommonResult.Table[0].MobileVerified,
-          email_verified: json.CommonResult.Table[0].EmailVerified,
-          address: json.CommonResult.Table[0].Address,
-          city: json.CommonResult.Table[0].City,
-          fileData: json.CommonResult.Table[0].Img,
-          isLoading: false,
+          email_verified:  json.CommonResult.Table[0].EmailVerified,
+          address:         json.CommonResult.Table[0].Address,
+          city:            json.CommonResult.Table[0].City,
+          fileData:        json.CommonResult.Table[0].Img,
+          isLoading:       false,
         });
       });
   };
 
   renderCard() {
+    const { theme } = this.props;
     return this.state.cardlist.map((item, index) => {
       let imageuri = '';
       let cardtype = '';
       switch (item.card_type) {
-        case 'visa':
-          imageuri = require('../assets/cardicon/stp_card_visa.png');
-          cardtype = 'Visa';
-          break;
-        case 'master-card':
-          imageuri = require('../assets/cardicon/stp_card_mastercard.png');
-          cardtype = 'Master card';
-          break;
-        case 'american-express':
-          imageuri = require('../assets/cardicon/stp_card_amex.png');
-          cardtype = 'American Express';
-          break;
-        case 'diners-club':
-          imageuri = require('../assets/cardicon/stp_card_diners.png');
-          cardtype = 'Diners Club';
-          break;
-        case 'discover':
-          imageuri = require('../assets/cardicon/stp_card_discover.png');
-          cardtype = 'Discover';
-          break;
-        case 'jcb':
-          imageuri = require('../assets/cardicon/stp_card_jcb.png');
-          cardtype = 'JCB';
-          break;
-        default:
-          break;
+        case 'visa':            imageuri = require('../assets/cardicon/stp_card_visa.png');       cardtype = 'Visa';             break;
+        case 'master-card':     imageuri = require('../assets/cardicon/stp_card_mastercard.png'); cardtype = 'Master card';      break;
+        case 'american-express':imageuri = require('../assets/cardicon/stp_card_amex.png');       cardtype = 'American Express'; break;
+        case 'diners-club':     imageuri = require('../assets/cardicon/stp_card_diners.png');     cardtype = 'Diners Club';      break;
+        case 'discover':        imageuri = require('../assets/cardicon/stp_card_discover.png');   cardtype = 'Discover';         break;
+        case 'jcb':             imageuri = require('../assets/cardicon/stp_card_jcb.png');        cardtype = 'JCB';              break;
+        default: break;
       }
       return (
         <View
           key={index}
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginTop: 20,
-            marginRight: 20,
-          }}
+          style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20, marginRight: 20 }}
         >
-          <Image
-            source={imageuri}
-            style={{ height: 35 }}
-            resizeMode={'contain'}
-          />
-          <Text
-            style={{
-              flex: 1,
-              fontSize: 20,
-              fontFamily:
-                Platform.OS === 'ios'
-                  ? 'Asap-Regular_SemiBold'
-                  : 'AsapSemiBold',
-              marginLeft: 15,
-            }}
-          >
+          <Image source={imageuri} style={{ height: 35 }} resizeMode={'contain'} />
+          <Text style={{
+            flex: 1, fontSize: 20, marginLeft: 15,
+            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_SemiBold' : 'AsapSemiBold',
+            color: theme.text,  // ← NEW
+          }}>
             {cardtype}
           </Text>
-          <TouchableOpacity
-            onPress={() => this.onDeleteCardPress(item.card_number)}
-          >
-            {/* <IonicIcon name="trash-outline" size={25} /> */}
-            <FontAwesome6 name="trash" size={25} solid />
+          <TouchableOpacity onPress={() => this.onDeleteCardPress(item.card_number)}>
+            <FontAwesome6 name="trash" size={25} solid color={theme.text} />  {/* ← NEW */}
           </TouchableOpacity>
         </View>
       );
@@ -567,397 +383,194 @@ class AccountScreen extends React.Component {
 
   CheckSign = async () => {
     this.context.CheckSign();
-    // Promise.all([
-    //     this.props.navigation.dispatch(
-    //         CommonActions.reset({
-    //             index: 0,
-    //             routes: [{ name: "Home" }],
-    //         })
-    //     )
-    // ]).then(() => { this.context.CheckSign() })
   };
 
   logout = () => {
-    // Promise.all([
-    //     this.props.navigation.dispatch(
-    //         CommonActions.reset({
-    //             index: 0,
-    //             routes: [{ name: "auth" }],
-    //         })
-    //     )
-    // ]).then(() => {
-    //     this.props.resetCart();
-    // }).then(() => {
-
-    // this.RBSettingsSheet.close();
     this.props.resetCart();
     setTimeout(() => {
       this.context.logout();
     }, 180);
-    // })
   };
 
   render() {
+    const { theme } = this.props;  // ← NEW: single destructure at top of render
+
+    // ── Input field style — reused across all form fields ──────────────────
+    const inputContainer = {
+      flex: 1,
+      backgroundColor: theme.inputBg,      // ← was '#e8e8e8' in light, dark gets inputBg
+      borderRadius: 5,
+      borderColor: theme.inputBorder,      // ← was '#dbdbdb'
+      borderWidth: 1,
+      justifyContent: 'center',
+    };
+    const inputText = {
+      fontSize: 18,
+      fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+      color: theme.text,                   // ← was 'black'
+      margin: 10,
+    };
+    const labelText = {
+      fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+      fontSize: 19,
+      margin: 10,
+      color: theme.text,                   // ← NEW
+    };
+
+    // ── Tab screens defined inside render so they close over `theme` ───────
     const HomeScreen = () => {
       return (
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1, backgroundColor: theme.bg }}>  {/* ← NEW bg */}
+
+          {/* First name */}
           <View style={{ marginLeft: 30, marginRight: 30, marginTop: 10 }}>
-            {/* <Button title="Sign out" onPress={() => this.logout()} /> */}
-            <Text
-              style={{
-                fontFamily:
-                  Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-                fontSize: 19,
-                margin: 10,
-              }}
-            >
-              First name
-            </Text>
+            <Text style={labelText}>First name</Text>
             <TouchableOpacity
               style={{ flex: 1 }}
-              onPress={() =>
-                this.onTextInputPress(this.state.Firstname, 'First name')
-              }
+              onPress={() => this.onTextInputPress(this.state.Firstname, 'First name')}
             >
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: '#e8e8e8',
-                  borderRadius: 5,
-                  borderColor: '#dbdbdb',
-                  borderWidth: 1,
-                  justifyContent: 'center',
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: 'black',
-                    margin: 10,
-                    paddingLeft: 5,
-                  }}
-                >
-                  {this.state.Firstname}
-                </Text>
+              <View style={inputContainer}>
+                <Text style={[inputText, { paddingLeft: 5 }]}>{this.state.Firstname}</Text>
               </View>
             </TouchableOpacity>
           </View>
 
+          {/* Last name */}
           <View style={{ marginLeft: 30, marginRight: 30 }}>
-            <Text
-              style={{
-                fontFamily:
-                  Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-                fontSize: 19,
-                margin: 10,
-              }}
-            >
-              Last name
-            </Text>
+            <Text style={labelText}>Last name</Text>
             <TouchableOpacity
               style={{ flex: 1 }}
-              onPress={() =>
-                this.onTextInputPress(this.state.Lastname, 'Last name')
-              }
+              onPress={() => this.onTextInputPress(this.state.Lastname, 'Last name')}
             >
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: '#e8e8e8',
-                  borderRadius: 5,
-                  borderColor: '#dbdbdb',
-                  borderWidth: 1,
-                  justifyContent: 'center',
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: 'black',
-                    margin: 10,
-                    paddingLeft: 5,
-                  }}
-                >
-                  {this.state.Lastname}
-                </Text>
+              <View style={inputContainer}>
+                <Text style={inputText}>{this.state.Lastname}</Text>
               </View>
             </TouchableOpacity>
           </View>
 
+          {/* Phone number */}
           <View style={{ marginLeft: 30, marginTop: 15, marginRight: 30 }}>
-            <Text
-              style={{
-                fontFamily:
-                  Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+            <Text style={labelText}>Phone Number</Text>
+            <View style={{
+              flexDirection: 'row',
+              borderRadius: 5,
+              backgroundColor: theme.inputBg,    // ← NEW
+              borderColor: theme.inputBorder,    // ← NEW
+              borderWidth: 1,
+              alignItems: 'center',
+            }}>
+              <Text style={{
+                fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_SemiBold' : 'AsapSemiBold',
                 fontSize: 19,
-                margin: 10,
-              }}
-            >
-              Phone Number
-            </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                borderRadius: 5,
-                backgroundColor: '#e8e8e8',
-                borderColor: '#dbdbdb',
-                borderWidth: 1,
-                alignItems: 'center',
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily:
-                    Platform.OS === 'ios'
-                      ? 'Asap-Regular_SemiBold'
-                      : 'AsapSemiBold',
-                  fontSize: 19,
-                  marginLeft: 15,
-                }}
-              >
-                +94
-              </Text>
-              <View
-                style={{
-                  borderLeftWidth: 1,
-                  height: 20,
-                  backgroundColor: '#ededed',
-                  marginLeft: 10,
-                }}
-              />
+                marginLeft: 15,
+                color: theme.text,               // ← NEW
+              }}>+94</Text>
+              <View style={{
+                borderLeftWidth: 1,
+                height: 20,
+                backgroundColor: theme.separator, // ← was '#ededed'
+                marginLeft: 10,
+              }} />
               <TouchableOpacity
                 style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
-                onPress={() =>
-                  this.onTextInputPress(this.state.phonenumber, 'Phone Number')
-                }
+                onPress={() => this.onTextInputPress(this.state.phonenumber, 'Phone Number')}
               >
-                <Text
-                  style={{
-                    flex: 1,
-                    fontSize: 18,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    margin: 10,
-                    color: 'black',
-                  }}
-                >
-                  {this.state.phonenumber}
-                </Text>
-
-                <Text
-                  style={{
-                    marginRight: 10,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: this.state.number_verified ? '#4dd91e' : '#FF6900',
-                  }}
-                >
+                <Text style={{
+                  flex: 1, fontSize: 18, margin: 10,
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                  color: theme.text,             // ← NEW
+                }}>{this.state.phonenumber}</Text>
+                <Text style={{
+                  marginRight: 10,
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                  color: this.state.number_verified ? '#4dd91e' : '#FF6900',  // keep status colours
+                }}>
                   {this.state.number_verified ? 'Verified' : 'Unverified'}
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
 
+          {/* Email */}
           <View style={{ marginLeft: 30, marginTop: 15, marginRight: 30 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text
-                style={{
-                  flex: 1,
-                  fontFamily:
-                    Platform.OS === 'ios'
-                      ? 'Asap-Regular_Medium'
-                      : 'AsapMedium',
-                  fontSize: 19,
-                  margin: 10,
-                  paddingLeft: 5,
-                }}
-              >
-                Email
-              </Text>
+              <Text style={[labelText, { flex: 1 }]}>Email</Text>
               {this.state.email_verified !== '' ? (
-                <Text
-                  style={{
-                    marginRight: 10,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: this.state.email_verified ? '#4dd91e' : '#FF6900',
-                  }}
-                >
+                <Text style={{
+                  marginRight: 10,
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                  color: this.state.email_verified ? '#4dd91e' : '#FF6900',  // keep status colours
+                }}>
                   {this.state.email_verified ? 'Verified' : 'Unverified'}
                 </Text>
               ) : null}
             </View>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                borderRadius: 5,
-                backgroundColor: '#e8e8e8',
-                borderColor: '#dbdbdb',
-                borderWidth: 1,
-                alignItems: 'center',
-              }}
-            >
+            <View style={{
+              flexDirection: 'row',
+              borderRadius: 5,
+              backgroundColor: theme.inputBg,    // ← NEW
+              borderColor: theme.inputBorder,    // ← NEW
+              borderWidth: 1,
+              alignItems: 'center',
+            }}>
               <TouchableOpacity
                 style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
                 onPress={() => this.onTextInputPress(this.state.email, 'Email')}
               >
-                <Text
-                  style={{
-                    flex: 1,
-                    margin: 10,
-                    fontSize: 18,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: 'black',
-                  }}
-                >
-                  {this.state.email}
-                </Text>
+                <Text style={{
+                  flex: 1, margin: 10, fontSize: 18,
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                  color: theme.text,             // ← NEW
+                }}>{this.state.email}</Text>
               </TouchableOpacity>
             </View>
           </View>
 
+          {/* Address */}
           <View style={{ marginLeft: 30, marginTop: 15, marginRight: 30 }}>
-            <Text
-              style={{
-                fontFamily:
-                  Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-                fontSize: 19,
-                margin: 10,
-                paddingLeft: 5,
-              }}
-            >
-              Address
-            </Text>
+            <Text style={[labelText, { paddingLeft: 5 }]}>Address</Text>
             <TouchableOpacity
               style={{ flex: 1 }}
-              onPress={() =>
-                this.onTextInputPress(this.state.address, 'Address')
-              }
+              onPress={() => this.onTextInputPress(this.state.address, 'Address')}
             >
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: '#e8e8e8',
-                  borderRadius: 5,
-                  borderColor: '#dbdbdb',
-                  borderWidth: 1,
-                  justifyContent: 'center',
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: 'black',
-                    margin: 10,
-                  }}
-                >
-                  {this.state.address}
-                </Text>
+              <View style={inputContainer}>
+                <Text style={inputText}>{this.state.address}</Text>
               </View>
             </TouchableOpacity>
           </View>
 
+          {/* City */}
           <View style={{ marginLeft: 30, marginRight: 30, marginTop: 15 }}>
-            <Text
-              style={{
-                fontFamily:
-                  Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-                fontSize: 19,
-                margin: 10,
-              }}
-            >
-              City
-            </Text>
+            <Text style={labelText}>City</Text>
             <TouchableOpacity
               style={{ flex: 1 }}
               onPress={() => this.onTextInputPress(this.state.city, 'City')}
             >
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: '#e8e8e8',
-                  borderRadius: 5,
-                  borderColor: '#dbdbdb',
-                  borderWidth: 1,
-                  justifyContent: 'center',
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: 'black',
-                    margin: 10,
-                    paddingLeft: 5,
-                  }}
-                >
-                  {this.state.city}
-                </Text>
+              <View style={inputContainer}>
+                <Text style={[inputText, { paddingLeft: 5 }]}>{this.state.city}</Text>
               </View>
             </TouchableOpacity>
           </View>
 
-          <View
-            style={{
-              marginLeft: 30,
-              marginRight: 30,
-              marginTop: 15,
-              marginBottom: 30,
-              flexDirection: 'row',
-            }}
-          >
-            <TouchableOpacity
-              style={{ flex: 1, marginRight: 10 }}
-              onPress={() => this.logout()}
-            >
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: 'black',
-                  borderRadius: 5,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: 'white',
-                    margin: 10,
-                    paddingLeft: 5,
-                  }}
-                >
-                  Sign Out
-                </Text>
+          {/* Sign Out + Delete row */}
+          <View style={{
+            marginLeft: 30, marginRight: 30,
+            marginTop: 15, marginBottom: 30,
+            flexDirection: 'row',
+          }}>
+            <TouchableOpacity style={{ flex: 1, marginRight: 10 }} onPress={() => this.logout()}>
+              <View style={{
+                flex: 1,
+                backgroundColor: theme.pill,    // ← was 'black'
+                borderRadius: 5,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+                <Text style={{
+                  fontSize: 18, margin: 10, paddingLeft: 5,
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                  color: theme.pillText,         // ← was 'white'
+                }}>Sign Out</Text>
               </View>
             </TouchableOpacity>
 
@@ -967,108 +580,40 @@ class AccountScreen extends React.Component {
                 Alert.alert(
                   'Alert',
                   'Do You Want To Delete Your Account ?',
-                  [
-                    {
-                      text: 'YES',
-                      onPress: () => this.deactivate_account(),
-                    },
-                    { text: 'NO' },
-                  ],
+                  [{ text: 'YES', onPress: () => this.deactivate_account() }, { text: 'NO' }],
                   { cancelable: false },
                 );
               }}
             >
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: 'red',
-                  borderRadius: 5,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: 'white',
-                    margin: 10,
-                    paddingLeft: 5,
-                  }}
-                >
-                  Delete
-                </Text>
+              <View style={{
+                flex: 1, backgroundColor: 'red',   // keep red — intentional danger colour
+                borderRadius: 5, justifyContent: 'center', alignItems: 'center',
+              }}>
+                <Text style={{
+                  fontSize: 18, margin: 10, paddingLeft: 5,
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                  color: 'white',                  // keep white on red
+                }}>Delete</Text>
               </View>
             </TouchableOpacity>
           </View>
 
-          {/*<View*/}
-          {/*    style={{marginLeft: 30, marginRight: 30, marginTop: 15, marginBottom: 30}}>*/}
-          {/*    <TouchableOpacity style={{flex: 1}}*/}
-          {/*                      onPress={() => {*/}
-
-          {/*                          Alert.alert(*/}
-          {/*                              'Alert',*/}
-          {/*                              'Do You Want To Deactivate Your Account ?',*/}
-          {/*                              [*/}
-          {/*                                  {*/}
-          {/*                                      text: 'YES',*/}
-          {/*                                      onPress: () => this.deactivate_account(),*/}
-          {/*                                  }, {text: 'NO'},*/}
-          {/*                              ],*/}
-          {/*                              {cancelable: false}*/}
-          {/*                          );*/}
-
-          {/*                      }}>*/}
-          {/*        <View style={{*/}
-          {/*            flex: 1,*/}
-          {/*            backgroundColor: 'red',*/}
-          {/*            borderRadius: 5,*/}
-          {/*            justifyContent: 'center',*/}
-          {/*            alignItems: 'center'*/}
-          {/*        }}>*/}
-          {/*            <Text style={{*/}
-          {/*                fontSize: 18,*/}
-          {/*                fontFamily: Platform.OS === "ios" ? 'Asap-Regular_Medium' : 'AsapMedium',*/}
-          {/*                color: 'white',*/}
-          {/*                margin: 10,*/}
-          {/*                paddingLeft: 5*/}
-          {/*            }}>DEACTIVATE</Text>*/}
-          {/*        </View>*/}
-
-          {/*    </TouchableOpacity>*/}
-          {/*</View>*/}
         </ScrollView>
       );
     };
 
     const SettingsScreen = () => {
       return (
-        <View style={{ flex: 1 }}>
-          <View
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Text
-              style={{
-                color: 'black',
-                fontFamily:
-                  Platform.OS === 'ios'
-                    ? 'Asap-Regular_SemiBold'
-                    : 'AsapSemiBold',
-                fontSize: 16,
-              }}
-            >
-              Coming soon
-            </Text>
+        <View style={{ flex: 1, backgroundColor: theme.bg }}>  {/* ← NEW bg */}
+          <View style={{
+            position: 'absolute', width: '100%', height: '100%',
+            alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Text style={{
+              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_SemiBold' : 'AsapSemiBold',
+              fontSize: 16,
+              color: theme.textMuted,             // ← was 'black'
+            }}>Coming soon</Text>
           </View>
           <Animated.View>{this.renderCard()}</Animated.View>
           <View style={{ margin: 10, marginTop: 20 }}>
@@ -1076,41 +621,14 @@ class AccountScreen extends React.Component {
               disabled={true}
               onPress={() => this.props.navigation.navigate('CreditCardScreen')}
             >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  margin: 10,
-                  alignItems: 'center',
-                }}
-              >
-                {/* <IonicIcon name="add-circle" size={30} color={'#d1d1d1'} /> */}
-                <FontAwesome6
-                  name="circle-plus"
-                  size={30}
-                  color="#d1d1d1"
-                  solid
-                />
-                <Text
-                  style={{
-                    flex: 1,
-                    textAlign: 'center',
-                    fontSize: 18,
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Medium'
-                        : 'AsapMedium',
-                    color: '#d1d1d1',
-                  }}
-                >
-                  Add Credit or Debit card
-                </Text>
-                {/* <IonicIcon name="chevron-forward" size={30} color={'#d1d1d1'} /> */}
-                <FontAwesome6
-                  name="chevron-right"
-                  size={30}
-                  color="#d1d1d1"
-                  solid
-                />
+              <View style={{ flexDirection: 'row', margin: 10, alignItems: 'center' }}>
+                <FontAwesome6 name="circle-plus" size={30} color="#d1d1d1" solid />
+                <Text style={{
+                  flex: 1, textAlign: 'center', fontSize: 18,
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                  color: '#d1d1d1',               // keep disabled grey as-is
+                }}>Add Credit or Debit card</Text>
+                <FontAwesome6 name="chevron-right" size={30} color="#d1d1d1" solid />
               </View>
             </TouchableOpacity>
           </View>
@@ -1118,378 +636,247 @@ class AccountScreen extends React.Component {
       );
     };
 
+    // ── Loading state ────────────────────────────────────────────────────────
     if (this.state.isLoading) {
       return (
-        <View
-          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-        >
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.bg }}>
           <ActivityIndicator
             animating={this.state.isLoading}
             size="large"
-            color="black"
+            color={theme.accent}               // ← was 'black'
           />
         </View>
       );
-    } else {
-      return (
-        <Animated.View style={[{ flex: 1 }, { opacity: this.state.fadeAnim }]}>
-          <View style={{ flex: 1 }}>
-            {this.state.userlog === null ? (
-              <View style={{ flex: 1 }}>
-                <Text
-                  style={{
-                    fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_SemiBold'
-                        : 'AsapSemiBold',
-                    fontSize: 20,
-                    margin: 30,
-                    marginTop: 20,
-                    alignSelf: 'center',
-                  }}
-                >
-                  Profile
+    }
+
+    // ── Main render ──────────────────────────────────────────────────────────
+    return (
+      <Animated.View style={[{ flex: 1, backgroundColor: theme.bg }, { opacity: this.state.fadeAnim }]}>
+        <View style={{ flex: 1 }}>
+
+          {/* ── Not logged in ── */}
+          {this.state.userlog === null ? (
+            <View style={{ flex: 1 }}>
+
+              {/* Header row with ThemeToggle — matches Dashboard pattern */}
+              <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginLeft: 30,
+                marginTop: 20,
+                marginRight: 16,
+              }}>
+                <Text style={{
+                  flex: 1,
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_SemiBold' : 'AsapSemiBold',
+                  fontSize: 20,
+                  color: theme.text,             // ← NEW
+                }}>Profile</Text>
+                <ThemeToggle />                  {/* ← NEW */}
+              </View>
+
+              <View style={{ justifyContent: 'center', flex: 1 }}>
+                <Text style={{
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                  fontSize: 24, textAlign: 'center',
+                  color: theme.text,             // ← NEW
+                }}>Don't have sign in</Text>
+                <Text style={{
+                  margin: 20,
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                  fontSize: 17, textAlign: 'center',
+                  marginLeft: 40, marginRight: 40,
+                  color: theme.textSub,          // ← NEW
+                }}>
+                  Register to access all the features of our service. Eat, drink and live free.
                 </Text>
-                <View style={{ justifyContent: 'center', flex: 1 }}>
-                  <Text
+                <TouchableOpacity
+                  style={{ alignItems: 'center', marginTop: 10, marginLeft: 40, marginRight: 40, marginBottom: 30 }}
+                  onPress={() => this.CheckSign()}
+                >
+                  <View style={{
+                    width: '40%', height: 50,
+                    alignItems: 'center', justifyContent: 'center',
+                    backgroundColor: theme.pill,  // ← was 'black'
+                    borderRadius: 50,
+                  }}>
+                    <Text style={{
+                      color: theme.pillText,       // ← was 'white'
+                      fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                      fontSize: 18,
+                    }}>Sign in</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+          ) : (
+            // ── Logged in ──
+            <>
+              {/* Profile banner */}
+              <View style={{
+                flex: 0.5, flexDirection: 'row',
+                alignItems: 'center', justifyContent: 'center',
+                backgroundColor: theme.surface,  // ← was '#e3e3e3'
+              }}>
+                {this.state.fileData !== null ? (
+                  <>
+                    <Image
+                      source={{ uri: 'data:image/jpeg;base64,' + this.state.fileData }}
+                      style={[StyleSheet.absoluteFillObject]}
+                      resizeMethod={'resize'}
+                    />
+                    <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.4)' }]} />
+                  </>
+                ) : null}
+
+                {/* ThemeToggle — top-right corner of the banner */}
+                <View style={[StyleSheet.absoluteFillObject, {
+                  alignItems: 'flex-end',
+                  margin: 10, marginTop: 14,
+                }]}>
+                  <ThemeToggle />               {/* ← NEW */}
+                </View>
+
+                {/* Avatar */}
+                <View style={{
+                  height: this.state.fileData === null ? 80 : 85,
+                  width:  this.state.fileData === null ? 80 : 85,
+                  borderRadius: this.state.fileData === null ? 40 : 42.5,
+                  borderColor: this.state.fileData === null ? theme.text : 'white',
+                  borderWidth: 2,
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Image
+                    source={
+                      this.state.fileData === null
+                        ? require('../assets/user.png')
+                        : { uri: 'data:image/jpeg;base64,' + this.state.fileData }
+                    }
                     style={{
-                      fontFamily:
-                        Platform.OS === 'ios'
-                          ? 'Asap-Regular_Bold'
-                          : 'AsapBold',
-                      fontSize: 24,
-                      textAlign: 'center',
+                      height: this.state.fileData === null ? 60 : 80,
+                      width:  this.state.fileData === null ? 60 : 80,
+                      borderRadius: this.state.fileData === null ? null : 40,
                     }}
-                  >
-                    Don't have sign in
+                  />
+                </View>
+
+                {/* Name + edit button */}
+                <View style={{ marginLeft: 20 }}>
+                  <Text style={{
+                    color: this.state.fileData === null ? theme.text : 'white',
+                    fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                    fontSize: 20,
+                  }}>
+                    {this.state.Firstname} {this.state.Lastname}
                   </Text>
-                  <Text
-                    style={{
-                      margin: 20,
-                      fontFamily:
-                        Platform.OS === 'ios'
-                          ? 'Asap-Regular_Medium'
-                          : 'AsapMedium',
-                      fontSize: 17,
-                      textAlign: 'center',
-                      marginLeft: 40,
-                      marginRight: 40,
-                    }}
-                  >
-                    Register to access all the features of our service. Eat,
-                    drink and live free.{' '}
+                  <Text style={{
+                    color: this.state.fileData === null ? theme.textSub : 'white',
+                    fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                    fontSize: 16, textTransform: 'lowercase',
+                  }}>
+                    @{this.state.Firstname}{this.state.Lastname}
                   </Text>
-                  <TouchableOpacity
-                    style={{
-                      alignItems: 'center',
-                      marginTop: 10,
-                      marginLeft: 40,
-                      marginRight: 40,
-                      marginBottom: 30,
-                    }}
-                    onPress={() => this.CheckSign()}
-                  >
-                    <View
-                      style={{
-                        width: '40%',
-                        height: 50,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'black',
-                        borderRadius: 50,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: 'white',
-                          fontFamily:
-                            Platform.OS === 'ios'
-                              ? 'Asap-Regular_Medium'
-                              : 'AsapMedium',
-                          fontSize: 18,
-                        }}
-                      >
-                        Sign in
-                      </Text>
+                  <TouchableOpacity style={{ marginTop: 5 }} onPress={() => this.RBSheet.open()}>
+                    <View style={{
+                      alignItems: 'center', justifyContent: 'center',
+                      backgroundColor: theme.pill,   // ← was 'black'
+                      borderRadius: 5,
+                      borderColor: this.state.fileData === null ? theme.pill : 'white',
+                      borderWidth: 1,
+                    }}>
+                      <Text style={{
+                        paddingLeft: 15, paddingRight: 15, paddingBottom: 5, paddingTop: 5,
+                        color: theme.pillText,         // ← was 'white'
+                        fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                        fontSize: 16,
+                      }}>Edit profile image</Text>
                     </View>
                   </TouchableOpacity>
                 </View>
               </View>
-            ) : (
-              <>
-                <View
-                  style={{
-                    flex: 0.5,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#e3e3e3',
-                  }}
-                >
-                  {this.state.fileData !== null ? (
-                    <>
-                      <Image
-                        source={{
-                          uri: 'data:image/jpeg;base64,' + this.state.fileData,
-                        }}
-                        style={[StyleSheet.absoluteFillObject]}
-                        resizeMethod={'resize'}
-                      />
-                      <View
-                        style={[
-                          StyleSheet.absoluteFillObject,
-                          { backgroundColor: 'rgba(0,0,0,0.4)' },
-                        ]}
-                      />
-                    </>
-                  ) : null}
-                  {/* <View style={[StyleSheet.absoluteFillObject, { alignItems: 'flex-end', margin: 10, marginTop: 20 }]}>
-                                            <TouchableOpacity onPress={() => this.RBSettingsSheet.open()} >
-                                                <IonicIcon name="ellipsis-vertical-outline" size={25} color={this.state.fileData === null ? 'black' : 'white'} />
-                                            </TouchableOpacity>
-                                        </View> */}
-                  <View
-                    style={{
-                      height: this.state.fileData === null ? 80 : 85,
-                      width: this.state.fileData === null ? 80 : 85,
-                      borderRadius:
-                        this.state.fileData === null ? 80 / 2 : 85 / 2,
-                      borderColor:
-                        this.state.fileData === null ? 'black' : 'white',
-                      borderWidth: 2,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Image
-                      source={
-                        this.state.fileData === null
-                          ? require('../assets/user.png')
-                          : {
-                              uri:
-                                'data:image/jpeg;base64,' + this.state.fileData,
-                            }
-                      }
-                      style={{
-                        height: this.state.fileData === null ? 60 : 80,
-                        width: this.state.fileData === null ? 60 : 80,
-                        borderRadius:
-                          this.state.fileData === null ? null : 80 / 2,
-                      }}
-                    />
-                  </View>
-                  <View style={{ marginLeft: 20 }}>
-                    <Text
-                      style={{
-                        color: this.state.fileData === null ? 'black' : 'white',
-                        fontFamily:
-                          Platform.OS === 'ios'
-                            ? 'Asap-Regular_Bold'
-                            : 'AsapBold',
-                        fontSize: 20,
-                      }}
-                    >
-                      {this.state.Firstname} {this.state.Lastname}
-                    </Text>
-                    <Text
-                      style={{
-                        color: this.state.fileData === null ? 'black' : 'white',
-                        fontFamily:
-                          Platform.OS === 'ios'
-                            ? 'Asap-Regular_Medium'
-                            : 'AsapMedium',
-                        fontSize: 16,
-                        textTransform: 'lowercase',
-                      }}
-                    >
-                      @{this.state.Firstname}
-                      {this.state.Lastname}
-                    </Text>
-                    <TouchableOpacity
-                      style={{ marginTop: 5 }}
-                      onPress={() => this.RBSheet.open()}
-                    >
-                      <View
-                        style={{
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: 'black',
-                          borderRadius: 5,
-                          borderColor:
-                            this.state.fileData === null ? 'black' : 'white',
-                          borderWidth: 1,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            paddingLeft: 15,
-                            paddingRight: 15,
-                            paddingBottom: 5,
-                            paddingTop: 5,
-                            color: 'white',
-                            fontFamily:
-                              Platform.OS === 'ios'
-                                ? 'Asap-Regular'
-                                : 'AsapRegular',
-                            fontSize: 16,
-                          }}
-                        >
-                          Edit profile image
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                <Tab.Navigator
-                  tabBarOptions={{
-                    labelStyle: {
-                      fontSize: 16,
-                      fontFamily:
-                        Platform.OS === 'ios'
-                          ? 'Asap-Regular_Medium'
-                          : 'AsapMedium',
-                    },
-                    indicatorStyle: { backgroundColor: 'black' },
-                    style: { backgroundColor: 'transparent' },
-                  }}
-                >
-                  <Tab.Screen name="Personal info" children={HomeScreen} />
-                  <Tab.Screen name="Wallet" children={SettingsScreen} />
-                </Tab.Navigator>
-              </>
-            )}
-          </View>
 
-          <RBSheet
-            animationType={'fade'}
-            ref={ref => {
-              this.RBSheet = ref;
-            }}
-            height={200}
-            openDuration={500}
-            closeOnDragDown={true}
-            closeOnPressMask={true}
-            customStyles={{
-              // wrapper: {
-              //     backgroundColor: "transparent"
-              // },
-              draggableIcon: {
-                backgroundColor: '#000',
-              },
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  margin: 10,
-                  fontFamily:
-                    Platform.OS === 'ios'
-                      ? 'Asap-Regular_SemiBold'
-                      : 'AsapSemiBold',
+              {/* Tabs */}
+              <Tab.Navigator
+                screenOptions={{
+                  tabBarLabelStyle: {
+                    fontSize: 16,
+                    fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                  },
+                  tabBarActiveTintColor:   theme.text,       // ← NEW
+                  tabBarInactiveTintColor: theme.textMuted,  // ← NEW
+                  tabBarIndicatorStyle: { backgroundColor: theme.accent },  // ← was 'black'
+                  tabBarStyle: { backgroundColor: theme.bg },               // ← NEW
+                }}
+              >
+                <Tab.Screen name="Personal info" children={HomeScreen} />
+                <Tab.Screen name="Wallet"        children={SettingsScreen} />
+              </Tab.Navigator>
+            </>
+          )}
+        </View>
+
+        {/* ── Photo picker RBSheet ── */}
+        <RBSheet
+          animationType={'fade'}
+          ref={ref => { this.RBSheet = ref; }}
+          height={200}
+          openDuration={500}
+          closeOnDragDown={true}
+          closeOnPressMask={true}
+          customStyles={{
+            draggableIcon: { backgroundColor: theme.textMuted },  // ← was '#000'
+            container: { backgroundColor: theme.card },           // ← NEW
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={{
+              margin: 10, alignSelf: 'center',
+              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_SemiBold' : 'AsapSemiBold',
+              fontSize: 18,
+              color: theme.text,                 // ← NEW
+            }}>Select a photo</Text>
+
+            <TouchableOpacity
+              style={{ alignItems: 'center', justifyContent: 'center', margin: 5 }}
+              onPress={() => this.takePhoto()}
+            >
+              <View style={{
+                width: '90%', height: 45,
+                alignItems: 'center', justifyContent: 'center',
+                backgroundColor: theme.pill,     // ← was 'black'
+                borderRadius: 5,
+              }}>
+                <Text style={{
+                  color: theme.pillText,         // ← was 'white'
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
                   fontSize: 18,
-                  color: 'black',
-                  alignSelf: 'center',
-                }}
-              >
-                Select a photo
-              </Text>
-              <TouchableOpacity
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: 5,
-                }}
-                onPress={() => this.takePhoto()}
-              >
-                <View
-                  style={{
-                    width: '90%',
-                    height: 45,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: 'black',
-                    borderRadius: 5,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontFamily:
-                        Platform.OS === 'ios'
-                          ? 'Asap-Regular_Medium'
-                          : 'AsapMedium',
-                      fontSize: 18,
-                    }}
-                  >
-                    Take photo
-                  </Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: 5,
-                }}
-                onPress={() => this.chooseImage()}
-              >
-                <View
-                  style={{
-                    width: '90%',
-                    height: 45,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: 'black',
-                    borderRadius: 5,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontFamily:
-                        Platform.OS === 'ios'
-                          ? 'Asap-Regular_Medium'
-                          : 'AsapMedium',
-                      fontSize: 18,
-                    }}
-                  >
-                    Choose from library
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </RBSheet>
+                }}>Take photo</Text>
+              </View>
+            </TouchableOpacity>
 
-          {/* <RBSheet
-                        animationType={'fade'}
-                        ref={ref => {
-                            this.RBSettingsSheet = ref;
-                        }}
-                        height={140}
-                        openDuration={500}
-                        closeOnDragDown={true}
-                        closeOnPressMask={true}
-                        customStyles={{
-                            // wrapper: {
-                            //     backgroundColor: "transparent"
-                            // },
-                            draggableIcon: {
-                                backgroundColor: "#000"
-                            }
-                        }}
-                    >
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ margin: 10, fontFamily: Platform.OS === "ios" ? 'Asap-Regular_Bold' : 'AsapBold', fontSize: 18, color: 'black', alignSelf: 'center' }}>Settings</Text>
-                            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', margin: 5 }} onPress={() => this.logout()}>
-                                <View style={{ width: "90%", height: 45, alignItems: 'center', justifyContent: 'center', backgroundColor: 'black', borderRadius: 5 }}>
-                                    <Text style={{ color: 'white', fontFamily: Platform.OS === "ios" ? 'Asap-Regular_Medium' : 'AsapMedium', fontSize: 18 }}>Sign out</Text>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-                    </RBSheet> */}
-        </Animated.View>
-      );
-    }
+            <TouchableOpacity
+              style={{ alignItems: 'center', justifyContent: 'center', margin: 5 }}
+              onPress={() => this.chooseImage()}
+            >
+              <View style={{
+                width: '90%', height: 45,
+                alignItems: 'center', justifyContent: 'center',
+                backgroundColor: theme.pill,     // ← was 'black'
+                borderRadius: 5,
+              }}>
+                <Text style={{
+                  color: theme.pillText,         // ← was 'white'
+                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                  fontSize: 18,
+                }}>Choose from library</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </RBSheet>
+
+      </Animated.View>
+    );
   }
 
   deactivate_account = async () => {
@@ -1505,31 +892,16 @@ class AccountScreen extends React.Component {
       body: JSON.stringify({
         HasReturnData: 'T',
         Parameters: [
-          {
-            Para_Data: '117',
-            Para_Direction: 'Input',
-            Para_Lenth: 10,
-            Para_Name: '@Iid',
-            Para_Type: 'int',
-          },
-          {
-            Para_Data: mobilenumber,
-            Para_Direction: 'Input',
-            Para_Lenth: 100,
-            Para_Name: '@Text1',
-            Para_Type: 'varchar',
-          },
+          { Para_Data: '117',        Para_Direction: 'Input', Para_Lenth: 10,  Para_Name: '@Iid',   Para_Type: 'int'     },
+          { Para_Data: mobilenumber, Para_Direction: 'Input', Para_Lenth: 100, Para_Name: '@Text1', Para_Type: 'varchar' },
         ],
         SpName: 'sp_Android_Common_API',
         con: '1',
       }),
     })
-      .then(res => {
-        return res.json();
-      })
+      .then(res => res.json())
       .then(json => {
         console.log(json.CommonResult.Table[0].Val + '   val');
-
         if (json.CommonResult.Table[0].Val === 'T') {
           this.logout();
         }
@@ -1537,10 +909,9 @@ class AccountScreen extends React.Component {
   };
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    resetCart: () => dispatch({ type: 'RESET_CART' }),
-  };
-};
+const mapDispatchToProps = dispatch => ({
+  resetCart: () => dispatch({ type: 'RESET_CART' }),
+});
 
-export default connect(null, mapDispatchToProps)(AccountScreen);
+// withTheme wraps first, then connect — same pattern as DashboardScreen
+export default connect(null, mapDispatchToProps)(withTheme(AccountScreen));

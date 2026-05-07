@@ -21,10 +21,12 @@ import {openDatabase} from 'react-native-sqlite-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {APIURL, OTPAPIURL} from '../Data/CloneData';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import { useTheme } from '../Context/ThemeContext';
+import ThemeToggle from '../Components/ThemeToggle';
 
 var db = openDatabase({name: 'UserDatabase.db'});
 
-export default class EditInfoScreen extends React.Component {
+class EditInfoScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -429,12 +431,13 @@ export default class EditInfoScreen extends React.Component {
   };
 
   render() {
+    const { theme } = this.props; 
     const screenWidth = Dimensions.get('window').width;
 
     return (
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{flex: 1}}
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  style={{flex: 1, backgroundColor: theme.bg}}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
         <ScrollView
           contentContainerStyle={{flexGrow: 1}}
@@ -453,10 +456,10 @@ export default class EditInfoScreen extends React.Component {
                     borderRadius: 50 / 2,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: '#e6e6e6',
+                    backgroundColor: theme.surface,
                   },
                 ]}>
-                <FontAwesome6 name="chevron-left" size={35} color="#000000" />
+                <FontAwesome6 name="chevron-left" size={35} color={theme.text} />
               </View>
             </TouchableOpacity>
 
@@ -467,6 +470,7 @@ export default class EditInfoScreen extends React.Component {
                 fontSize: 18,
                 margin: 10,
                 marginLeft: 35,
+                color: theme.text,
               }}>
               {this.state.Title}
             </Text>
@@ -477,8 +481,8 @@ export default class EditInfoScreen extends React.Component {
                   style={{
                     flexDirection: 'row',
                     borderRadius: 5,
-                    backgroundColor: '#f0f0f0',
-                    borderColor: '#dbdbdb',
+                    backgroundColor: theme.inputBg,
+borderColor: theme.inputBorder,
                     borderWidth: 1,
                     alignItems: 'center',
                     marginLeft: 30,
@@ -492,6 +496,7 @@ export default class EditInfoScreen extends React.Component {
                           : 'AsapMedium',
                       fontSize: 18,
                       marginLeft: 15,
+                      color: theme.text,
                     }}>
                     +94
                   </Text>
@@ -504,7 +509,7 @@ export default class EditInfoScreen extends React.Component {
                           ? 'Asap-Regular_Medium'
                           : 'AsapMedium',
                       padding: 7,
-                      color: 'black',
+                      color: theme.text,
                     }}
                     placeholder={this.state.Title}
                     placeholderTextColor={'#7a7a7a'}
@@ -523,7 +528,7 @@ export default class EditInfoScreen extends React.Component {
                         : 'AsapMedium',
                     margin: 10,
                     fontSize: 16,
-                    color: '#7a7a7a',
+                    color: theme.textMuted,
                   }}>
                   A verification code will be sent to this number
                 </Text>
@@ -544,12 +549,12 @@ export default class EditInfoScreen extends React.Component {
               <View style={{marginLeft: 30, marginRight: 30, flex: 1}}>
                 <TextInput
                   style={{
-                    color: 'black',
-                    backgroundColor: '#f0f0f0',
+                    color: theme.text,
+backgroundColor: theme.inputBg,
                     height: this.state.Title === 'Address' ? 100 : 40,
                     paddingLeft: 20,
                     borderRadius: 5,
-                    borderColor: '#dbdbdb',
+                    borderColor: theme.inputBorder,
                     borderWidth: 1,
                     fontSize: 18,
                     fontFamily:
@@ -574,7 +579,7 @@ export default class EditInfoScreen extends React.Component {
                           : 'AsapMedium',
                       margin: 10,
                       fontSize: 16,
-                      color: '#7a7a7a',
+                      color: theme.textMuted,
                     }}>
                     Check your email to confirm verification
                   </Text>
@@ -603,7 +608,7 @@ export default class EditInfoScreen extends React.Component {
                 marginLeft: 30,
                 marginRight: 30,
                 marginBottom: 30,
-                backgroundColor: 'black',
+                backgroundColor: theme.pill,
               }}
               onPress={() => this.SaveData()}>
               <View
@@ -616,7 +621,7 @@ export default class EditInfoScreen extends React.Component {
                 }}>
                 <Text
                   style={{
-                    color: 'white',
+                    color: theme.pillText,
                     fontFamily:
                       Platform.OS === 'ios'
                         ? 'Asap-Regular_Medium'
@@ -628,7 +633,7 @@ export default class EditInfoScreen extends React.Component {
               </View>
               <ActivityIndicator
                 size={'small'}
-                color={'white'}
+                color={theme.pillText}
                 animating={this.state.isLoading}
                 style={{marginRight: 20}}
               />
@@ -650,7 +655,7 @@ export default class EditInfoScreen extends React.Component {
               backgroundColor: 'rgba(0,0,0, 0.7)',
             }}>
             <Card
-              style={{backgroundColor: 'white', width: 310, height: 460}}
+              style={{backgroundColor: theme.card, width: 310, height: 460}}
               cardElevation={2}
               cardMaxElevation={2}
               cornerRadius={10}>
@@ -658,7 +663,7 @@ export default class EditInfoScreen extends React.Component {
                 <TouchableOpacity
                   style={{position: 'relative', marginTop: 10}}
                   onPress={() => this.onClosePres()}>
-                  <FontAwesome6 name="circle-xmark" size={40} />
+                  <FontAwesome6 name="circle-xmark" size={40} color={theme.text}/>
                 </TouchableOpacity>
               </View>
 
@@ -668,12 +673,12 @@ export default class EditInfoScreen extends React.Component {
                     width: 55,
                     height: 55,
                     borderRadius: 100 / 2,
-                    backgroundColor: '#F4F4F4',
+                    backgroundColor: theme.surface,
                     margin: 30,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}>
-                  <FontAwesome6 name="lock" size={25} color={'black'} />
+                  <FontAwesome6 name="lock" size={25} color={theme.text} />
                 </View>
 
                 <Text
@@ -683,6 +688,7 @@ export default class EditInfoScreen extends React.Component {
                       Platform.OS === 'ios'
                         ? 'Asap-Regular_Bold'
                         : 'AsapBold',
+                        color: theme.text,
                   }}>
                   Enter your code
                 </Text>
@@ -692,6 +698,7 @@ export default class EditInfoScreen extends React.Component {
                     marginTop: 10,
                     fontFamily:
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                      color: theme.textSub,
                   }}>
                   To continue please enter{'\n'} the verification code we've
                   {'\n'} just send for you
@@ -718,7 +725,7 @@ export default class EditInfoScreen extends React.Component {
                   <View>
                     <Text
                       style={{
-                        color: this.state.isEnable ? '#d1d1d1' : 'black',
+                        color: this.state.isEnable ? theme.textMuted : theme.text,
                       }}>
                       Resend Code{' '}
                       {this.state.isEnable ? '00:' + this.state.second : null}
@@ -730,7 +737,7 @@ export default class EditInfoScreen extends React.Component {
                   style={{
                     width: 150,
                     height: 50,
-                    backgroundColor: 'black',
+                    backgroundColor: theme.pill,
                     borderRadius: 10,
                     marginTop: -30,
                     marginBottom: 30,
@@ -745,7 +752,7 @@ export default class EditInfoScreen extends React.Component {
                     <Text
                       style={{
                         fontSize: 14,
-                        color: 'white',
+                        color: theme.pillText,
                         fontFamily:
                           Platform.OS === 'ios'
                             ? 'Asap-Regular_Bold'
@@ -779,3 +786,10 @@ const styles = StyleSheet.create({
     borderColor: 'black',
   },
 });
+
+function EditInfoScreenWrapper(props) {
+  const { theme, isDark, toggleTheme } = useTheme();
+  return <EditInfoScreen {...props} theme={theme} isDark={isDark} toggleTheme={toggleTheme} />;
+}
+
+export default EditInfoScreenWrapper;
