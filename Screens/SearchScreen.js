@@ -166,6 +166,7 @@ class SearchScreen extends React.PureComponent {
   };
 
   onrenderCategory = ({ item, index }) => {
+   
     const { theme } = this.props;
 
     if (item.empty === true) {
@@ -404,20 +405,26 @@ class SearchScreen extends React.PureComponent {
         });
 
         Productlist.push(mapItem(json.CommonResult.Table[0], true));
+        console.log('Product List:', Productlist);
+        
 
-        json.CommonResult.Table.forEach(element => {
-          if (Department === element.Dept_Name) {
-            Productlist.push(mapItem(element, false));
-          } else {
-            Productlist.push(mapItem(element, true));
-            Productlist.push(mapItem(element, false));
-            Department = element.Dept_Name;
-          }
-        });
+     json.CommonResult.Table.forEach(element => {
+  if (Department !== element.Dept_Name) {
+    Productlist.push(mapItem(element, true)); // new dept header
+    Department = element.Dept_Name;
+  }
+  Productlist.push(mapItem(element, false));
+});
+        
+Productlist.forEach(obj => {
+  if (obj.header && !Categorylist.includes(obj.Prod_Name)) {
+    Categorylist.push(obj.Prod_Name);
+  }
+});
 
-        Productlist.forEach(obj => {
-          if (obj.header) Categorylist.push(obj.Prod_Name);
-        });
+        console.log('Category Names:', Categorylist);
+        console.log(json.CommonResult);
+        
 
         this.setState({
           ItemList:   Productlist.filter(i => !i.header),

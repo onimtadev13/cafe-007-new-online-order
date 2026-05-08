@@ -8,30 +8,37 @@ const screenwidth = Dimensions.get('screen').width;
 
 class HeaderView extends React.PureComponent {
   render() {
-    const {item, theme} = this.props;
+    const {item, theme, isDark} = this.props;
+
+    const imageSource = isTablet()
+      ? require('../assets/section_tablet_img.png')
+      : isDark
+        ? require('../assets/section_img_dark.png')  // ← dark mode image
+        : require('../assets/section_img.png');       // ← light mode image
 
     return (
-      <View style={{
-        width: '100%',
-        height: 170,
-        backgroundColor: theme.bg,  // ← was '#F0F0F0'
-      }}>
+      <View
+        style={{
+          width: '100%',
+          height: 170,
+          backgroundColor: theme.bg,
+        }}>
+
+        {/* Background section image — switches based on theme */}
         <FastImage
-          source={
-            isTablet()
-              ? require('../assets/section_tablet_img.png')
-              : require('../assets/section_img.png')
-          }
+          source={imageSource}
           style={{width: screenwidth, height: '100%', position: 'absolute'}}
           resizeMode={FastImage.resizeMode.stretch}
         />
+
+        {/* Text content */}
         <View style={{flex: 1, margin: 10, justifyContent: 'center'}}>
           <Text
             style={{
               fontSize: 18,
               fontFamily:
                 Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-              color: theme.text,  // ← was no colour (inherited black)
+              color: theme.text,
             }}>
             {item.Prod_Name}
           </Text>
@@ -39,7 +46,7 @@ class HeaderView extends React.PureComponent {
             style={{
               fontFamily:
                 Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-              color: theme.textSub,  // ← was no colour
+              color: theme.textSub,
             }}
             numberOfLines={5}>
             {item.Dept_Content}
@@ -50,7 +57,6 @@ class HeaderView extends React.PureComponent {
   }
 }
 
-// Wrapper to inject theme — same pattern used across the app
 function HeaderViewWrapper(props) {
   const {theme, isDark} = useTheme();
   return <HeaderView {...props} theme={theme} isDark={isDark} />;

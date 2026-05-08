@@ -151,7 +151,7 @@ class HomeScreen extends React.PureComponent {
   }
 
   render() {
-    const { theme, isDark } = this.props; // ← NEW
+    const { theme, isDark } = this.props; 
 
     const keyExtractor = (item, index) => index.toString();
 
@@ -286,34 +286,61 @@ class HomeScreen extends React.PureComponent {
           </Animated.View>
 
           {/* ── Back button row ── */}
-          <Animated.View style={[
-            { marginLeft: 30, marginTop: 20, marginRight: 20 },
-            { transform: [{ translateY: buttonTranslateY }, { translateX: buttonTranslateX }] },
-          ]}>
-              {/* Back button */}
-              <TouchableOpacity
-                style={{ width: 40 }}
-                onPress={() => this.props.navigation.goBack()}
-              >
-                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                  {/* White circle fades out as header collapses */}
-                  <Animated.View style={[
-                    {
-                      width: 40, height: 40, borderRadius: 20,
-                      backgroundColor: 'white',
-                    },
-                    { opacity: buttonopacity },
-                  ]} />
-                  <FontAwesome6
-                    name="chevron-left"
-                    size={30}
-                    style={{ position: 'absolute' }}
-                    color={isDark ? theme.text : 'black'}
-                    solid
-                  />
-                </View>
-              </TouchableOpacity>
-          </Animated.View>
+<Animated.View style={[
+  { marginLeft: 30, marginTop: 20, marginRight: 20 },
+  { transform: [{ translateY: buttonTranslateY }, { translateX: buttonTranslateX }] },
+]}>
+  <TouchableOpacity
+    style={{ width: 40 }}
+    onPress={() => this.props.navigation.goBack()}
+  >
+    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+
+      {/* Circle background — white in light, semi-transparent in dark */}
+      <Animated.View style={[
+        {
+          width: 40,
+          height: 40,
+          borderRadius: 20,
+          backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.9)',
+        },
+        { opacity: buttonopacity },
+      ]} />
+
+      {/* Icon over image — dark in light mode, white in dark mode */}
+      <Animated.View style={[
+        { position: 'absolute' },
+        { opacity: buttonopacity }, // ← fades with circle (over image)
+      ]}>
+        <FontAwesome6
+          name="chevron-left"
+          size={22}
+          color={isDark ? 'white' : 'black'} // ← correct contrast in both modes
+          solid
+        />
+      </Animated.View>
+
+      {/* Icon when header is collapsed — always uses theme.text */}
+      <Animated.View style={[
+        { position: 'absolute' },
+        {
+          opacity: buttonopacity.interpolate({
+            inputRange: [0, 1],
+            outputRange: [1, 0], // ← visible when circle is gone
+          }),
+        },
+      ]}>
+        <FontAwesome6
+          name="chevron-left"
+          size={22}
+          color={theme.text} // ← theme-aware when header is collapsed
+          solid
+        />
+      </Animated.View>
+
+    </View>
+  </TouchableOpacity>
+</Animated.View>
 
           {/* ── Restaurant / category title ── */}
           <Animated.View style={[
@@ -440,131 +467,125 @@ class HomeScreen extends React.PureComponent {
       });
   }
 
-  LoadProducts(Loca) {
-    fetch(APIURL, {
-      method: 'POST', cache: 'no-cache',
-      headers: { 'content-type': 'application/json', 'cache-control': 'no-cache' },
-      body: JSON.stringify({
-        HasReturnData: 'T',
-        Parameters: [
-          { Para_Data: '115', Para_Direction: 'Input', Para_Lenth: 10,  Para_Name: '@Iid',   Para_Type: 'int'     },
-          { Para_Data: Loca,  Para_Direction: 'Input', Para_Lenth: 100, Para_Name: '@Text1', Para_Type: 'VARCHAR' },
-        ],
-        SpName: 'sp_Android_Common_API', con: '1',
-      }),
-    })
-      .then(res => res.json())
-      .then(json => {
-        const Productlist = [];
-        var SelectedItem  = '';
+LoadProducts(Loca) {
+  fetch(APIURL, {
+    method: 'POST', cache: 'no-cache',
+    headers: { 'content-type': 'application/json', 'cache-control': 'no-cache' },
+    body: JSON.stringify({
+      HasReturnData: 'T',
+      Parameters: [
+        { Para_Data: '115', Para_Direction: 'Input', Para_Lenth: 10,  Para_Name: '@Iid',   Para_Type: 'int'     },
+        { Para_Data: Loca,  Para_Direction: 'Input', Para_Lenth: 100, Para_Name: '@Text1', Para_Type: 'VARCHAR' },
+      ],
+      SpName: 'sp_Android_Common_API', con: '1',
+    }),
+  })
+    .then(res => res.json())
+    .then(json => {
+      const Productlist = [];
+      let SelectedItem  = '';
 
-        if (json.CommonResult.Table.length !== 0) {
-          var dd         = '';
-          var i          = 0;
-          var Department = json.CommonResult.Table[0].Dept_Name;
-          SelectedItem   = Department;
+      if (json.CommonResult.Table.length !== 0) {
+        SelectedItem = json.CommonResult.Table[0].Dept_Name;
 
+        // ── Step 1: Group all products by department ──────────────────────────
+        // Use a Map to preserve insertion order and avoid duplicates
+        const deptMap = new Map();
+
+        json.CommonResult.Table.forEach(element => {
+          const deptName = element.Dept_Name;
+          const dd = element.Dept_Content != null
+            ? element.Dept_Content.toString().replace(/\r\n/g, ' ')
+            : '';
+
+          if (!deptMap.has(deptName)) {
+            deptMap.set(deptName, {
+              deptInfo: {
+                Prod_Code:     element.Prod_Code,
+                Dept_Name:     deptName,
+                ImagePath:     element.ImagePath,
+                More_Descrip:  element.More_Descrip,
+                Dept_Content:  dd,
+                Selling_Price: this.numberWithCommas(element.Selling_Price),
+                NconvertPrice: element.Selling_Price,
+                BestSeller:    element.isBestSeller,
+                Offer:         element.isOffer,
+                isSoldOut:     element.isSoldOut,
+                isDiscounted:  element.isDiscounted,
+              },
+              products: [],
+            });
+          }
+
+          // Add product to its department group
+          deptMap.get(deptName).products.push({
+            Prod_Code:     element.Prod_Code,
+            Prod_Name:     element.Prod_Name,
+            Dept_Name:     deptName,
+            ImagePath:     element.ImagePath,
+            More_Descrip:  element.More_Descrip,
+            Dept_Content:  dd,
+            Selling_Price: this.numberWithCommas(element.Selling_Price),
+            NconvertPrice: element.Selling_Price,
+            BestSeller:    element.isBestSeller,
+            Offer:         element.isOffer,
+            isSoldOut:     element.isSoldOut,
+            isDiscounted:  element.isDiscounted,
+          });
+        });
+
+        // ── Step 2: Build the flat list from grouped data ─────────────────────
+        let headerIndex = 0;
+        const arr = [];
+
+        deptMap.forEach((group, deptName) => {
+          // Push header
+          arr.push(Productlist.length); // record index before pushing header
           Productlist.push({
-            Prod_Code:    json.CommonResult.Table[0].Prod_Code,
-            Prod_Name:    Department,
-            header:       true,
-            Dept_Name:    Department,
-            ImagePath:    json.CommonResult.Table[0].ImagePath,
-            More_Descrip: json.CommonResult.Table[0].More_Descrip,
-            Dept_Content: json.CommonResult.Table[0].Dept_Content.toString().replace(/\r\n/g, ' '),
-            Selling_Price:this.numberWithCommas(json.CommonResult.Table[0].Selling_Price),
-            headerindex:  i,
-            NconvertPrice:json.CommonResult.Table[0].Selling_Price,
-            BestSeller:   json.CommonResult.Table[0].isBestSeller,
-            Offer:        json.CommonResult.Table[0].isOffer,
-            isSoldOut:    json.CommonResult.Table[0].isSoldOut,
-            isDiscounted: json.CommonResult.Table[0].isDiscounted,
+            ...group.deptInfo,
+            Prod_Name:   deptName,
+            header:      true,
+            headerindex: headerIndex,
           });
 
-          json.CommonResult.Table.forEach(element => {
-            dd = element.Dept_Content != null
-              ? element.Dept_Content.toString().replace(/\r\n/g, ' ')
-              : '';
-
-            if (Department === element.Dept_Name) {
-              Productlist.push({
-                Prod_Code:    element.Prod_Code,
-                Prod_Name:    element.Prod_Name,
-                header:       false,
-                Dept_Name:    element.Dept_Name,
-                ImagePath:    element.ImagePath,
-                More_Descrip: element.More_Descrip,
-                Dept_Content: dd,
-                Selling_Price:this.numberWithCommas(element.Selling_Price),
-                headerindex:  i,
-                NconvertPrice:element.Selling_Price,
-                BestSeller:   element.isBestSeller,
-                Offer:        element.isOffer,
-                isSoldOut:    element.isSoldOut,
-                isDiscounted: element.isDiscounted,
-              });
-            } else {
-              i += 1;
-              Productlist.push({
-                Prod_Code:    element.Prod_Code,
-                Prod_Name:    element.Dept_Name,
-                header:       true,
-                Dept_Name:    element.Dept_Name,
-                ImagePath:    element.ImagePath,
-                More_Descrip: element.More_Descrip,
-                Dept_Content: dd,
-                Selling_Price:this.numberWithCommas(element.Selling_Price),
-                headerindex:  i,
-                NconvertPrice:element.Selling_Price,
-                BestSeller:   element.isBestSeller,
-                Offer:        element.isOffer,
-                isSoldOut:    element.isSoldOut,
-                isDiscounted: element.isDiscounted,
-              });
-              Productlist.push({
-                Prod_Code:    element.Prod_Code,
-                Prod_Name:    element.Prod_Name,
-                header:       false,
-                Dept_Name:    element.Dept_Name,
-                ImagePath:    element.ImagePath,
-                More_Descrip: element.More_Descrip,
-                Dept_Content: dd,
-                Selling_Price:this.numberWithCommas(element.Selling_Price),
-                headerindex:  i,
-                NconvertPrice:element.Selling_Price,
-                BestSeller:   element.isBestSeller,
-                Offer:        element.isOffer,
-                isSoldOut:    element.isSoldOut,
-                isDiscounted: element.isDiscounted,
-              });
-              Department = element.Dept_Name;
-            }
+          // Push all products under this department
+          group.products.forEach(product => {
+            Productlist.push({
+              ...product,
+              header:      false,
+              headerindex: headerIndex,
+            });
           });
 
-          var arr = [];
-          Productlist.forEach(obj => {
-            if (obj.header) arr.push(Productlist.indexOf(obj));
-          });
+          headerIndex += 1;
+        });
 
-          this.setState({
-            Productlist,
-            stickyHeaderIndices: arr,
-            select:    SelectedItem,
-            isLoading: false,
-          });
-        }
-      })
-      .catch(er => {
-        console.log(er);
-        Alert.alert(
-          'Warning',
-          "The operation couldn't be completed.",
-          [{ text: 'Try Again', onPress: () => this.LoadProducts(this.state.Location) }],
-          { cancelable: false },
-        );
-      })
-      .finally(() => { this.sliderUp(); });
-  }
+        console.log('Final Productlist:', JSON.stringify(Productlist.map(p => ({
+          Prod_Name:   p.Prod_Name,
+          Dept_Name:   p.Dept_Name,
+          header:      p.header,
+          headerindex: p.headerindex,
+        })), null, 2));
+
+        this.setState({
+          Productlist,
+          stickyHeaderIndices: arr,
+          select:    SelectedItem,
+          isLoading: false,
+        });
+      }
+    })
+    .catch(er => {
+      console.log(er);
+      Alert.alert(
+        'Warning',
+        "The operation couldn't be completed.",
+        [{ text: 'Try Again', onPress: () => this.LoadProducts(this.state.Location) }],
+        { cancelable: false },
+      );
+    })
+    .finally(() => { this.sliderUp(); });
+}
 }
 
 // ── Redux ─────────────────────────────────────────────────────────────────────
