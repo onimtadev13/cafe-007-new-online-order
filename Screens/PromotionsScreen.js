@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,18 +9,18 @@ import {
   Alert,
   Animated,
 } from 'react-native';
-import {APIURL} from '../Data/CloneData';
+import { APIURL } from '../Data/CloneData';
 import FastImage from 'react-native-fast-image';
 
-const PromotionsScreen = ({navigation}) => {
+const PromotionsScreen = ({ navigation }) => {
   const [promotions, setPromotions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 🔹 Animated value for scroll
+  // Animated value for scroll
   const scrollY = useRef(new Animated.Value(0)).current;
   const HEADER_SCROLL_DISTANCE = 150;
 
-  // 🔹 Interpolations
+  // Interpolations
   const buttonScale = scrollY.interpolate({
     inputRange: [0, HEADER_SCROLL_DISTANCE / 2, HEADER_SCROLL_DISTANCE],
     outputRange: [1, 1, 0.9],
@@ -101,8 +101,8 @@ const PromotionsScreen = ({navigation}) => {
       .finally(() => setIsLoading(false));
   };
 
-  // 🔹 Render each promotion
-  const renderPromotion = ({item}) => (
+  // Render each promotion
+  const renderPromotion = ({ item }) => (
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() =>
@@ -114,7 +114,8 @@ const PromotionsScreen = ({navigation}) => {
           IMG: item.imageUrl,
           Location: 'Promotion',
         })
-      }>
+      }
+    >
       <View style={styles.card}>
         {/* Details */}
         <View style={styles.detailsWrapper}>
@@ -123,7 +124,7 @@ const PromotionsScreen = ({navigation}) => {
           </Text>
           <Text style={styles.description}>Code: {item.BannerId}</Text>
 
-          <View style={styles.priceColumn}> 
+          <View style={styles.priceColumn}>
             <View style={styles.percentageRow}>
               <Text style={styles.percentage}>{item.discountPercentage}%</Text>
               <Text style={styles.oldPrice}>
@@ -137,7 +138,7 @@ const PromotionsScreen = ({navigation}) => {
         {/* Image */}
         <View style={styles.imageWrapper}>
           <FastImage
-            source={{uri: item.imageUrl}}
+            source={{ uri: item.imageUrl }}
             style={styles.image}
             resizeMode={FastImage.resizeMode.cover}
           />
@@ -157,13 +158,13 @@ const PromotionsScreen = ({navigation}) => {
           keyExtractor={item => item.BannerId.toString()}
           contentContainerStyle={styles.list}
           onScroll={Animated.event(
-            [{nativeEvent: {contentOffset: {y: scrollY}}}],
-            {useNativeDriver: true},
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true },
           )}
           scrollEventThrottle={16}
           ListHeaderComponent={
             <View style={styles.headerContainer}>
-              {/* 🔹 Animated Back Button */}
+              {/* Animated Back Button */}
               <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Animated.View
                   style={[
@@ -175,14 +176,15 @@ const PromotionsScreen = ({navigation}) => {
                     },
                     {
                       transform: [
-                        {scale: buttonScale},
-                        {translateY: buttonTranslateY},
+                        { scale: buttonScale },
+                        { translateY: buttonTranslateY },
                       ],
                     },
-                  ]}>
+                  ]}
+                >
                   <FastImage
                     source={require('../assets/left-arrow.png')}
-                    style={{width: 20, height: 20}}
+                    style={{ width: 20, height: 20 }}
                   />
                 </Animated.View>
               </TouchableOpacity>
@@ -197,10 +199,10 @@ const PromotionsScreen = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#fff'},
+  container: { flex: 1, backgroundColor: '#fff' },
   headerContainer: {
     flexDirection: 'row',
-    alignItems: 'center', // ✅ keeps arrow & text aligned vertically
+    alignItems: 'center',
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
@@ -211,7 +213,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
     fontSize: 18,
-    marginLeft: 10, // spacing from back arrow
+    marginLeft: 10,
   },
   list: {
     paddingBottom: 20,
@@ -224,7 +226,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
   },
   imageWrapper: {

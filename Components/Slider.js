@@ -1,16 +1,10 @@
 import React from 'react';
-import {
-  View,
-  Dimensions,
-  Animated,
-  FlatList,
-  ImageBackground,
-} from 'react-native';
+import { View, Dimensions, Animated, ImageBackground } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import {BarIndicator} from 'react-native-indicators';
-import {APIURL} from '../Data/CloneData';
+import { BarIndicator } from 'react-native-indicators';
+import { APIURL } from '../Data/CloneData';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 const height = 240;
 const SPACING = 10;
 
@@ -32,42 +26,41 @@ export default class FullWidthSlider extends React.PureComponent {
     clearInterval(this.myInterval);
   }
 
-  
-// loopBanners = () => {
-//   const ll = this.state.BannerList.length;
-//   let i = 0;
-//   this.myInterval = setInterval(() => {
-//     if (ll > 0) {
-//       this.flatRef.scrollToIndex({index: i, animated: true});
-//       i = (i + 1) % ll;
-//     }
-//   }, 7000);
-// };
+  // loopBanners = () => {
+  //   const ll = this.state.BannerList.length;
+  //   let i = 0;
+  //   this.myInterval = setInterval(() => {
+  //     if (ll > 0) {
+  //       this.flatRef.scrollToIndex({index: i, animated: true});
+  //       i = (i + 1) % ll;
+  //     }
+  //   }, 7000);
+  // };
 
   // AFTER
-loopBanners = () => {
-  const ll = this.state.BannerList.length;
-  let i = 0;
-  this.myInterval = setInterval(() => {
-    if (ll > 0) {
-      Animated.timing(this.scrollX, {
-        toValue: i * width,
-        duration: 10000,       // ← sliding animation speed in ms
-                              //   increase for slower, decrease for faster
-                              //   800 = fast, 1200 = medium, 2000 = very slow
-        useNativeDriver: true,
-      }).start(() => {
-        this.flatRef.scrollToOffset({
-          offset: i * width,
-          animated: true,    // ← sync the actual FlatList position silently
+  loopBanners = () => {
+    const ll = this.state.BannerList.length;
+    let i = 0;
+    this.myInterval = setInterval(() => {
+      if (ll > 0) {
+        Animated.timing(this.scrollX, {
+          toValue: i * width,
+          duration: 10000, // ← sliding animation speed in ms
+          //   increase for slower, decrease for faster
+          //   800 = fast, 1200 = medium, 2000 = very slow
+          useNativeDriver: true,
+        }).start(() => {
+          this.flatRef.scrollToOffset({
+            offset: i * width,
+            animated: true, // ← sync the actual FlatList position silently
+          });
         });
-      });
-      i = (i + 1) % ll;
-    }
-  }, 7000);
-};
+        i = (i + 1) % ll;
+      }
+    }, 7000);
+  };
 
-  renderItem = ({item, index}) => {
+  renderItem = ({ item, index }) => {
     const inputRange = [
       (index - 1) * width,
       index * width,
@@ -97,14 +90,15 @@ loopBanners = () => {
         style={{
           width, // full screen width
           height,
-          transform: [{scale}, {translateY}],
+          transform: [{ scale }, { translateY }],
           opacity,
           borderRadius: 16,
           overflow: 'hidden',
-        }}>
+        }}
+      >
         <FastImage
-          source={{uri: item.imageUrl}}
-          style={{width: '100%', height: '100%'}}
+          source={{ uri: item.imageUrl }}
+          style={{ width: '100%', height: '100%' }}
           resizeMode={FastImage.resizeMode.cover}
         />
       </Animated.View>
@@ -123,8 +117,8 @@ loopBanners = () => {
                 height,
                 justifyContent: 'center',
                 alignItems: 'center',
-              }}>
-              {/* <BarIndicator count={6} size={30} color="#FF7B54" /> */}
+              }}
+            >
               <BarIndicator count={6} size={30} color="black" />
             </ImageBackground>
           </View>
@@ -138,8 +132,8 @@ loopBanners = () => {
             pagingEnabled
             decelerationRate="fast"
             onScroll={Animated.event(
-              [{nativeEvent: {contentOffset: {x: this.scrollX}}}],
-              {useNativeDriver: true},
+              [{ nativeEvent: { contentOffset: { x: this.scrollX } } }],
+              { useNativeDriver: true },
             )}
             scrollEventThrottle={16}
             renderItem={this.renderItem}
@@ -147,7 +141,13 @@ loopBanners = () => {
         )}
 
         {/* Dots Indicator */}
-        <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 12}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 12,
+          }}
+        >
           {this.state.BannerList.map((_, i) => {
             const opacity = this.scrollX.interpolate({
               inputRange: [(i - 1) * width, i * width, (i + 1) * width],
@@ -169,7 +169,7 @@ loopBanners = () => {
                   margin: 4,
                   backgroundColor: '#383636ff',
                   opacity,
-                  transform: [{scale}],
+                  transform: [{ scale }],
                 }}
               />
             );
@@ -209,7 +209,10 @@ loopBanners = () => {
           BannerName: el.BannerName,
           imageUrl: el.imageUrl,
         }));
-        this.setState({BannerList: BList, isLoading: false}, this.loopBanners);
+        this.setState(
+          { BannerList: BList, isLoading: false },
+          this.loopBanners,
+        );
       });
   }
 }

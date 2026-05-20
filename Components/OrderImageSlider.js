@@ -1,15 +1,5 @@
 import React from 'react';
-import {
-  Alert,
-  Dimensions,
-  FlatList,
-  Image,
-  ImageBackground,
-  Platform,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Dimensions, FlatList, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 
 const width = Dimensions.get('screen').width;
@@ -43,16 +33,16 @@ export default class OrderImageSlider extends React.PureComponent {
       } else {
         i = i + 1;
       }
-      this.flatref.scrollToIndex({index: i, animated: true, viewOffset: 0});
+      this.flatref.scrollToIndex({ index: i, animated: true, viewOffset: 0 });
     }, 3000);
   };
 
-  change = ({nativeEvent}) => {
+  change = ({ nativeEvent }) => {
     const slide = Math.ceil(
       nativeEvent.contentOffset.x / nativeEvent.layoutMeasurement.width,
     );
     if (slide !== this.state.active) {
-      this.setState({active: slide});
+      this.setState({ active: slide });
     }
     var currentOffset = nativeEvent.contentOffset.x;
     var direction = currentOffset > this.state.offset ? 'down' : 'up';
@@ -79,14 +69,15 @@ export default class OrderImageSlider extends React.PureComponent {
     }
   };
 
-  singleRenderImage = ({item, index}) => {
+  singleRenderImage = ({ item, index }) => {
     return (
       <TouchableOpacity
         key={index}
         activeOpacity={1}
         onPressIn={() => this.onImagePressIn(index)}
         onPressOut={() => this.onContinueloop(index)}
-        onPress={() => this.onImagePressIn(index)}>
+        onPress={() => this.onImagePressIn(index)}
+      >
         <View
           key={index}
           style={{
@@ -95,14 +86,15 @@ export default class OrderImageSlider extends React.PureComponent {
             marginRight: 3,
             alignItems: 'center',
             justifyContent: 'center',
-          }}>
+          }}
+        >
           <FastImage
             source={
               item.ProductIMG === ''
                 ? require('../assets/image-placeholder.png')
-                : {uri: item.ProductIMG, priority: FastImage.priority.high}
+                : { uri: item.ProductIMG, priority: FastImage.priority.high }
             }
-            style={{width: width, height: 200}}
+            style={{ width: width, height: 200 }}
             resizeMode={FastImage.resizeMode.contain}
           />
         </View>

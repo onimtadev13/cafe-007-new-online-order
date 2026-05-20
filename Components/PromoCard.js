@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Slider from '../Components/Slider';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 export default function PromoCard({
   visible = false,
@@ -19,7 +19,6 @@ export default function PromoCard({
   onDismiss,
   onMoreOptions,
 }) {
-  
   const slideAnim = useRef(new Animated.Value(height)).current;
 
   const cardWidth = width * 0.9;
@@ -54,13 +53,16 @@ export default function PromoCard({
     }
   };
 
- 
-  const promotion = promotionsData && promotionsData.length > 0 
-    ? promotionsData[0] 
-    : null;
+  const promotion =
+    promotionsData && promotionsData.length > 0 ? promotionsData[0] : null;
 
-  const title = promotion?.Title || promotion?.Promo_Title || 'Enjoy 50% off (up to LKR 400)';
-  const description = promotion?.Description || promotion?.Promo_Description || 
+  const title =
+    promotion?.Title ||
+    promotion?.Promo_Title ||
+    'Enjoy 50% off (up to LKR 400)';
+  const description =
+    promotion?.Description ||
+    promotion?.Promo_Description ||
     'LKR 100 minimum order (excluding promotions) • Delivery orders only • Some merchants excluded • This promotion does not apply to already...';
 
   return (
@@ -68,21 +70,24 @@ export default function PromoCard({
       transparent
       animationType="fade"
       visible={visible}
-      onRequestClose={onDismiss}>
+      onRequestClose={onDismiss}
+    >
       <View style={styles.wrapper}>
         <Animated.View
           style={[
             {
               position: 'absolute',
               left: width * 0.05,
-              transform: [{translateY: slideAnim}],
+              transform: [{ translateY: slideAnim }],
             },
-          ]}>
+          ]}
+        >
           <View
             style={[
               styles.cardContainer,
-              {width: cardWidth, minHeight: cardHeight},
-            ]}>
+              { width: cardWidth, minHeight: cardHeight },
+            ]}
+          >
             <View style={styles.content}>
               <View style={styles.sliderWrapper}>
                 {/* Pass promotionsData to Slider component */}
@@ -97,12 +102,14 @@ export default function PromoCard({
               <View style={styles.buttonRow}>
                 <TouchableOpacity
                   style={[styles.button, styles.dismissButton]}
-                  onPress={onDismiss}>
+                  onPress={onDismiss}
+                >
                   <Text style={styles.dismissText}>Dismiss</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.button, styles.moreButton]}
-                  onPress={handleMoreOptions}>
+                  onPress={handleMoreOptions}
+                >
                   <Text style={styles.moreText}>More Options</Text>
                 </TouchableOpacity>
               </View>
@@ -128,7 +135,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5,
   },
-  content: {width: '100%', alignItems: 'center'},
+  content: { width: '100%', alignItems: 'center' },
   sliderWrapper: {
     width: '100%',
     height: 240,
@@ -170,8 +177,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     alignItems: 'center',
   },
-  dismissButton: {backgroundColor: '#3a3535ff'},
-  moreButton: {backgroundColor: '#28a745'},
+  dismissButton: { backgroundColor: '#3a3535ff' },
+  moreButton: { backgroundColor: '#28a745' },
   dismissText: {
     color: '#fff',
     fontSize: 18,

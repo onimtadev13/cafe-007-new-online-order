@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Animated,
   Easing,
-  TouchableOpacity,
 } from 'react-native';
 
 export default class BouncingPreloader extends Component {

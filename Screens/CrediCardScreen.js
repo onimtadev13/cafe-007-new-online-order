@@ -1,12 +1,11 @@
-import React, {PureComponent} from 'react';
-import {Alert, ScrollView, Text, TouchableOpacity, View} from 'react-native';
-// import IonicIcon from 'react-native-vector-icons/Ionicons';
-import {CreditCardInput} from '@rajeshsmallarc/react-native-creditcard';
-import {openDatabase} from 'react-native-sqlite-storage';
+import React, { PureComponent } from 'react';
+import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { CreditCardInput } from '@rajeshsmallarc/react-native-creditcard';
+import { openDatabase } from 'react-native-sqlite-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
-var db = openDatabase({name: 'UserDatabase.db'});
+var db = openDatabase({ name: 'UserDatabase.db' });
 
 export default class CreditCardScreen extends PureComponent {
   constructor(props) {
@@ -39,7 +38,7 @@ export default class CreditCardScreen extends PureComponent {
                     onPress: () => this.props.navigation.goBack(),
                   },
                 ],
-                {cancelable: false},
+                { cancelable: false },
               );
             } else {
               this.saveCard();
@@ -77,7 +76,7 @@ export default class CreditCardScreen extends PureComponent {
                   onPress: () => this.props.navigation.goBack(),
                 },
               ],
-              {cancelable: false},
+              { cancelable: false },
             );
           } else Alert.alert('Registration Failed');
         },
@@ -87,10 +86,14 @@ export default class CreditCardScreen extends PureComponent {
 
   render() {
     return (
-      <View style={{flex: 1}}>
+      <View style={{ flex: 1 }}>
         <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-          {/* <IonicIcon name="chevron-back" size={35} style={{margin: 30}} /> */}
-           <FontAwesome6 name="chevron-left" size={35} style={{ margin: 30 }} solid />
+          <FontAwesome6
+            name="chevron-left"
+            size={35}
+            style={{ margin: 30 }}
+            solid
+          />
         </TouchableOpacity>
         <ScrollView>
           <CreditCardInput
@@ -150,7 +153,8 @@ export default class CreditCardScreen extends PureComponent {
               marginRight: 30,
               marginBottom: 30,
             }}
-            onPress={() => this.onSaveCardPress()}>
+            onPress={() => this.onSaveCardPress()}
+          >
             <View
               style={{
                 width: '100%',
@@ -158,13 +162,15 @@ export default class CreditCardScreen extends PureComponent {
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: this.state.isValid ? 'black' : '#cfcfcf',
-              }}>
+              }}
+            >
               <Text
                 style={{
                   color: 'white',
                   fontFamily: 'AsapMedium',
                   fontSize: 18,
-                }}>
+                }}
+              >
                 Save
               </Text>
             </View>

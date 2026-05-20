@@ -219,10 +219,13 @@ class CartScreen extends React.Component {
               >
                 <Text
                   style={{
-                    fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-fontSize: 16,
-fontWeight: 'bold',
-color: theme.text, 
+                    fontFamily:
+                      Platform.OS === 'ios'
+                        ? 'Asap-Regular_Medium'
+                        : 'AsapMedium',
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                    color: theme.text,
                   }}
                 >
                   {item.Qty}
@@ -231,12 +234,15 @@ color: theme.text,
               <Text
                 style={{
                   marginTop: 6,
-                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-fontSize: 18,
-marginLeft: 10,
-flex: 0.85,
-fontWeight: '800',
-color: theme.text, 
+                  fontFamily:
+                    Platform.OS === 'ios'
+                      ? 'Asap-Regular_Medium'
+                      : 'AsapMedium',
+                  fontSize: 18,
+                  marginLeft: 10,
+                  flex: 0.85,
+                  fontWeight: '800',
+                  color: theme.text,
                 }}
               >
                 {item.ProductName}{' '}
@@ -252,12 +258,15 @@ color: theme.text,
                   renderText={formattedValue => (
                     <Text
                       style={{
-                       marginTop: 6,
-textAlignVertical: 'top',
-marginLeft: 15,
-fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-fontSize: 20,
-color: theme.text,
+                        marginTop: 6,
+                        textAlignVertical: 'top',
+                        marginLeft: 15,
+                        fontFamily:
+                          Platform.OS === 'ios'
+                            ? 'Asap-Regular'
+                            : 'AsapRegular',
+                        fontSize: 20,
+                        color: theme.text,
                       }}
                     >
                       {formattedValue}
@@ -313,7 +322,7 @@ color: theme.text,
               fontFamily:
                 Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
               fontSize: 17,
-             color: theme.textMuted, 
+              color: theme.textMuted,
               marginRight: 5,
             }}
           >
@@ -445,7 +454,12 @@ color: theme.text,
     };
 
     return (
-      <Animated.View style={[{ flex: 1, backgroundColor: theme.bg }, { opacity: this.state.fadeAnim }]}>
+      <Animated.View
+        style={[
+          { flex: 1, backgroundColor: theme.bg },
+          { opacity: this.state.fadeAnim },
+        ]}
+      >
         <View style={{ marginLeft: 40, marginTop: 20, marginBottom: 20 }}>
           <View
             style={{
@@ -453,8 +467,8 @@ color: theme.text,
               alignItems: 'center',
               marginRight: 40,
               marginTop: 20,
-        marginBottom: 20,
-        marginRight: 16,
+              marginBottom: 20,
+              marginRight: 16,
             }}
           >
             <Text
@@ -471,9 +485,15 @@ color: theme.text,
 
             {this.props.cartItems.length <= 0 ? null : (
               <View>
-                <TouchableOpacity onPress={() => this.RBSheet.open()}
-                  style={{ marginRight: 12 }} >
-                  <FontAwesome6 name="align-right" size={20} color={theme.text} />
+                <TouchableOpacity
+                  onPress={() => this.RBSheet.open()}
+                  style={{ marginRight: 12 }}
+                >
+                  <FontAwesome6
+                    name="align-right"
+                    size={20}
+                    color={theme.text}
+                  />
                 </TouchableOpacity>
               </View>
             )}
@@ -649,11 +669,11 @@ color: theme.text,
           openDuration={700}
           closeOnDragDown={true}
           closeOnPressMask={true}
-       customStyles={{
-  wrapper: { backgroundColor: 'transparent' },
-  draggableIcon: { backgroundColor: theme.textMuted },
-  container: { backgroundColor: theme.card },  
-}}
+          customStyles={{
+            wrapper: { backgroundColor: 'transparent' },
+            draggableIcon: { backgroundColor: theme.textMuted },
+            container: { backgroundColor: theme.card },
+          }}
         >
           <View style={{ flex: 1 }}>
             <Text
@@ -767,7 +787,14 @@ const mapStateToProps = state => {
 
 function CartScreenWrapper(props) {
   const { theme, isDark, toggleTheme } = useTheme();
-  return <CartScreen {...props} theme={theme} isDark={isDark} toggleTheme={toggleTheme} />;
+  return (
+    <CartScreen
+      {...props}
+      theme={theme}
+      isDark={isDark}
+      toggleTheme={toggleTheme}
+    />
+  );
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(CartScreenWrapper);

@@ -1,9 +1,9 @@
 import React from 'react';
-import {Platform, Text, View} from 'react-native';
+import { Platform, Text, View } from 'react-native';
 
 export default class FoodQtyLabel extends React.PureComponent {
   render() {
-    const {isBestseller, isOffer, qty} = this.props;
+    const { isBestseller, isOffer, qty } = this.props;
 
     return (
       <>
@@ -21,7 +21,8 @@ export default class FoodQtyLabel extends React.PureComponent {
               borderTopLeftRadius: 20,
               marginTop: 5,
               marginLeft: 5,
-            }}>
+            }}
+          >
             <Text
               style={{
                 color: 'white',
@@ -29,7 +30,8 @@ export default class FoodQtyLabel extends React.PureComponent {
                   Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                 fontSize: 14,
                 marginTop: -2,
-              }}>
+              }}
+            >
               Bestseller
             </Text>
           </View>
@@ -45,21 +47,23 @@ export default class FoodQtyLabel extends React.PureComponent {
               alignItems: 'center',
               position: 'absolute',
               marginTop: 30,
-            }}>
+            }}
+          >
             <Text
               style={{
                 color: 'white',
                 fontFamily:
                   Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                 fontSize: 14,
-              }}>
+              }}
+            >
               {isOffer}% LKR OFF
             </Text>
           </View>
         ) : null}
 
         {qty > 0 ? (
-          <View style={{alignItems: 'flex-end', justifyContent: 'flex-end'}}>
+          <View style={{ alignItems: 'flex-end', justifyContent: 'flex-end' }}>
             <View
               style={{
                 backgroundColor: 'black',
@@ -67,7 +71,8 @@ export default class FoodQtyLabel extends React.PureComponent {
                 justifyContent: 'center',
                 position: 'absolute',
                 borderBottomRightRadius: 10,
-              }}>
+              }}
+            >
               <Text
                 style={{
                   fontFamily:
@@ -78,7 +83,8 @@ export default class FoodQtyLabel extends React.PureComponent {
                   paddingRight: 8,
                   paddingTop: 3,
                   paddingBottom: 3,
-                }}>
+                }}
+              >
                 {qty}
               </Text>
             </View>

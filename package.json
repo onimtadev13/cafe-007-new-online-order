@@ -73,6 +73,7 @@
     "react-native-sqlite-storage": "^6.0.0",
     "react-native-star-view": "^1.1.3",
     "react-native-svg": "^15.13.0",
+    "react-native-system-navigation-bar": "^2.8.0",
     "react-native-tab-view": "^2.16.0",
     "react-native-text-input-interactive": "^0.1.5",
     "react-native-touch-id": "^4.4.1",

@@ -28,15 +28,15 @@ const getTabBarVisible = route => {
 };
 
 const iconMap = {
-  Home:    { name: 'house' },
-  Search:  { name: 'magnifying-glass' },
-  Cart:    { name: 'cart-shopping' },
-  Orders:  { name: 'basket-shopping' },
+  Home: { name: 'house' },
+  Search: { name: 'magnifying-glass' },
+  Cart: { name: 'cart-shopping' },
+  Orders: { name: 'basket-shopping' },
   Account: { name: 'user' },
 };
 
 const BottomTabNavigation = props => {
-  const { theme } = props; // ← NEW
+  const { theme } = props;
 
   return (
     <Tab.Navigator
@@ -58,22 +58,22 @@ const BottomTabNavigation = props => {
 
         // ── Theme-aware tab bar styles ──────────────────────────────
         tabBarStyle: {
-          height:          50,
-          backgroundColor: theme.card,       
-          borderTopColor:  theme.separator,  
-          borderTopWidth:  1,
+          height: 50,
+          backgroundColor: theme.card,
+          borderTopColor: theme.separator,
+          borderTopWidth: 1,
         },
         tabBarLabelStyle: {
-          fontSize:     12,
-          fontWeight:   'bold',
+          fontSize: 12,
+          fontWeight: 'bold',
           marginBottom: 5,
         },
-        tabBarIconStyle:          { marginTop: 5 },
-        tabBarShowLabel:          false,
-        tabBarActiveTintColor:    theme.text,    
-        tabBarInactiveTintColor:  theme.textMuted, 
-        tabBarHideOnKeyboard:     false,
-        headerShown:              false,
+        tabBarIconStyle: { marginTop: 5 },
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: theme.text,
+        tabBarInactiveTintColor: theme.textMuted,
+        tabBarHideOnKeyboard: false,
+        headerShown: false,
       })}
       animationEnabled={true}
     >
@@ -99,7 +99,7 @@ const BottomTabNavigation = props => {
         })}
         listeners={({ navigation }) => ({
           tabPress: e => {
-            const state    = navigation.getState();
+            const state = navigation.getState();
             const cartStack = state.routes.find(r => r.name === 'Cart');
             if (cartStack?.state?.index > 0) {
               e.preventDefault();

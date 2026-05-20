@@ -1,6 +1,5 @@
-// import {NavigationContainer, DefaultTheme as NavigationDefaultTheme, DarkTheme as NavigationDarkTheme} from '@react-navigation/native';
-import { useEffect, useState, useRef, useCallback  } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import React from 'react';
 import {
   Alert,
@@ -9,6 +8,7 @@ import {
   Platform,
   Linking,
   AppState,
+  View,
 } from 'react-native';
 import AuthContext from './Components/Context';
 import BottomTabNavigation from './Routes/BottomTabNavigation';
@@ -28,19 +28,33 @@ import NotificationModal from './Components/NotificationModal';
 import PromoCard from './Components/PromoCard';
 import SplashScreen from './Screens/SplashScreen';
 import { ThemeProvider, useTheme } from './Context/ThemeContext';
-
+import { showNetworkError } from './Utils/networkError';
+import NetInfo from '@react-native-community/netinfo';
 import {
   SafeAreaProvider,
   SafeAreaView,
   initialWindowMetrics,
 } from 'react-native-safe-area-context';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 var db = openDatabase({ name: 'UserDatabase.db' });
 const RootStack = createStackNavigator();
 
+// ── Themed helper components (defined OUTSIDE App so they can use useTheme) ──
 
 const ThemedApp = ({ children }) => {
   const { theme, isDark } = useTheme();
+
+  React.useEffect(() => {
+    if (Platform.OS === 'android') {
+      // Set navigation bar background color
+      SystemNavigationBar.setNavigationColor(
+        theme.card,                            
+        isDark ? 'light' : 'dark',         
+      );
+    }
+  }, [theme, isDark]);  // ← re-runs whenever theme changes
+
   return (
     <>
       <StatusBar
@@ -55,16 +69,49 @@ const ThemedApp = ({ children }) => {
   );
 };
 
-
 const ThemedTopBar = () => {
   const { theme } = useTheme();
   return (
     <SafeAreaView
       edges={['top']}
-      style={{ flex: 0, backgroundColor: theme.bg }}  // ← theme-aware, not hardcoded
+      style={{ flex: 0, backgroundColor: theme.bg }}
     />
   );
 };
+
+const ThemedNavigationContainer = ({ children, navigationRef }) => {
+  const { theme } = useTheme();
+  const navigationTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: theme.bg,
+      card: theme.bg,
+    },
+  };
+  return (
+    <NavigationContainer ref={navigationRef} theme={navigationTheme}>
+      {children}
+    </NavigationContainer>
+  );
+};
+
+
+const ThemedSafeAreaBottom = ({ children }) => {
+  const { theme } = useTheme();
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.card }}>  {/* ← theme.card */}
+      <SafeAreaView
+        edges={['bottom']}
+        style={{ flex: 1, backgroundColor: theme.card }}     
+      >
+        {children}
+      </SafeAreaView>
+    </View>
+  );
+};
+
+// ── Main App ──────────────────────────────────────────────────────────────────
 
 const App = () => {
   const [isClick, setClick] = React.useState(false);
@@ -89,11 +136,7 @@ const App = () => {
     isMenuButtonVisible: false,
     isVisible: false,
   });
-
   const navigationRef = React.createRef();
-
-
-
   const [showPromo, setShowPromo] = useState(false);
 
   function navigate(name, params) {
@@ -110,11 +153,11 @@ const App = () => {
   };
 
   const handleSplashFinish = useCallback(() => {
-  setShowSplash(prev => {
-    if (prev === true) return false; 
-    return prev;
-  });
-}, []);
+    setShowSplash(prev => {
+      if (prev === true) return false;
+      return prev;
+    });
+  }, []);
 
   const LoginReducer = (prevstate, action) => {
     switch (action.Type) {
@@ -124,14 +167,12 @@ const App = () => {
           userToken: action.Token,
           isLoading: false,
         };
-
       case 'LOGIN':
         return {
           ...prevstate,
           userToken: action.Token,
           isLoading: false,
         };
-
       case 'LOGOUT':
         return {
           ...prevstate,
@@ -164,11 +205,9 @@ const App = () => {
           }
         }
       },
-
       OTPVerification: async (OTPCode, mobilenumber, navigation) => {
         console.log('Entered OTPCode:', OTPCode);
         console.log('Expected OtpCode(ref):', otpRef.current);
-
         if (!OTPCode || OTPCode.trim() === '') {
           setOTPVisible(false);
           setButtonClick(false);
@@ -178,20 +217,16 @@ const App = () => {
           );
           return;
         }
-
         if (OTPCode !== otpRef.current) {
           Alert.alert('Warning', 'Incorrect OTP. Please try again.');
           return;
         }
-
         setOTPVisible(false);
         setButtonClick(false);
-
         getToken().then(fcmToken => {
           CheckUserDetailExist(mobilenumber, navigation);
         });
       },
-
       ResendOTP: async mobilenumber => {
         if (mobilenumber === '11111') {
           testNotification();
@@ -199,12 +234,10 @@ const App = () => {
           ResendSMS(mobilenumber);
         }
       },
-
       CloseOtpBox: () => {
         setOTPVisible(false);
         setButtonClick(false);
       },
-
       SkipButton: async () => {
         const keys = [
           'address',
@@ -218,27 +251,22 @@ const App = () => {
           'PUSH',
           'NID',
         ];
-
         AsyncStorage.multiRemove(keys).then(res => {
           dispatch({ Type: 'LOGIN', Token: 'Osanda' });
         });
       },
-
       SignUp: (firstname, lastname, mobilenumber, email, address, city) => {
         setRegister(true);
         getToken().then(fcmToken => {
           RegisterUser(firstname, lastname, mobilenumber, email, address, city);
         });
       },
-
       CheckSign: () => {
         dispatch({ Type: 'LOGOUT' });
       },
-
       Rememberme: () => {
         dispatch({ Type: 'LOGIN', Token: 'Osanda' });
       },
-
       logout: async () => {
         dispatch({ Type: 'LOGOUT' });
         const keys = await AsyncStorage.getAllKeys();
@@ -336,7 +364,6 @@ const App = () => {
     var code = generateOTP(4);
     setOtpCode(code);
     otpRef.current = code;
-
     fetch(SENDTESTNOTIFICTION, {
       method: 'POST',
       cache: 'no-cache',
@@ -352,9 +379,7 @@ const App = () => {
       .then(res => {
         return res.json();
       })
-      .then(json => {
-        // console.log(JSON.stringify(json));
-      })
+      .then(json => {})
       .catch(er => {
         Alert.alert('Warning', 'Required Valid Mobile Number');
       });
@@ -362,12 +387,9 @@ const App = () => {
 
   const sendSMS = mobilenumber => {
     var code = generateOTP(4);
-
     setOtpCode(code);
     otpRef.current = code;
-
     console.log('Generated OTP:', code);
-
     fetch(OTPAPIURL, {
       method: 'POST',
       cache: 'no-cache',
@@ -380,7 +402,6 @@ const App = () => {
         msg: code,
       }),
     });
-
     SaveOTP(mobilenumber, code);
   };
 
@@ -427,7 +448,6 @@ const App = () => {
     var code = generateOTP(4);
     setOtpCode(code);
     otpRef.current = code;
-
     fetch(OTPAPIURL, {
       method: 'POST',
       cache: 'no-cache',
@@ -514,13 +534,11 @@ const App = () => {
       .then(json => {
         const Status = json.CommonResult.Table[0].Status;
         var AppURL = json.CommonResult.Table[0].AppURL;
-
         if (Status === 'Exist') {
           setUpdated(true);
-          CheckUserLogin(); // This now handles auth better
+          CheckUserLogin();
         } else {
           setUpdated(false);
-          // SplashScreen.hide();
           Alert.alert(
             'Update is available',
             'An update for the application is available',
@@ -536,27 +554,14 @@ const App = () => {
       })
       .catch(er => {
         console.log('CheckAppVersion', er);
-
-        // On error, still try to log user in if they have credentials
         AsyncStorage.getItem('phonenumber').then(phone => {
           if (phone) {
             dispatch({ Type: 'RETREIVE_TOKEN', Token: phone });
-            // SplashScreen.hide();
           } else {
-            Alert.alert(
-              'Warning',
-              "The operation couldn't be completed.",
-              [
-                {
-                  text: 'Try Again',
-                  onPress: () => CheckAppVersion(),
-                },
-                {
-                  text: 'Close',
-                  onPress: () => BackHandler.exitApp(),
-                },
-              ],
-              { cancelable: false },
+            showNetworkError(
+              er,
+              () => CheckAppVersion(),
+              () => BackHandler.exitApp(),
             );
           }
         });
@@ -571,7 +576,6 @@ const App = () => {
 
   useEffect(() => {
     if (!loginstate.userToken) return;
-
     const checkPromo = async () => {
       const hasShown = await AsyncStorage.getItem('promoShown');
       if (!hasShown) {
@@ -579,9 +583,7 @@ const App = () => {
         await AsyncStorage.setItem('promoShown', 'true');
       }
     };
-
     checkPromo();
-
   }, [loginstate.userToken]);
 
   const handleDismissPromo = () => {
@@ -599,7 +601,6 @@ const App = () => {
   const CheckUserDetailExist = async (mobilenumber, navigation) => {
     AsyncStorage.getItem('fcmToken').then(FCMToken => {
       console.log(FCMToken);
-
       fetch(APIURL, {
         method: 'POST',
         cache: 'no-cache',
@@ -646,7 +647,6 @@ const App = () => {
           var UserLastname = json.CommonResult.Table[0].LastName;
           var UserEmail = json.CommonResult.Table[0].Email;
           var UserCity = json.CommonResult.Table[0].City;
-
           if (UserExist === 'Success') {
             const items = [
               ['firstname', UserFirstname],
@@ -657,7 +657,6 @@ const App = () => {
               ['city', UserCity],
               ['EditStatus', 'false'],
             ];
-
             AsyncStorage.multiSet(items, () => {
               setRegister(false);
               dispatch({ Type: 'LOGIN', Token: mobilenumber });
@@ -670,38 +669,23 @@ const App = () => {
         })
         .catch(er => {
           console.log('Login User Detail Exist Error', er);
-          Alert.alert(
-            'Warning',
-            "The operation couldn't be completed.",
-            [
-              {
-                text: 'Try Again',
-                onPress: () => CheckUserDetailExist(mobilenumber, navigation),
-              },
-              {
-                text: 'Close',
-                onPress: () => BackHandler.exitApp(),
-              },
-            ],
-            { cancelable: false },
+          showNetworkError(
+            er,
+            () => CheckUserDetailExist(mobilenumber, navigation),
+            () => BackHandler.exitApp(),
           );
         });
     });
   };
 
   const CheckUserExist = async mobilenumber => {
-    // If no mobile number, show login immediately
     if (!mobilenumber) {
       dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
-      setTimeout(() => {
-        // SplashScreen.hide();
-      }, 1000);
+      setTimeout(() => {}, 1000);
       return;
     }
-
     AsyncStorage.getItem('fcmToken').then(FCMToken => {
       console.log(FCMToken);
-
       fetch(APIURL, {
         method: 'POST',
         cache: 'no-cache',
@@ -755,7 +739,6 @@ const App = () => {
           var UserLastname = json.CommonResult.Table[0].LastName;
           var UserEmail = json.CommonResult.Table[0].Email;
           var UserCity = json.CommonResult.Table[0].City;
-
           if (UserExist === 'Success') {
             const items = [
               ['firstname', UserFirstname],
@@ -766,50 +749,25 @@ const App = () => {
               ['city', UserCity],
               ['EditStatus', 'false'],
             ];
-
             AsyncStorage.multiSet(items, () => {
               setRegister(false);
-              // Token already set in CheckUserLogin, just update user data
               dispatch({ Type: 'LOGIN', Token: mobilenumber });
             });
           } else {
-            // Only clear token if user doesn't exist on server
             dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
           }
         })
         .catch(er => {
           console.log('Login User Exist Error', er);
-
-          // On network error, keep user logged in if they have phone number
-          // Don't force logout on network issues
           if (mobilenumber) {
-            console.log('Network error but keeping user logged in');
             dispatch({ Type: 'LOGIN', Token: mobilenumber });
           } else {
             dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
           }
-
-          // Still show alert but don't force logout
-          Alert.alert(
-            'Warning',
-            "The operation couldn't be completed.",
-            [
-              {
-                text: 'Try Again',
-                onPress: () => CheckUserExist(mobilenumber),
-              },
-              {
-                text: 'Continue Offline',
-                onPress: () => {},
-              },
-            ],
-            { cancelable: false },
-          );
+          showNetworkError(er, () => CheckUserExist(mobilenumber), null);
         })
         .finally(() => {
-          setTimeout(() => {
-            // SplashScreen.hide();
-          }, 1000);
+          setTimeout(() => {}, 1000);
         });
     });
   };
@@ -818,12 +776,9 @@ const App = () => {
     const initializeAuth = async () => {
       try {
         const phonenumber = await AsyncStorage.getItem('phonenumber');
-
         if (phonenumber) {
-          // User has logged in before, set token immediately
           dispatch({ Type: 'RETREIVE_TOKEN', Token: phonenumber });
         } else {
-          // No stored credentials, show login
           dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
         }
       } catch (error) {
@@ -831,7 +786,6 @@ const App = () => {
         dispatch({ Type: 'RETREIVE_TOKEN', Token: null });
       }
     };
-
     initializeAuth();
   }, []);
 
@@ -845,7 +799,6 @@ const App = () => {
   ) => {
     AsyncStorage.getItem('fcmToken').then(FCMToken => {
       console.log(FCMToken);
-
       fetch(APIURL, {
         method: 'POST',
         cache: 'no-cache',
@@ -922,10 +875,8 @@ const App = () => {
         })
         .then(json => {
           var UserExist = json.CommonResult.Table[0].Message;
-
           if (UserExist === 'Success') {
             sendEmail(email, firstname);
-
             const items = [
               ['firstname', firstname],
               ['lastname', lastname],
@@ -935,7 +886,6 @@ const App = () => {
               ['city', city],
               ['EditStatus', 'false'],
             ];
-
             AsyncStorage.multiSet(items, () => {
               setRegister(false);
               dispatch({ Type: 'LOGIN', Token: mobilenumber });
@@ -959,28 +909,18 @@ const App = () => {
         .catch(er => {
           console.log('Register User Error', er);
           setRegister(false);
-          Alert.alert(
-            'Warning',
-            "The operation coundn't be completed.",
-            [
-              {
-                text: 'Try Again',
-                onPress: () =>
-                  RegisterUser(
-                    firstname,
-                    lastname,
-                    mobilenumber,
-                    email,
-                    address,
-                    city,
-                  ),
-              },
-              {
-                text: 'Close',
-                onPress: () => BackHandler.exitApp(),
-              },
-            ],
-            { cancelable: false },
+          showNetworkError(
+            er,
+            () =>
+              RegisterUser(
+                firstname,
+                lastname,
+                mobilenumber,
+                email,
+                address,
+                city,
+              ),
+            () => BackHandler.exitApp(),
           );
         });
     });
@@ -1029,47 +969,31 @@ const App = () => {
       })
       .catch(er => {
         console.log('UpdateEmailVerify', er);
-        Alert.alert(
-          'Warning',
-          "THe email verify operation coundn't be completed.",
-          [
-            {
-              text: 'Try Again',
-              onPress: () => UpdateEmailVerify(),
-            },
-            {
-              text: 'Close',
-              onPress: () => BackHandler.exitApp(),
-            },
-          ],
-          { cancelable: false },
+        showNetworkError(
+          er,
+          () => UpdateEmailVerify(),
+          () => BackHandler.exitApp(),
         );
       });
   };
 
   const CheckUserLogin = async () => {
     let mobilenumber = await AsyncStorage.getItem('phonenumber');
-
-    // If mobile number exists, set token immediately to prevent login screen flash
     if (mobilenumber) {
       dispatch({ Type: 'RETREIVE_TOKEN', Token: mobilenumber });
     }
-
-    // Then verify with server in background
     getToken().then(fcmToken => {
       CheckUserExist(mobilenumber);
     });
   };
 
   const handleBranchLink = params => {
-    // Branch passes data in params object
     if (
       params &&
       params.link_url === 'https://cafe007.lk/embilipitiya-cafe007/'
     ) {
       UpdateEmailVerify();
     }
-    // You can also check for specific keys you set when creating the link
     if (params && params.action === 'email_verification') {
       UpdateEmailVerify();
     }
@@ -1098,7 +1022,6 @@ const App = () => {
       '[FCMService] onNotificationOpenedApp Notification caused app to open',
     );
     console.log(remoteMessage.data);
-
     if (remoteMessage) {
       if (remoteMessage.data.OrderID !== undefined) {
         const OrderID = remoteMessage.data.OrderID;
@@ -1118,7 +1041,6 @@ const App = () => {
             isVisible: true,
             isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
           }));
-
           AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
         } else {
           setstate(prevState => ({ ...prevState, isVisible: false }));
@@ -1135,7 +1057,6 @@ const App = () => {
             isVisible: true,
             isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
           }));
-
           AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
         } else {
           setstate(prevState => ({ ...prevState, isVisible: false }));
@@ -1166,7 +1087,6 @@ const App = () => {
               isVisible: true,
               isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
             }));
-
             AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
           } else {
             setstate(prevState => ({ ...prevState, isVisible: false }));
@@ -1184,7 +1104,6 @@ const App = () => {
                 isVisible: true,
                 isMenuButtonVisible: remoteMessage.data.is_visible_Menu_Button,
               }));
-
               AsyncStorage.setItem('NID', remoteMessage.data.notification_id);
             }, 1000);
           } else {
@@ -1202,12 +1121,10 @@ const App = () => {
     registerAppWithFCM();
     CreatSqlitTable();
     CheckAppVersion();
-
     LocalNotificationService.configure(onNotificationPop);
 
     function onNotificationPop(notification) {
       console.log('START  onNotificationPop');
-
       if (notification.data.Status !== undefined) {
         const OrderID = notification.data.OrderID;
         navigate('Orders', {
@@ -1274,23 +1191,25 @@ const App = () => {
       }
     });
 
-    const subscription = AppState.addEventListener('change', async nextAppState => {
-  if (
-    appState.current.match(/inactive|background/) &&
-    nextAppState === 'active'
-  ) {
-    CheckAppVersion(); 
-    
-    if (loginstate.userToken) {
-      await AsyncStorage.removeItem('promoShown');
-      setShowPromo(true);
-      await AsyncStorage.setItem('promoShown', 'true');
-    }
-  }
+    const subscription = AppState.addEventListener(
+      'change',
+      async nextAppState => {
+        if (
+          appState.current.match(/inactive|background/) &&
+          nextAppState === 'active'
+        ) {
+          CheckAppVersion();
+          if (loginstate.userToken) {
+            await AsyncStorage.removeItem('promoShown');
+            setShowPromo(true);
+            await AsyncStorage.setItem('promoShown', 'true');
+          }
+        }
+        appState.current = nextAppState;
+        setAppStateVisible(appState.current);
+      },
+    );
 
-  appState.current = nextAppState; 
-  setAppStateVisible(appState.current);
-});
     return () => {
       branchUnsubscribe();
       unsubscribeNotification();
@@ -1304,70 +1223,71 @@ const App = () => {
     setstate(prevState => ({ ...prevState, isVisible: false }));
   }
 
-return (
-  <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-    <ThemeProvider>  {/* ← moved outside NavigationContainer */}
-      <ThemedTopBar />  {/* ← see below */}
-      <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-        <AuthContext.Provider value={authContext}>
-
-          <ThemedApp>
-            {showSplash ? (
-              <SplashScreen onFinish={handleSplashFinish} />
-            ) : (
-              <NavigationContainer ref={navigationRef}>
-                <Provider store={store}>
-                  <RootStack.Navigator
-                    screenOptions={{ cardStyle: { backgroundColor: undefined } }}
-                  >
-                    {loginstate.userToken == null ? (
-                      <RootStack.Screen
-                        key="auth-screen"
-                        name="Auth"
-                        options={{ headerShown: false }}
-                      >
-                        {() => (
-                          <AuthStackNavigation
-                            isClick={isClick}
-                            isVisible={isOTPVisible}
-                            OTPNotification={OtpNotification}
-                            isLoading={isRegister}
-                            isUpdated={isUpdated}
-                          />
-                        )}
-                      </RootStack.Screen>
-                    ) : (
-                      <RootStack.Screen
-                        key="app-screen"
-                        name="App"
-                        options={{ headerShown: false }}
-                        component={BottomTabNavigation}
-                      />
-                    )}
-                  </RootStack.Navigator>
-                </Provider>
-              </NavigationContainer>
-            )}
-          </ThemedApp>
-
-        </AuthContext.Provider>
-
-        <NotificationModal
-          type={state.Type}
-          description={state.Description}
-          more_description={state.More_Description}
-          isMenuButtonVisible={state.isMenuButtonVisible}
-          itemCode={state.ItemCode}
-          image={state.Image}
-          visible={state.isVisible}
-          onItemPress={data => onNotification_Model_Press(data)}
-          onClosePress={() => onClosePopUp()}
-          onMenuPress={data => onNotification_Model_Press(data)}
-        />
-      </SafeAreaView>
-    </ThemeProvider>
-  </SafeAreaProvider>
-);
+  return (
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}
+    style={{ flex: 1, backgroundColor: '#0F0E0C' }}>
+      <ThemeProvider>
+        <ThemedTopBar />
+        {/* ← ThemedSafeAreaBottom replaces the plain SafeAreaView */}
+        <ThemedSafeAreaBottom>
+          <AuthContext.Provider value={authContext}>
+            <ThemedApp>
+              {showSplash ? (
+                <SplashScreen onFinish={handleSplashFinish} />
+              ) : (
+                <ThemedNavigationContainer ref={navigationRef}>
+                  <Provider store={store}>
+                    <RootStack.Navigator
+                      screenOptions={{
+                        cardStyle: { backgroundColor: undefined },
+                      }}
+                    >
+                      {loginstate.userToken == null ? (
+                        <RootStack.Screen
+                          key="auth-screen"
+                          name="Auth"
+                          options={{ headerShown: false }}
+                        >
+                          {() => (
+                            <AuthStackNavigation
+                              isClick={isClick}
+                              isVisible={isOTPVisible}
+                              OTPNotification={OtpNotification}
+                              isLoading={isRegister}
+                              isUpdated={isUpdated}
+                            />
+                          )}
+                        </RootStack.Screen>
+                      ) : (
+                        <RootStack.Screen
+                          key="app-screen"
+                          name="App"
+                          options={{ headerShown: false }}
+                          component={BottomTabNavigation}
+                        />
+                      )}
+                    </RootStack.Navigator>
+                  </Provider>
+                </ThemedNavigationContainer>
+              )}
+            </ThemedApp>
+          </AuthContext.Provider>
+          <NotificationModal
+            type={state.Type}
+            description={state.Description}
+            more_description={state.More_Description}
+            isMenuButtonVisible={state.isMenuButtonVisible}
+            itemCode={state.ItemCode}
+            image={state.Image}
+            visible={state.isVisible}
+            onItemPress={data => onNotification_Model_Press(data)}
+            onClosePress={() => onClosePopUp()}
+            onMenuPress={data => onNotification_Model_Press(data)}
+          />
+        </ThemedSafeAreaBottom>
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
 };
 
 export default App;

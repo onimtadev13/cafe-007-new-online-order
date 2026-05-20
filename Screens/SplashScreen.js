@@ -6,7 +6,7 @@ const { width } = Dimensions.get('window');
 const SplashScreen = ({ onFinish }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  const hasFinished = useRef(false); 
+  const hasFinished = useRef(false);
   const runAnimation = useCallback(() => {
     fadeAnim.setValue(0);
     scaleAnim.setValue(0.8);
@@ -27,7 +27,7 @@ const SplashScreen = ({ onFinish }) => {
   }, [fadeAnim, scaleAnim]);
 
   useEffect(() => {
-    hasFinished.current = false; 
+    hasFinished.current = false;
     runAnimation();
 
     const timer = setTimeout(() => {
@@ -36,7 +36,7 @@ const SplashScreen = ({ onFinish }) => {
         duration: 400,
         useNativeDriver: true,
       }).start(() => {
-        if (!hasFinished.current) { 
+        if (!hasFinished.current) {
           hasFinished.current = true;
           onFinish();
         }
@@ -45,7 +45,7 @@ const SplashScreen = ({ onFinish }) => {
 
     return () => {
       clearTimeout(timer);
-      hasFinished.current = true; 
+      hasFinished.current = true;
     };
   }, [fadeAnim, scaleAnim, onFinish, runAnimation]);
 
@@ -58,7 +58,8 @@ const SplashScreen = ({ onFinish }) => {
             opacity: fadeAnim,
             transform: [{ scale: scaleAnim }],
           },
-        ]}>
+        ]}
+      >
         <Image
           source={require('../assets/launch_screen.jpg')}
           style={styles.logo}
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
   logoWrapper: {
     width: width * 0.5,
     height: width * 0.5,
-    borderRadius: (width * 0.5) * 0.22,
+    borderRadius: width * 0.5 * 0.22,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },

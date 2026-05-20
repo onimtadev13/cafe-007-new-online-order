@@ -1,16 +1,15 @@
 import React from 'react';
-import {Platform, Text, View} from 'react-native';
-// import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Platform, Text, View } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 export default class RatingStarIcon extends React.PureComponent {
   render() {
-    const {rate, isSoldOut} = this.props;
+    const { rate, isSoldOut } = this.props;
 
     return (
       <View
-        style={{flexDirection: 'row', alignItems: 'center', marginBottom: 5}}>
-        {/* <Ionicons name="star" size={20} color={'#fcba03'} /> */}
+        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
+      >
         <FontAwesome6 name="star" size={20} color="#fcba03" solid />
         <Text
           style={{
@@ -18,7 +17,8 @@ export default class RatingStarIcon extends React.PureComponent {
             fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
             fontSize: 14,
             marginLeft: 5,
-          }}>
+          }}
+        >
           {rate}
         </Text>
         {isSoldOut ? (
@@ -31,7 +31,8 @@ export default class RatingStarIcon extends React.PureComponent {
               backgroundColor: 'red',
               justifyContent: 'center',
               alignItems: 'center',
-            }}>
+            }}
+          >
             <Text
               style={{
                 color: 'white',
@@ -39,7 +40,8 @@ export default class RatingStarIcon extends React.PureComponent {
                   Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                 fontSize: 14,
                 marginTop: -2,
-              }}>
+              }}
+            >
               Sold out
             </Text>
           </View>

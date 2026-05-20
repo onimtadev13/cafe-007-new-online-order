@@ -11,14 +11,15 @@ import {
   View,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {APIURL} from '../Data/CloneData';
+import { APIURL } from '../Data/CloneData';
 import moment from 'moment';
-import {NumericFormat} from 'react-number-format';
+import { NumericFormat } from 'react-number-format';
 import messaging from '@react-native-firebase/messaging';
-import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import {withTheme} from '../Context/ThemeContext';
+import { withTheme } from '../Context/ThemeContext';
 import ThemeToggle from '../Components/ThemeToggle';
+import { showNetworkError } from '../Utils/networkError';
 
 const height = Dimensions.get('window').height;
 const Tab = createMaterialTopTabNavigator();
@@ -42,7 +43,7 @@ class OrderScreen extends React.PureComponent {
 
     this._unsubscribe = this.props.navigation.addListener('focus', async () => {
       this.fadeIn();
-      this.setState({isLoading: true});
+      this.setState({ isLoading: true });
       this.onGetOrderHeader();
     });
 
@@ -66,7 +67,7 @@ class OrderScreen extends React.PureComponent {
   localNotification = () => {
     this.messageListner = messaging().onMessage(async remoteMessage => {
       if (remoteMessage.data?.Status === 'Finish') {
-        this.setState({isLoading: true});
+        this.setState({ isLoading: true });
         this.onGetOrderHeader();
       }
     });
@@ -163,21 +164,16 @@ class OrderScreen extends React.PureComponent {
       })
       .catch(er => {
         console.log('onGetOrderHeader', er);
-        Alert.alert(
-          'Warning',
-          "The operation couldn't be completed.",
-          [{text: 'Try Again', onPress: () => this.onGetOrderHeader()}],
-          {cancelable: false},
-        );
+        showNetworkError(er, () => this.onGetOrderHeader(), null);
       })
       .finally(() => {
-        this.setState({refresh: true});
+        this.setState({ refresh: true });
         this.sliderUp();
       });
   };
 
-  onrenderOrder = ({item, index}) => {
-    const {theme} = this.props;
+  onrenderOrder = ({ item, index }) => {
+    const { theme } = this.props;
 
     let Icon = '';
     switch (item.DineType) {
@@ -237,8 +233,9 @@ class OrderScreen extends React.PureComponent {
             marginRight: 20,
             marginBottom: 15,
           },
-          {transform: [{translateY: this.state.sliderUp}]},
-        ]}>
+          { transform: [{ translateY: this.state.sliderUp }] },
+        ]}
+      >
         {/* Order ID row */}
         <View
           style={{
@@ -248,7 +245,8 @@ class OrderScreen extends React.PureComponent {
             marginTop: 20,
             marginRight: 20,
             marginBottom: 5,
-          }}>
+          }}
+        >
           <Text
             style={{
               flex: 1,
@@ -257,7 +255,8 @@ class OrderScreen extends React.PureComponent {
               fontSize: 20,
               marginLeft: 20,
               color: theme.text,
-            }}>
+            }}
+          >
             Order ID
           </Text>
           <Text
@@ -269,7 +268,8 @@ class OrderScreen extends React.PureComponent {
               textAlign: 'right',
               color: theme.textMuted,
               marginRight: 20,
-            }}>
+            }}
+          >
             {item.OrderID}
           </Text>
         </View>
@@ -280,7 +280,8 @@ class OrderScreen extends React.PureComponent {
             flexDirection: 'row',
             alignItems: 'center',
             marginRight: 20,
-          }}>
+          }}
+        >
           <Text
             style={{
               flex: 1,
@@ -290,7 +291,8 @@ class OrderScreen extends React.PureComponent {
               marginLeft: 40,
               marginBottom: 10,
               color: theme.textMuted,
-            }}>
+            }}
+          >
             {moment(item.InsertDate).format('YYYY-MM-DD hh:mm:ss A ')}
           </Text>
           <Text
@@ -305,7 +307,8 @@ class OrderScreen extends React.PureComponent {
               marginBottom: 10,
               color: Status === 'Cancel' ? '#D9534F' : theme.text,
               textAlign: 'right',
-            }}>
+            }}
+          >
             {Status}
           </Text>
         </View>
@@ -327,7 +330,8 @@ class OrderScreen extends React.PureComponent {
             alignItems: 'center',
             marginLeft: 40,
             marginBottom: 10,
-          }}>
+          }}
+        >
           <View
             style={{
               width: 55,
@@ -336,14 +340,15 @@ class OrderScreen extends React.PureComponent {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 10,
-            }}>
+            }}
+          >
             <FontAwesome6
               name={item.PaymentType === 'Cash' ? 'money-bill' : 'credit-card'}
               size={30}
               color={theme.accent}
             />
           </View>
-          <View style={{marginLeft: 20}}>
+          <View style={{ marginLeft: 20 }}>
             <Text
               style={{
                 fontFamily:
@@ -352,7 +357,8 @@ class OrderScreen extends React.PureComponent {
                     : 'AsapSemiBold',
                 fontSize: 18,
                 color: theme.text,
-              }}>
+              }}
+            >
               Payment Type
             </Text>
             <Text
@@ -363,7 +369,8 @@ class OrderScreen extends React.PureComponent {
                     : 'AsapSemiBold',
                 fontSize: 16,
                 color: theme.textSub,
-              }}>
+              }}
+            >
               {item.PaymentType}
             </Text>
           </View>
@@ -375,7 +382,8 @@ class OrderScreen extends React.PureComponent {
             flexDirection: 'row',
             alignItems: 'center',
             marginLeft: 40,
-          }}>
+          }}
+        >
           <View
             style={{
               width: 55,
@@ -384,10 +392,11 @@ class OrderScreen extends React.PureComponent {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 10,
-            }}>
+            }}
+          >
             <FontAwesome6 name={Icon} size={30} color={theme.accent} />
           </View>
-          <View style={{marginLeft: 20}}>
+          <View style={{ marginLeft: 20 }}>
             <Text
               style={{
                 fontFamily:
@@ -396,7 +405,8 @@ class OrderScreen extends React.PureComponent {
                     : 'AsapSemiBold',
                 fontSize: 18,
                 color: theme.text,
-              }}>
+              }}
+            >
               Dine Type
             </Text>
             <Text
@@ -407,7 +417,8 @@ class OrderScreen extends React.PureComponent {
                     : 'AsapSemiBold',
                 fontSize: 16,
                 color: theme.textSub,
-              }}>
+              }}
+            >
               {item.DineType}
             </Text>
           </View>
@@ -429,15 +440,17 @@ class OrderScreen extends React.PureComponent {
             marginRight: 30,
             marginLeft: 40,
             marginBottom: 20,
-          }}>
-          <View style={{flex: 1}}>
+          }}
+        >
+          <View style={{ flex: 1 }}>
             <Text
               style={{
                 fontFamily:
                   Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                 fontSize: 16,
                 color: theme.textMuted,
-              }}>
+              }}
+            >
               NetTotal
             </Text>
             <NumericFormat
@@ -456,7 +469,8 @@ class OrderScreen extends React.PureComponent {
                         : 'AsapSemiBold',
                     fontSize: 20,
                     color: theme.text,
-                  }}>
+                  }}
+                >
                   {formattedValue}
                 </Text>
               )}
@@ -469,7 +483,8 @@ class OrderScreen extends React.PureComponent {
                 OrderID: item.OrderID,
                 Screen: 'OrderScreen',
               })
-            }>
+            }
+          >
             <View
               style={{
                 backgroundColor: theme.pill,
@@ -478,7 +493,8 @@ class OrderScreen extends React.PureComponent {
                 borderRadius: 50,
                 borderColor: theme.pill,
                 borderWidth: 1.5,
-              }}>
+              }}
+            >
               <Text
                 style={{
                   color: theme.pillText,
@@ -491,7 +507,8 @@ class OrderScreen extends React.PureComponent {
                   marginRight: 15,
                   marginBottom: 5,
                   marginTop: 5,
-                }}>
+                }}
+              >
                 View Order
               </Text>
             </View>
@@ -502,87 +519,89 @@ class OrderScreen extends React.PureComponent {
   };
 
   render() {
-    const {theme} = this.props;
+    const { theme } = this.props;
 
     const EmptyList = () => (
-  <View
-    style={{
-      flex: 1,
-      backgroundColor: theme.bg,
-      minHeight: height * 0.6,
-    }}>
-    <View style={{alignItems: 'center', marginTop: 130}}>
-      {/* No image in your current code but space kept for consistency */}
-    </View>
-    <Text
-      style={{
-        fontFamily:
-          Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-        fontSize: 24,
-        textAlign: 'center',
-        color: theme.text,
-      }}>
-      No order yet
-    </Text>
-    <Text
-      style={{
-        margin: 20,
-        fontFamily:
-          Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-        fontSize: 17,
-        textAlign: 'center',
-        marginLeft: 40,
-        marginRight: 40,
-        color: theme.textSub,
-      }}>
-      When you place your first order, it will appear here
-    </Text>
-    <TouchableOpacity
-      style={{
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 30,
-        marginLeft: 10,
-        marginRight: 40,
-        marginBottom: 30,
-      }}
-      onPress={() => this.props.navigation.navigate('Home')}>
       <View
         style={{
-          width: '40%',
-          height: 50,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: theme.pill,
-          borderRadius: 50,
-        }}>
+          flex: 1,
+          backgroundColor: theme.bg,
+          minHeight: height * 0.6,
+        }}
+      >
+        <View style={{ alignItems: 'center', marginTop: 130 }}>
+          {/* No image in your current code but space kept for consistency */}
+        </View>
         <Text
           style={{
-            color: theme.pillText,
             fontFamily:
-              Platform.OS === 'ios'
-                ? 'Asap-Regular_Medium'
-                : 'AsapMedium',
-            fontSize: 18,
-          }}>
-          Find Food
+              Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+            fontSize: 24,
+            textAlign: 'center',
+            color: theme.text,
+          }}
+        >
+          No order yet
         </Text>
+        <Text
+          style={{
+            margin: 20,
+            fontFamily:
+              Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+            fontSize: 17,
+            textAlign: 'center',
+            marginLeft: 40,
+            marginRight: 40,
+            color: theme.textSub,
+          }}
+        >
+          When you place your first order, it will appear here
+        </Text>
+        <TouchableOpacity
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 30,
+            marginLeft: 10,
+            marginRight: 40,
+            marginBottom: 30,
+          }}
+          onPress={() => this.props.navigation.navigate('Home')}
+        >
+          <View
+            style={{
+              width: '40%',
+              height: 50,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: theme.pill,
+              borderRadius: 50,
+            }}
+          >
+            <Text
+              style={{
+                color: theme.pillText,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                fontSize: 18,
+              }}
+            >
+              Find Food
+            </Text>
+          </View>
+        </TouchableOpacity>
       </View>
-    </TouchableOpacity>
-  </View>
-);
+    );
 
-    // Renders only when list has items — gives top spacing without
-    // exposing white background when the list is empty
     const TopSpacer = () => (
-      <View style={{height: 20, backgroundColor: theme.bg}} />
+      <View style={{ height: 20, backgroundColor: theme.bg }} />
     );
 
     const OngoingOrder = () => (
-      <View style={{flex: 1, backgroundColor: theme.bg}}>
+      <View style={{ flex: 1, backgroundColor: theme.bg }}>
         <FlatList
           extraData={this.state}
-          style={{flex: 1, backgroundColor: theme.bg}}
+          style={{ flex: 1, backgroundColor: theme.bg }}
           contentContainerStyle={{
             flexGrow: 1,
             backgroundColor: theme.bg,
@@ -611,10 +630,10 @@ class OrderScreen extends React.PureComponent {
     );
 
     const CompleteOrder = () => (
-      <View style={{flex: 1, backgroundColor: theme.bg}}>
+      <View style={{ flex: 1, backgroundColor: theme.bg }}>
         <FlatList
           extraData={this.state}
-          style={{flex: 1, backgroundColor: theme.bg}}
+          style={{ flex: 1, backgroundColor: theme.bg }}
           contentContainerStyle={{
             flexGrow: 1,
             backgroundColor: theme.bg,
@@ -643,13 +662,13 @@ class OrderScreen extends React.PureComponent {
     );
 
     return (
-      // Solid backdrop prevents any white flash during fade animation
-      <View style={{flex: 1, backgroundColor: theme.bg}}>
+      <View style={{ flex: 1, backgroundColor: theme.bg }}>
         <Animated.View
           style={[
-            {flex: 1, backgroundColor: theme.bg},
-            {opacity: this.state.fadeAnim},
-          ]}>
+            { flex: 1, backgroundColor: theme.bg },
+            { opacity: this.state.fadeAnim },
+          ]}
+        >
           {/* Header */}
           <View
             style={{
@@ -659,15 +678,17 @@ class OrderScreen extends React.PureComponent {
               marginTop: 25,
               marginRight: 16,
               marginBottom: 10,
-            }}>
-            <View style={{flex: 1}}>
+            }}
+          >
+            <View style={{ flex: 1 }}>
               <Text
                 style={{
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                   fontSize: 26,
                   color: theme.text,
-                }}>
+                }}
+              >
                 My Orders
               </Text>
               <Text
@@ -679,7 +700,8 @@ class OrderScreen extends React.PureComponent {
                   marginTop: 6,
                   marginBottom: 10,
                   color: theme.textSub,
-                }}>
+                }}
+              >
                 When you place your first order, it will appear here
               </Text>
             </View>
@@ -689,23 +711,22 @@ class OrderScreen extends React.PureComponent {
           {/* Tab Navigator */}
           <Tab.Navigator
             keyboardDismissMode="auto"
-            style={{backgroundColor: theme.bg}}
-            sceneContainerStyle={{backgroundColor: theme.bg}}
+            style={{ backgroundColor: theme.bg }}
+            sceneContainerStyle={{ backgroundColor: theme.bg }}
             screenOptions={{
               keyboardHidesTabBar: true,
               tabBarLabelStyle: {
                 fontSize: 16,
                 fontFamily:
-                  Platform.OS === 'ios'
-                    ? 'Asap-Regular_Medium'
-                    : 'AsapMedium',
+                  Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
               },
               tabBarActiveTintColor: theme.text,
               tabBarInactiveTintColor: theme.textMuted,
-              tabBarIndicatorStyle: {backgroundColor: theme.accent},
-              tabBarStyle: {backgroundColor: theme.bg},
+              tabBarIndicatorStyle: { backgroundColor: theme.accent },
+              tabBarStyle: { backgroundColor: theme.bg },
               tabBarShowIcon: true,
-            }}>
+            }}
+          >
             <Tab.Screen name="Ongoing" children={OngoingOrder} />
             <Tab.Screen name="Completed" children={CompleteOrder} />
           </Tab.Navigator>

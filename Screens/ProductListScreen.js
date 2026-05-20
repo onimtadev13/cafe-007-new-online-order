@@ -1,5 +1,11 @@
 import React from 'react';
-import { Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Platform,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { connect } from 'react-redux';
@@ -11,7 +17,7 @@ class ProductListScreen extends React.PureComponent {
     super(props);
     this.state = {
       ItemList: this.props.route.params.ItemList,
-      Title:    this.props.route.params.Title,
+      Title: this.props.route.params.Title,
     };
   }
 
@@ -65,10 +71,10 @@ class ProductListScreen extends React.PureComponent {
         {/* Header */}
         <View
           style={{
-            flexDirection:   'row',
-            alignItems:      'center',
-            paddingTop:      Platform.OS === 'ios' ? 54 : 16,
-            paddingBottom:   12,
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingTop: Platform.OS === 'ios' ? 54 : 16,
+            paddingBottom: 12,
             paddingHorizontal: 16,
             backgroundColor: theme.bg,
             borderBottomWidth: 0.6,
@@ -78,33 +84,30 @@ class ProductListScreen extends React.PureComponent {
           <TouchableOpacity
             onPress={() => this.props.navigation.goBack()}
             style={{
-              width:           38,
-              height:          38,
-              borderRadius:    19,
+              width: 38,
+              height: 38,
+              borderRadius: 19,
               backgroundColor: theme.card,
-              justifyContent:  'center',
-              alignItems:      'center',
-              elevation:       3,
-              shadowColor:     theme.shadow.shadowColor,
-              shadowOffset:    { width: 0, height: 1 },
-              shadowOpacity:   theme.shadow.shadowOpacity,
-              shadowRadius:    3,
+              justifyContent: 'center',
+              alignItems: 'center',
+              elevation: 3,
+              shadowColor: theme.shadow.shadowColor,
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: theme.shadow.shadowOpacity,
+              shadowRadius: 3,
             }}
           >
-            <FontAwesome6
-              name="arrow-left"
-              size={16}
-              color={theme.text}
-            />
+            <FontAwesome6 name="arrow-left" size={16} color={theme.text} />
           </TouchableOpacity>
 
           <Text
             style={{
-              flex:       1,
-              textAlign:  'center',
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-              fontSize:   20,
-              color:      theme.text,
+              flex: 1,
+              textAlign: 'center',
+              fontFamily:
+                Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+              fontSize: 20,
+              color: theme.text,
               marginRight: 38, // balances the back button
             }}
           >
@@ -128,10 +131,11 @@ class ProductListScreen extends React.PureComponent {
               />
               <Text
                 style={{
-                  marginTop:  16,
-                  fontSize:   16,
-                  color:      theme.textSub,
-                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                  marginTop: 16,
+                  fontSize: 16,
+                  color: theme.textSub,
+                  fontFamily:
+                    Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                 }}
               >
                 No items in this category
@@ -146,5 +150,4 @@ class ProductListScreen extends React.PureComponent {
 
 const mapStateToProps = state => ({ cartItems: state });
 
-// withTheme before connect — same pattern as all other screens
 export default connect(mapStateToProps, null)(withTheme(ProductListScreen));

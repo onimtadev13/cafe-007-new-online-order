@@ -21,7 +21,6 @@ import {
 
 import { Card } from 'react-native-shadow-cards';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
-import Icon from 'react-native-vector-icons/Ionicons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { isTablet } from 'react-native-device-info';
 import RBSheet from 'react-native-raw-bottom-sheet';
@@ -252,7 +251,11 @@ export default class LoginScreen extends React.PureComponent {
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : null}
-        style={{ flex: 1, paddingBottom: Platform.OS === 'ios' ? 60 : 20 }}
+        style={{
+          flex: 1,
+          paddingBottom: Platform.OS === 'ios' ? 60 : 20,
+          backgroundColor: '#F3F3F3',
+        }}
       >
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}

@@ -15,16 +15,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {Card} from 'react-native-shadow-cards';
+import { Card } from 'react-native-shadow-cards';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
-import {openDatabase} from 'react-native-sqlite-storage';
-import Icon from 'react-native-vector-icons/Ionicons';
-import {APIURL, OTPAPIURL} from '../Data/CloneData';
+import { openDatabase } from 'react-native-sqlite-storage';
+import { APIURL, OTPAPIURL } from '../Data/CloneData';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { useTheme } from '../Context/ThemeContext';
-import ThemeToggle from '../Components/ThemeToggle';
 
-var db = openDatabase({name: 'UserDatabase.db'});
+var db = openDatabase({ name: 'UserDatabase.db' });
 
 class EditInfoScreen extends React.Component {
   constructor(props) {
@@ -48,11 +46,11 @@ class EditInfoScreen extends React.Component {
     var firstname = await AsyncStorage.getItem('firstname');
 
     if (this.state.Value === '') {
-      this.setState({isLoading: false, Errors: 'Filed Empty'});
+      this.setState({ isLoading: false, Errors: 'Filed Empty' });
       this.touchableInactive = false;
     } else {
       if (!this.touchableInactive) {
-        this.setState({isLoading: true});
+        this.setState({ isLoading: true });
         this.touchableInactive = true;
         switch (this.state.Title) {
           case 'First name':
@@ -188,18 +186,18 @@ class EditInfoScreen extends React.Component {
 
   onenableResendOTP = () => {
     let s = this.state.second;
-    this.setState({isEnable: true});
+    this.setState({ isEnable: true });
     this.interval = setInterval(() => {
       s = s - 1;
 
       if (s < 10) {
-        this.setState({second: '0' + s});
+        this.setState({ second: '0' + s });
       } else {
-        this.setState({second: s});
+        this.setState({ second: s });
       }
 
       if (s === 0) {
-        this.setState({isEnable: false, second: 30});
+        this.setState({ isEnable: false, second: 30 });
         clearInterval(this.interval);
       }
     }, 1000);
@@ -207,24 +205,24 @@ class EditInfoScreen extends React.Component {
 
   resendOTP = () => {
     let s = this.state.second;
-    this.setState({isEnable: true, code: ''});
+    this.setState({ isEnable: true, code: '' });
     this.interval = setInterval(() => {
       s = s - 1;
 
       if (s < 10) {
-        this.setState({second: '0' + s});
+        this.setState({ second: '0' + s });
       } else {
-        this.setState({second: s});
+        this.setState({ second: s });
       }
 
       if (s === 0) {
-        this.setState({isEnable: false, second: 30});
+        this.setState({ isEnable: false, second: 30 });
         clearInterval(this.interval);
       }
     }, 1000);
 
     var code = this.generateOTP(4);
-    this.setState({otp: code});
+    this.setState({ otp: code });
     console.log(code);
 
     fetch(OTPAPIURL, {
@@ -253,7 +251,7 @@ class EditInfoScreen extends React.Component {
 
   sendSMS(mobilenumber) {
     var code = this.generateOTP(4);
-    this.setState({otp: code});
+    this.setState({ otp: code });
     var message = 'Your one time password is ' + code;
 
     fetch(
@@ -317,7 +315,7 @@ class EditInfoScreen extends React.Component {
     const Mobile = await AsyncStorage.getItem('phonenumber');
 
     if (this.state.otp === this.state.code) {
-      this.setState({isvisible: false}, () => {
+      this.setState({ isvisible: false }, () => {
         clearInterval(this.interval);
         this.onUpdateDetails(
           'Mobile',
@@ -372,9 +370,9 @@ class EditInfoScreen extends React.Component {
             'Alert',
             'This mobile number all ready exist. Please check your number',
           );
-          this.setState({isLoading: false});
+          this.setState({ isLoading: false });
         } else {
-          this.setState({isvisible: true});
+          this.setState({ isvisible: true });
           this.onenableResendOTP();
           this.sendSMS(mobilenumber);
         }
@@ -422,7 +420,7 @@ class EditInfoScreen extends React.Component {
             'Alert',
             'This email address all ready exist. Please try again with new email address',
           );
-          this.setState({isLoading: false});
+          this.setState({ isLoading: false });
           this.touchableInactive = false;
         } else {
           this.onUpdateDetails('Email', email, Mobile, firstname);
@@ -431,23 +429,26 @@ class EditInfoScreen extends React.Component {
   };
 
   render() {
-    const { theme } = this.props; 
+    const { theme } = this.props;
     const screenWidth = Dimensions.get('window').width;
 
     return (
       <KeyboardAvoidingView
-  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-  style={{flex: 1, backgroundColor: theme.bg}}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1, backgroundColor: theme.bg }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      >
         <ScrollView
-          contentContainerStyle={{flexGrow: 1}}
+          contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          bounces={false}>
-          <View style={{flex: 1}}>
+          bounces={false}
+        >
+          <View style={{ flex: 1 }}>
             <TouchableOpacity
-              style={{marginTop: 35, marginLeft: 25, marginBottom: 50}}
-              onPress={() => this.props.navigation.goBack()}>
+              style={{ marginTop: 35, marginLeft: 25, marginBottom: 50 }}
+              onPress={() => this.props.navigation.goBack()}
+            >
               <View
                 style={[
                   {
@@ -458,8 +459,13 @@ class EditInfoScreen extends React.Component {
                     justifyContent: 'center',
                     backgroundColor: theme.surface,
                   },
-                ]}>
-                <FontAwesome6 name="chevron-left" size={35} color={theme.text} />
+                ]}
+              >
+                <FontAwesome6
+                  name="chevron-left"
+                  size={35}
+                  color={theme.text}
+                />
               </View>
             </TouchableOpacity>
 
@@ -471,23 +477,25 @@ class EditInfoScreen extends React.Component {
                 margin: 10,
                 marginLeft: 35,
                 color: theme.text,
-              }}>
+              }}
+            >
               {this.state.Title}
             </Text>
 
             {this.state.Title === 'Phone Number' ? (
-              <View style={{flex: 1}}>
+              <View style={{ flex: 1 }}>
                 <View
                   style={{
                     flexDirection: 'row',
                     borderRadius: 5,
                     backgroundColor: theme.inputBg,
-borderColor: theme.inputBorder,
+                    borderColor: theme.inputBorder,
                     borderWidth: 1,
                     alignItems: 'center',
                     marginLeft: 30,
                     marginRight: 30,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       fontFamily:
@@ -497,7 +505,8 @@ borderColor: theme.inputBorder,
                       fontSize: 18,
                       marginLeft: 15,
                       color: theme.text,
-                    }}>
+                    }}
+                  >
                     +94
                   </Text>
                   <TextInput
@@ -515,7 +524,7 @@ borderColor: theme.inputBorder,
                     placeholderTextColor={'#7a7a7a'}
                     value={this.state.Value}
                     autoFocus={true}
-                    onChangeText={text => this.setState({Value: text})}
+                    onChangeText={text => this.setState({ Value: text })}
                     keyboardType={'numeric'}
                   />
                 </View>
@@ -529,7 +538,8 @@ borderColor: theme.inputBorder,
                     margin: 10,
                     fontSize: 16,
                     color: theme.textMuted,
-                  }}>
+                  }}
+                >
                   A verification code will be sent to this number
                 </Text>
                 <Text
@@ -541,16 +551,17 @@ borderColor: theme.inputBorder,
                     marginRight: 30,
                     textAlign: 'right',
                     color: '#ff0000',
-                  }}>
+                  }}
+                >
                   {this.state.Errors}
                 </Text>
               </View>
             ) : (
-              <View style={{marginLeft: 30, marginRight: 30, flex: 1}}>
+              <View style={{ marginLeft: 30, marginRight: 30, flex: 1 }}>
                 <TextInput
                   style={{
                     color: theme.text,
-backgroundColor: theme.inputBg,
+                    backgroundColor: theme.inputBg,
                     height: this.state.Title === 'Address' ? 100 : 40,
                     paddingLeft: 20,
                     borderRadius: 5,
@@ -567,7 +578,7 @@ backgroundColor: theme.inputBg,
                   placeholderTextColor={'#7a7a7a'}
                   value={this.state.Value}
                   autoFocus={true}
-                  onChangeText={text => this.setState({Value: text})}
+                  onChangeText={text => this.setState({ Value: text })}
                 />
 
                 {this.state.Title === 'Email' ? (
@@ -580,7 +591,8 @@ backgroundColor: theme.inputBg,
                       margin: 10,
                       fontSize: 16,
                       color: theme.textMuted,
-                    }}>
+                    }}
+                  >
                     Check your email to confirm verification
                   </Text>
                 ) : null}
@@ -593,7 +605,8 @@ backgroundColor: theme.inputBg,
                     margin: 10,
                     textAlign: 'right',
                     color: '#ff0000',
-                  }}>
+                  }}
+                >
                   {this.state.Errors}
                 </Text>
               </View>
@@ -610,7 +623,8 @@ backgroundColor: theme.inputBg,
                 marginBottom: 30,
                 backgroundColor: theme.pill,
               }}
-              onPress={() => this.SaveData()}>
+              onPress={() => this.SaveData()}
+            >
               <View
                 style={{
                   flex: 1,
@@ -618,7 +632,8 @@ backgroundColor: theme.inputBg,
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginLeft: 40,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     color: theme.pillText,
@@ -627,7 +642,8 @@ backgroundColor: theme.inputBg,
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     fontSize: 18,
-                  }}>
+                  }}
+                >
                   Update {this.state.Title}
                 </Text>
               </View>
@@ -635,7 +651,7 @@ backgroundColor: theme.inputBg,
                 size={'small'}
                 color={theme.pillText}
                 animating={this.state.isLoading}
-                style={{marginRight: 20}}
+                style={{ marginRight: 20 }}
               />
             </TouchableOpacity>
           </View>
@@ -645,7 +661,8 @@ backgroundColor: theme.inputBg,
           visible={this.state.isvisible}
           transparent={true}
           animated={true}
-          animationType={'fade'}>
+          animationType={'fade'}
+        >
           <View
             style={{
               flex: 1,
@@ -653,21 +670,28 @@ backgroundColor: theme.inputBg,
               justifyContent: 'center',
               alignItems: 'center',
               backgroundColor: 'rgba(0,0,0, 0.7)',
-            }}>
+            }}
+          >
             <Card
-              style={{backgroundColor: theme.card, width: 310, height: 460}}
+              style={{ backgroundColor: theme.card, width: 310, height: 460 }}
               cardElevation={2}
               cardMaxElevation={2}
-              cornerRadius={10}>
-              <View style={{alignItems: 'flex-end', marginRight: 10}}>
+              cornerRadius={10}
+            >
+              <View style={{ alignItems: 'flex-end', marginRight: 10 }}>
                 <TouchableOpacity
-                  style={{position: 'relative', marginTop: 10}}
-                  onPress={() => this.onClosePres()}>
-                  <FontAwesome6 name="circle-xmark" size={40} color={theme.text}/>
+                  style={{ position: 'relative', marginTop: 10 }}
+                  onPress={() => this.onClosePres()}
+                >
+                  <FontAwesome6
+                    name="circle-xmark"
+                    size={40}
+                    color={theme.text}
+                  />
                 </TouchableOpacity>
               </View>
 
-              <View style={{flex: 1, alignItems: 'center'}}>
+              <View style={{ flex: 1, alignItems: 'center' }}>
                 <View
                   style={{
                     width: 55,
@@ -677,7 +701,8 @@ backgroundColor: theme.inputBg,
                     margin: 30,
                     alignItems: 'center',
                     justifyContent: 'center',
-                  }}>
+                  }}
+                >
                   <FontAwesome6 name="lock" size={25} color={theme.text} />
                 </View>
 
@@ -685,11 +710,10 @@ backgroundColor: theme.inputBg,
                   style={{
                     fontSize: 20,
                     fontFamily:
-                      Platform.OS === 'ios'
-                        ? 'Asap-Regular_Bold'
-                        : 'AsapBold',
-                        color: theme.text,
-                  }}>
+                      Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                    color: theme.text,
+                  }}
+                >
                   Enter your code
                 </Text>
                 <Text
@@ -698,35 +722,40 @@ backgroundColor: theme.inputBg,
                     marginTop: 10,
                     fontFamily:
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                      color: theme.textSub,
-                  }}>
+                    color: theme.textSub,
+                  }}
+                >
                   To continue please enter{'\n'} the verification code we've
                   {'\n'} just send for you
                 </Text>
 
                 <OTPInputView
-                  style={{width: '80%', height: 100}}
+                  style={{ width: '80%', height: 100 }}
                   pinCount={4}
                   keyboardType={'phone-pad'}
                   code={this.state.code}
-                  onCodeChanged={code => this.setState({code: code})}
+                  onCodeChanged={code => this.setState({ code: code })}
                   autoFocusOnLoad={false}
                   codeInputFieldStyle={styles.underlineStyleBase}
                   codeInputHighlightStyle={styles.underlineStyleHighLighted}
-                  onCodeFilled={code => this.setState({code: code})}
+                  onCodeFilled={code => this.setState({ code: code })}
                 />
 
                 <TouchableOpacity
                   disabled={this.state.isEnable}
-                  style={{flex: 1}}
+                  style={{ flex: 1 }}
                   onPress={() => {
                     this.resendOTP();
-                  }}>
+                  }}
+                >
                   <View>
                     <Text
                       style={{
-                        color: this.state.isEnable ? theme.textMuted : theme.text,
-                      }}>
+                        color: this.state.isEnable
+                          ? theme.textMuted
+                          : theme.text,
+                      }}
+                    >
                       Resend Code{' '}
                       {this.state.isEnable ? '00:' + this.state.second : null}
                     </Text>
@@ -742,13 +771,15 @@ backgroundColor: theme.inputBg,
                     marginTop: -30,
                     marginBottom: 30,
                   }}
-                  onPress={() => this.continuebuttonPress()}>
+                  onPress={() => this.continuebuttonPress()}
+                >
                   <View
                     style={{
                       alignItems: 'center',
                       justifyContent: 'center',
                       flex: 1,
-                    }}>
+                    }}
+                  >
                     <Text
                       style={{
                         fontSize: 14,
@@ -757,7 +788,8 @@ backgroundColor: theme.inputBg,
                           Platform.OS === 'ios'
                             ? 'Asap-Regular_Bold'
                             : 'AsapBold',
-                      }}>
+                      }}
+                    >
                       Continue
                     </Text>
                   </View>
@@ -789,7 +821,14 @@ const styles = StyleSheet.create({
 
 function EditInfoScreenWrapper(props) {
   const { theme, isDark, toggleTheme } = useTheme();
-  return <EditInfoScreen {...props} theme={theme} isDark={isDark} toggleTheme={toggleTheme} />;
+  return (
+    <EditInfoScreen
+      {...props}
+      theme={theme}
+      isDark={isDark}
+      toggleTheme={toggleTheme}
+    />
+  );
 }
 
 export default EditInfoScreenWrapper;

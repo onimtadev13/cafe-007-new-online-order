@@ -1,5 +1,5 @@
 import React from 'react';
-import {ActivityIndicator, Image} from 'react-native';
+import { ActivityIndicator, Image } from 'react-native';
 import FastImage from 'react-native-fast-image';
 
 export default class ScaledImage extends React.PureComponent {
@@ -26,7 +26,7 @@ export default class ScaledImage extends React.PureComponent {
           height: this.props.height,
         });
       } else {
-        this.setState({width: width, height: height});
+        this.setState({ width: width, height: height });
       }
     });
   }
@@ -46,11 +46,12 @@ export default class ScaledImage extends React.PureComponent {
           justifyContent: 'center',
         }}
         onLoadStart={() => {
-          this.setState({loading: true});
+          this.setState({ loading: true });
         }}
         onLoadEnd={() => {
-          this.setState({loading: false});
-        }}>
+          this.setState({ loading: false });
+        }}
+      >
         <ActivityIndicator
           animating={this.state.loading}
           size={'large'}

@@ -10,12 +10,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {openDatabase} from 'react-native-sqlite-storage';
-// import Icon from 'react-native-vector-icons/Ionicons';
+import { openDatabase } from 'react-native-sqlite-storage';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import AppContext from '../Components/Context';
 
-var db = openDatabase({name: 'UserDatabase.db'});
+var db = openDatabase({ name: 'UserDatabase.db' });
 
 export default class AddInfoScreen extends React.PureComponent {
   static contextType = AppContext;
@@ -57,12 +56,14 @@ export default class AddInfoScreen extends React.PureComponent {
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS == 'ios' ? 'padding' : null}
-        style={{flex: 1}}>
-        <View style={{flex: 1}}>
-          <ScrollView contentContainerStyle={{flexGrow: 1}}>
+        style={{ flex: 1 }}
+      >
+        <View style={{ flex: 1 }}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <TouchableOpacity
-              style={{marginTop: 35, marginLeft: 25, marginBottom: 20}}
-              onPress={() => this.props.navigation.goBack()}>
+              style={{ marginTop: 35, marginLeft: 25, marginBottom: 20 }}
+              onPress={() => this.props.navigation.goBack()}
+            >
               <View
                 style={[
                   {
@@ -73,19 +74,20 @@ export default class AddInfoScreen extends React.PureComponent {
                     justifyContent: 'center',
                     backgroundColor: '#e6e6e6',
                   },
-                ]}>
-                {/* <Icon name="chevron-back" size={35} /> */}
-                   <FontAwesome6 name="chevron-left" size={35} solid />
+                ]}
+              >
+                <FontAwesome6 name="chevron-left" size={35} solid />
               </View>
             </TouchableOpacity>
-            <View style={{alignItems: 'flex-end', marginRight: 25}}>
+            <View style={{ alignItems: 'flex-end', marginRight: 25 }}>
               <Text
                 style={{
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
                   fontSize: 24,
                   textAlign: 'right',
-                }}>
+                }}
+              >
                 Sign up to start order{'\n'}food in where you are today
               </Text>
               <Text
@@ -94,17 +96,19 @@ export default class AddInfoScreen extends React.PureComponent {
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                   marginTop: 5,
                   fontSize: 15,
-                }}>
+                }}
+              >
                 Can't cook don't bother order food online
               </Text>
             </View>
-            <View style={{marginLeft: 30, marginRight: 30, marginTop: 20}}>
+            <View style={{ marginLeft: 30, marginRight: 30, marginTop: 20 }}>
               <View
                 style={{
                   flexDirection: 'row',
                   margin: 10,
                   alignItems: 'center',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontFamily:
@@ -112,7 +116,8 @@ export default class AddInfoScreen extends React.PureComponent {
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     fontSize: 19,
-                  }}>
+                  }}
+                >
                   First name
                 </Text>
                 <Text
@@ -124,7 +129,8 @@ export default class AddInfoScreen extends React.PureComponent {
                     fontSize: 16,
                     marginLeft: 10,
                     color: '#7a7a7a',
-                  }}>
+                  }}
+                >
                   (require)
                 </Text>
               </View>
@@ -145,18 +151,19 @@ export default class AddInfoScreen extends React.PureComponent {
                 }}
                 placeholderTextColor={'#7a7a7a'}
                 onChangeText={firstname =>
-                  this.setState({firstname: firstname})
+                  this.setState({ firstname: firstname })
                 }
               />
             </View>
 
-            <View style={{marginLeft: 30, marginRight: 30, marginTop: 10}}>
+            <View style={{ marginLeft: 30, marginRight: 30, marginTop: 10 }}>
               <View
                 style={{
                   flexDirection: 'row',
                   margin: 10,
                   alignItems: 'center',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontFamily:
@@ -164,7 +171,8 @@ export default class AddInfoScreen extends React.PureComponent {
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     fontSize: 19,
-                  }}>
+                  }}
+                >
                   Last name
                 </Text>
                 <Text
@@ -176,7 +184,8 @@ export default class AddInfoScreen extends React.PureComponent {
                     fontSize: 16,
                     marginLeft: 10,
                     color: '#7a7a7a',
-                  }}>
+                  }}
+                >
                   (require)
                 </Text>
               </View>
@@ -197,17 +206,18 @@ export default class AddInfoScreen extends React.PureComponent {
                   color: 'black',
                 }}
                 placeholderTextColor={'#7a7a7a'}
-                onChangeText={lastname => this.setState({lastname: lastname})}
+                onChangeText={lastname => this.setState({ lastname: lastname })}
               />
             </View>
 
-            <View style={{marginLeft: 30, marginTop: 10, marginRight: 30}}>
+            <View style={{ marginLeft: 30, marginTop: 10, marginRight: 30 }}>
               <View
                 style={{
                   flexDirection: 'row',
                   margin: 10,
                   alignItems: 'center',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontFamily:
@@ -215,7 +225,8 @@ export default class AddInfoScreen extends React.PureComponent {
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     fontSize: 19,
-                  }}>
+                  }}
+                >
                   Email
                 </Text>
                 <Text
@@ -227,7 +238,8 @@ export default class AddInfoScreen extends React.PureComponent {
                     fontSize: 16,
                     marginLeft: 10,
                     color: '#7a7a7a',
-                  }}>
+                  }}
+                >
                   (optional)
                 </Text>
               </View>
@@ -249,17 +261,18 @@ export default class AddInfoScreen extends React.PureComponent {
                 }}
                 keyboardType={'email-address'}
                 placeholderTextColor={'#7a7a7a'}
-                onChangeText={email => this.setState({email: email})}
+                onChangeText={email => this.setState({ email: email })}
               />
             </View>
 
-            <View style={{marginLeft: 30, marginTop: 10, marginRight: 30}}>
+            <View style={{ marginLeft: 30, marginTop: 10, marginRight: 30 }}>
               <View
                 style={{
                   flexDirection: 'row',
                   margin: 10,
                   alignItems: 'center',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontFamily:
@@ -267,7 +280,8 @@ export default class AddInfoScreen extends React.PureComponent {
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     fontSize: 19,
-                  }}>
+                  }}
+                >
                   Address
                 </Text>
                 <Text
@@ -279,7 +293,8 @@ export default class AddInfoScreen extends React.PureComponent {
                     fontSize: 16,
                     marginLeft: 10,
                     color: '#7a7a7a',
-                  }}>
+                  }}
+                >
                   (require)
                 </Text>
               </View>
@@ -304,7 +319,7 @@ export default class AddInfoScreen extends React.PureComponent {
                 blurOnSubmit={true}
                 keyboardType={'default'}
                 placeholderTextColor={'#7a7a7a'}
-                onChangeText={address => this.setState({address: address})}
+                onChangeText={address => this.setState({ address: address })}
               />
             </View>
 
@@ -314,13 +329,15 @@ export default class AddInfoScreen extends React.PureComponent {
                 marginTop: 10,
                 marginRight: 30,
                 marginBottom: 30,
-              }}>
+              }}
+            >
               <View
                 style={{
                   flexDirection: 'row',
                   margin: 10,
                   alignItems: 'center',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     fontFamily:
@@ -328,7 +345,8 @@ export default class AddInfoScreen extends React.PureComponent {
                         ? 'Asap-Regular_Medium'
                         : 'AsapMedium',
                     fontSize: 19,
-                  }}>
+                  }}
+                >
                   City
                 </Text>
                 <Text
@@ -340,7 +358,8 @@ export default class AddInfoScreen extends React.PureComponent {
                     fontSize: 16,
                     marginLeft: 10,
                     color: '#7a7a7a',
-                  }}>
+                  }}
+                >
                   (require)
                 </Text>
               </View>
@@ -362,7 +381,7 @@ export default class AddInfoScreen extends React.PureComponent {
                 }}
                 keyboardType={'default'}
                 placeholderTextColor={'#7a7a7a'}
-                onChangeText={city => this.setState({city: city})}
+                onChangeText={city => this.setState({ city: city })}
               />
             </View>
             <View
@@ -371,7 +390,8 @@ export default class AddInfoScreen extends React.PureComponent {
                 justifyContent: 'flex-end',
                 marginRight: 30,
                 marginBottom: 30,
-              }}>
+              }}
+            >
               <TouchableOpacity onPress={() => this.SaveData()}>
                 <View
                   style={{
@@ -381,7 +401,8 @@ export default class AddInfoScreen extends React.PureComponent {
                     justifyContent: 'center',
                     backgroundColor: 'black',
                     borderRadius: 150 / 2,
-                  }}>
+                  }}
+                >
                   <Text
                     style={{
                       color: 'white',
@@ -390,7 +411,8 @@ export default class AddInfoScreen extends React.PureComponent {
                           ? 'Asap-Regular_Medium'
                           : 'AsapMedium',
                       fontSize: 20,
-                    }}>
+                    }}
+                  >
                     Done
                   </Text>
                 </View>
@@ -407,7 +429,8 @@ export default class AddInfoScreen extends React.PureComponent {
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: 'rgba(0,0,0,0.7)',
-              }}>
+              }}
+            >
               <View
                 style={{
                   width: 80,
@@ -416,7 +439,8 @@ export default class AddInfoScreen extends React.PureComponent {
                   borderRadius: 7,
                   alignItems: 'center',
                   justifyContent: 'center',
-                }}>
+                }}
+              >
                 <ActivityIndicator size={30} color="#c7c7c7" animating={true} />
                 <Text
                   style={{
@@ -425,7 +449,8 @@ export default class AddInfoScreen extends React.PureComponent {
                       Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                     fontSize: 15,
                     marginTop: 10,
-                  }}>
+                  }}
+                >
                   Adding
                 </Text>
               </View>

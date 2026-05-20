@@ -16,6 +16,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { APIURL } from '../Data/CloneData';
 import ItemView from '../Components/ItemView';
 import { withTheme } from '../Context/ThemeContext';
+import { showNetworkError } from '../Utils/networkError';
 
 const { width } = Dimensions.get('window');
 
@@ -95,13 +96,12 @@ class PopularScreen extends React.PureComponent {
         }
         this.setState({ productList, isLoading: false });
       })
-      .catch(() => {
+      .catch(er => {
         this.setState({ isLoading: false });
-        Alert.alert(
-          'Warning',
-          "The operation couldn't be completed.",
-          [{ text: 'Try Again', onPress: () => this.LoadProducts(this.state.Location) }],
-          { cancelable: false },
+        showNetworkError(
+          er,
+          () => this.LoadProducts(this.state.Location),
+          null,
         );
       });
   }
@@ -168,7 +168,14 @@ class PopularScreen extends React.PureComponent {
   renderEmpty = () => {
     const { theme } = this.props;
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 80 }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: 80,
+        }}
+      >
         <Text
           style={{
             fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
@@ -240,7 +247,9 @@ class PopularScreen extends React.PureComponent {
 
         {/* Content */}
         {this.state.isLoading ? (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <View
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          >
             <ActivityIndicator size="large" color={theme.accent} />
           </View>
         ) : (
@@ -263,5 +272,7 @@ const mapDispatchToProps = dispatch => ({
   addItemToCart: product => dispatch({ type: 'ADD_TO_CART', payload: product }),
 });
 
-// withTheme must wrap before connect — same pattern as DashboardScreen
-export default connect(mapStateToProps, mapDispatchToProps)(withTheme(PopularScreen));
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(withTheme(PopularScreen));

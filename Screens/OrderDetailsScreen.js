@@ -7,7 +7,6 @@ import {
   Dimensions,
   FlatList,
   Image,
-  KeyboardAvoidingView,
   LayoutAnimation,
   Platform,
   RefreshControl,
@@ -18,19 +17,19 @@ import {
   UIManager,
   View,
 } from 'react-native';
-import {NumericFormat} from 'react-number-format';
-import {APIURL, CancelReason, ORDERVIEW} from '../Data/CloneData';
+import { NumericFormat } from 'react-number-format';
+import { APIURL, CancelReason, ORDERVIEW } from '../Data/CloneData';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import OrderProcess from '../Components/OrderProcess';
 import messaging from '@react-native-firebase/messaging';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import {CommonActions} from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import OrderImageSlider from '../Components/OrderImageSlider';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import {withTheme} from '../Context/ThemeContext';    // ← NEW
-import ThemeToggle from '../Components/ThemeToggle';  // ← NEW
+import { withTheme } from '../Context/ThemeContext';
+import ThemeToggle from '../Components/ThemeToggle';
+import { showNetworkError } from '../Utils/networkError';
 
 const HEADER_MAX_HEIGHT = 200;
 const HEADER_MIN_HEIGHT = Platform.OS === 'android' ? 64 : 74;
@@ -79,9 +78,9 @@ class OrderDetailsScreen extends React.PureComponent {
 
   componentDidMount() {
     if (this.state.PreScreen === 'OrderScreen') {
-      this.setState({backStatus: '1'});
+      this.setState({ backStatus: '1' });
     } else {
-      this.setState({backStatus: '0'});
+      this.setState({ backStatus: '0' });
     }
     this.LoadOrderDetail();
     this.localNotification();
@@ -95,28 +94,62 @@ class OrderDetailsScreen extends React.PureComponent {
     this.messageListner = messaging().onMessage(async remoteMessage => {
       const status = remoteMessage.data?.Status;
       switch (status) {
-        case 'Processing': this.setState({OrderStatus: '1'}); break;
-        case 'Preparing':  this.setState({OrderStatus: '2'}); break;
-        case 'Delivery':   this.setState({OrderStatus: '3'}); break;
-        case 'Cancel':     this.setState({OrderStatus: '4'}); break;
-        case 'Finish':     this.setState({OrderStatus: '5'}); break;
-        default: break;
+        case 'Processing':
+          this.setState({ OrderStatus: '1' });
+          break;
+        case 'Preparing':
+          this.setState({ OrderStatus: '2' });
+          break;
+        case 'Delivery':
+          this.setState({ OrderStatus: '3' });
+          break;
+        case 'Cancel':
+          this.setState({ OrderStatus: '4' });
+          break;
+        case 'Finish':
+          this.setState({ OrderStatus: '5' });
+          break;
+        default:
+          break;
       }
     });
   };
 
   onOrderCancelPress = Reason => {
     fetch(APIURL, {
-      method: 'POST', cache: 'no-cache',
-      headers: {'content-type': 'application/json', 'cache-control': 'no-cache'},
+      method: 'POST',
+      cache: 'no-cache',
+      headers: {
+        'content-type': 'application/json',
+        'cache-control': 'no-cache',
+      },
       body: JSON.stringify({
         HasReturnData: 'F',
         Parameters: [
-          {Para_Data: '103',                Para_Direction: 'Input', Para_Lenth: 10,    Para_Name: '@Iid',   Para_Type: 'int'},
-          {Para_Data: this.state.OrderID,   Para_Direction: 'Input', Para_Lenth: 50000, Para_Name: '@Text1', Para_Type: 'varchar'},
-          {Para_Data: Reason,               Para_Direction: 'Input', Para_Lenth: 100,   Para_Name: '@Text2', Para_Type: 'varchar'},
+          {
+            Para_Data: '103',
+            Para_Direction: 'Input',
+            Para_Lenth: 10,
+            Para_Name: '@Iid',
+            Para_Type: 'int',
+          },
+          {
+            Para_Data: this.state.OrderID,
+            Para_Direction: 'Input',
+            Para_Lenth: 50000,
+            Para_Name: '@Text1',
+            Para_Type: 'varchar',
+          },
+          {
+            Para_Data: Reason,
+            Para_Direction: 'Input',
+            Para_Lenth: 100,
+            Para_Name: '@Text2',
+            Para_Type: 'varchar',
+          },
         ],
-        SpName: 'sp_Android_Common_API', con: '1',
+        SpName: 'sp_Android_Common_API',
+        con: '1',
       }),
     })
       .then(res => res.json())
@@ -142,36 +175,60 @@ class OrderDetailsScreen extends React.PureComponent {
       message: element.message,
       isSelected: false,
     }));
-    this.setState({CancelReason: ReasonList, isClickAddReason: false});
+    this.setState({ CancelReason: ReasonList, isClickAddReason: false });
   };
 
   // ── Render helpers ──────────────────────────────────────────────────────────
   renderCartItems = Item => {
-    const {theme} = this.props;  // ← NEW
+    const { theme } = this.props;
     return Item.map((item, index) => (
-      <View key={index} style={{
-        flex: 1, margin: 5, marginLeft: 10,
-        backgroundColor: theme.surface,   // ← was '#F0F0F0'
-      }}>
-        <View style={{flexDirection: 'row'}}>
-          <View style={{
-            width: 30, height: 30,
-            backgroundColor: theme.surfaceDeep,  // ← was '#e0e0e0'
-            alignItems: 'center', margin: 10,
-            justifyContent: 'center', borderRadius: 6,
-          }}>
-            <Text style={{
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-              fontSize: 16, fontWeight: 'bold',
-              color: theme.text,           // ← NEW
-            }}>{item.Qty}</Text>
+      <View
+        key={index}
+        style={{
+          flex: 1,
+          margin: 5,
+          marginLeft: 10,
+          backgroundColor: theme.surface,
+        }}
+      >
+        <View style={{ flexDirection: 'row' }}>
+          <View
+            style={{
+              width: 30,
+              height: 30,
+              backgroundColor: theme.surfaceDeep,
+              alignItems: 'center',
+              margin: 10,
+              justifyContent: 'center',
+              borderRadius: 6,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: theme.text,
+              }}
+            >
+              {item.Qty}
+            </Text>
           </View>
-          <Text style={{
-            marginTop: 6,
-            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-            fontSize: 18, marginLeft: 10, flex: 0.85, fontWeight: '800',
-            color: theme.text,             // ← NEW
-          }}>{item.ProductName} </Text>
+          <Text
+            style={{
+              marginTop: 6,
+              fontFamily:
+                Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+              fontSize: 18,
+              marginLeft: 10,
+              flex: 0.85,
+              fontWeight: '800',
+              color: theme.text,
+            }}
+          >
+            {item.ProductName}{' '}
+          </Text>
           <NumericFormat
             value={item.NetTotal}
             displayType={'text'}
@@ -180,15 +237,23 @@ class OrderDetailsScreen extends React.PureComponent {
             decimalScale={2}
             prefix={'LKR '}
             renderText={formattedValue => (
-              <Text style={{
-                marginTop: 6, textAlignVertical: 'top', marginLeft: 15,
-                fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                fontSize: 20, color: theme.text,  // ← NEW
-              }}>{formattedValue}</Text>
+              <Text
+                style={{
+                  marginTop: 6,
+                  textAlignVertical: 'top',
+                  marginLeft: 15,
+                  fontFamily:
+                    Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                  fontSize: 20,
+                  color: theme.text,
+                }}
+              >
+                {formattedValue}
+              </Text>
             )}
           />
         </View>
-        <View style={{marginBottom: 10}}>
+        <View style={{ marginBottom: 10 }}>
           {this.renderAddons(item.Addons)}
           {this.renderExtra(item.Extra)}
         </View>
@@ -197,14 +262,23 @@ class OrderDetailsScreen extends React.PureComponent {
   };
 
   renderAddons(Addons) {
-    const {theme} = this.props;  // ← NEW
+    const { theme } = this.props;
     return Addons.map((item, key) => (
-      <View key={key} style={{alignItems: 'center', marginLeft: 60, flexDirection: 'row'}}>
-        <Text style={{
-          fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-          fontSize: 16, marginRight: 5,
-          color: theme.textMuted,          // ← was '#969696'
-        }}>{item.name}</Text>
+      <View
+        key={key}
+        style={{ alignItems: 'center', marginLeft: 60, flexDirection: 'row' }}
+      >
+        <Text
+          style={{
+            fontFamily:
+              Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+            fontSize: 16,
+            marginRight: 5,
+            color: theme.textMuted,
+          }}
+        >
+          {item.name}
+        </Text>
         <NumericFormat
           value={item.price}
           displayType={'text'}
@@ -213,11 +287,16 @@ class OrderDetailsScreen extends React.PureComponent {
           decimalScale={2}
           prefix={'LKR '}
           renderText={formattedValue => (
-            <Text style={{
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-              fontSize: 16,
-              color: theme.textMuted,      // ← was '#969696'
-            }}>({formattedValue})</Text>
+            <Text
+              style={{
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                fontSize: 16,
+                color: theme.textMuted,
+              }}
+            >
+              ({formattedValue})
+            </Text>
           )}
         />
       </View>
@@ -225,14 +304,23 @@ class OrderDetailsScreen extends React.PureComponent {
   }
 
   renderExtra(Extra) {
-    const {theme} = this.props;  // ← NEW
+    const { theme } = this.props;
     return Extra.map((item, key) => (
-      <View key={key} style={{alignItems: 'center', marginLeft: 60, flexDirection: 'row'}}>
-        <Text style={{
-          fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-          fontSize: 16, marginRight: 5,
-          color: theme.textMuted,          // ← was '#969696'
-        }}>{item.name}</Text>
+      <View
+        key={key}
+        style={{ alignItems: 'center', marginLeft: 60, flexDirection: 'row' }}
+      >
+        <Text
+          style={{
+            fontFamily:
+              Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+            fontSize: 16,
+            marginRight: 5,
+            color: theme.textMuted,
+          }}
+        >
+          {item.name}
+        </Text>
         <NumericFormat
           value={item.amount}
           displayType={'text'}
@@ -241,38 +329,55 @@ class OrderDetailsScreen extends React.PureComponent {
           decimalScale={2}
           prefix={'LKR '}
           renderText={formattedValue => (
-            <Text style={{
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-              fontSize: 16,
-              color: theme.textMuted,      // ← was '#969696'
-            }}>({formattedValue})</Text>
+            <Text
+              style={{
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
+                fontSize: 16,
+                color: theme.textMuted,
+              }}
+            >
+              ({formattedValue})
+            </Text>
           )}
         />
       </View>
     ));
   }
 
-  renderReason = ({item}) => {
-    const {theme} = this.props;  // ← NEW
+  renderReason = ({ item }) => {
+    const { theme } = this.props;
     return (
       <TouchableOpacity
-        style={{flex: 1, margin: 5, justifyContent: 'space-between'}}
-        onPress={() => this.onReasonClick(item.id)}>
-        <View style={{
-          flex: 1, alignItems: 'center', justifyContent: 'center',
-          borderColor: item.isSelected ? theme.pill : theme.inputBorder,  // ← NEW
-          borderWidth: 1,
-          backgroundColor: item.isSelected ? theme.pill : 'transparent',  // ← NEW
-          borderRadius: 5,
-        }}>
-          <Text style={{
-            paddingLeft: 10, paddingRight: 10,
-            paddingBottom: 5, paddingTop: 5,
-            textAlign: 'center',
-            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-            fontSize: 16,
-            color: item.isSelected ? theme.pillText : theme.textMuted,    // ← NEW
-          }}>{item.message}</Text>
+        style={{ flex: 1, margin: 5, justifyContent: 'space-between' }}
+        onPress={() => this.onReasonClick(item.id)}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderColor: item.isSelected ? theme.pill : theme.inputBorder,
+            borderWidth: 1,
+            backgroundColor: item.isSelected ? theme.pill : 'transparent',
+            borderRadius: 5,
+          }}
+        >
+          <Text
+            style={{
+              paddingLeft: 10,
+              paddingRight: 10,
+              paddingBottom: 5,
+              paddingTop: 5,
+              textAlign: 'center',
+              fontFamily:
+                Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+              fontSize: 16,
+              color: item.isSelected ? theme.pillText : theme.textMuted,
+            }}
+          >
+            {item.message}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -292,7 +397,7 @@ class OrderDetailsScreen extends React.PureComponent {
   onBackPress = () => {
     if (this.state.backStatus === '0') {
       this.props.navigation.dispatch(
-        CommonActions.reset({index: 0, routes: [{name: 'Orders'}]}),
+        CommonActions.reset({ index: 0, routes: [{ name: 'Orders' }] }),
       );
     } else {
       this.props.navigation.goBack();
@@ -320,24 +425,31 @@ class OrderDetailsScreen extends React.PureComponent {
 
   onShowlessPress = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    this.setState({isShowLess: !this.state.isShowLess});
+    this.setState({ isShowLess: !this.state.isShowLess });
   };
 
   // ── Billing row helper — avoids repeating the same pattern 6 times ──────────
   renderBillingRow(label, value, isFirst = false) {
-    const {theme} = this.props;
+    const { theme } = this.props;
     return (
-      <View style={{
-        flexDirection: 'row',
-        marginTop: isFirst ? 0 : 5,
-        marginLeft: 30, marginRight: 30,
-      }}>
-        <Text style={{
-          flex: 1,
-          fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-          fontSize: 16,
-          color: theme.textSub,            // ← was 'black'
-        }}>{label}</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          marginTop: isFirst ? 0 : 5,
+          marginLeft: 30,
+          marginRight: 30,
+        }}
+      >
+        <Text
+          style={{
+            flex: 1,
+            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+            fontSize: 16,
+            color: theme.textSub,
+          }}
+        >
+          {label}
+        </Text>
         <NumericFormat
           value={value}
           displayType={'text'}
@@ -346,12 +458,18 @@ class OrderDetailsScreen extends React.PureComponent {
           decimalScale={2}
           prefix={'LKR '}
           renderText={formattedValue => (
-            <Text style={{
-              flex: 1,
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-              fontSize: 16, textAlign: 'right',
-              color: theme.text,           // ← was 'black'
-            }}>{formattedValue}</Text>
+            <Text
+              style={{
+                flex: 1,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                fontSize: 16,
+                textAlign: 'right',
+                color: theme.text, // ← was 'black'
+              }}
+            >
+              {formattedValue}
+            </Text>
           )}
         />
       </View>
@@ -359,19 +477,23 @@ class OrderDetailsScreen extends React.PureComponent {
   }
 
   render() {
-    const {theme} = this.props;  // ← NEW: single destructure at top
+    const { theme } = this.props;
 
     // ── Separator ─────────────────────────────────────────────────────────────
-    const Separator = ({mt = 10, mb = 20}) => (
-      <View style={{
-        height: 0.9,
-        marginTop: mt, marginBottom: mb,
-        marginLeft: 20, marginRight: 20,
-        backgroundColor: theme.separator,   // ← was 'black'
-      }} />
+    const Separator = ({ mt = 10, mb = 20 }) => (
+      <View
+        style={{
+          height: 0.9,
+          marginTop: mt,
+          marginBottom: mb,
+          marginLeft: 20,
+          marginRight: 20,
+          backgroundColor: theme.separator,
+        }}
+      />
     );
 
-    // ── Scroll animations (unchanged) ─────────────────────────────────────────
+    // ── Scroll animations ─────────────────────────────────────────
     const headerTranslateY = this.state.scrollY.interpolate({
       inputRange: [0, HEADER_SCROLL_DISTANCE],
       outputRange: [0, -HEADER_SCROLL_DISTANCE],
@@ -410,155 +532,264 @@ class OrderDetailsScreen extends React.PureComponent {
 
     var ORDERSTATUS = '';
     switch (this.state.OrderStatus) {
-      case '1': ORDERSTATUS = 'Processing';  break;
-      case '2': ORDERSTATUS = 'Preparing';   break;
-      case '3': ORDERSTATUS = 'Delivering';  break;
-      case '4': ORDERSTATUS = 'Cancel';      break;
-      case '5': ORDERSTATUS = 'Finish';      break;
-      default: break;
+      case '1':
+        ORDERSTATUS = 'Processing';
+        break;
+      case '2':
+        ORDERSTATUS = 'Preparing';
+        break;
+      case '3':
+        ORDERSTATUS = 'Delivering';
+        break;
+      case '4':
+        ORDERSTATUS = 'Cancel';
+        break;
+      case '5':
+        ORDERSTATUS = 'Finish';
+        break;
+      default:
+        break;
     }
 
     return (
-      <View style={{flex: 1, backgroundColor: theme.bg}}>  {/* ← NEW bg */}
-
+      <View style={{ flex: 1, backgroundColor: theme.bg }}>
         {/* ── Scrollable body ── */}
         <Animated.ScrollView
           refreshControl={
             <RefreshControl
               refreshing={this.state.isLoading}
-              colors={[theme.accent]}          // ← was ['red','green','blue']
+              colors={[theme.accent]}
               tintColor={theme.accent}
               title={'Refreshing'}
               titleColor={theme.textSub}
             />
           }
-          contentContainerStyle={{paddingTop: HEADER_MAX_HEIGHT}}
+          contentContainerStyle={{ paddingTop: HEADER_MAX_HEIGHT }}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
           onScroll={Animated.event(
-            [{nativeEvent: {contentOffset: {y: this.state.scrollY}}}],
-            {useNativeDriver: true},
-          )}>
-
+            [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }],
+            { useNativeDriver: true },
+          )}
+        >
           <Separator mt={10} mb={0} />
 
           {/* ── Order ID + Cancel button row ── */}
-          <View style={{
-            flexDirection: 'row', marginTop: 10, marginLeft: 20,
-            alignItems: 'center',
-            marginBottom: this.state.OrderStatus === '1' ? 10 : 0,
-          }}>
-            <Text style={{
-              flex: 1,
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-              fontSize: 20, color: theme.text,   // ← NEW
-            }}>Order No : {this.state.OrderID}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              marginTop: 10,
+              marginLeft: 20,
+              alignItems: 'center',
+              marginBottom: this.state.OrderStatus === '1' ? 10 : 0,
+            }}
+          >
+            <Text
+              style={{
+                flex: 1,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                fontSize: 20,
+                color: theme.text,
+              }}
+            >
+              Order No : {this.state.OrderID}
+            </Text>
 
             {this.state.OrderStatus === '1' ? (
               <TouchableOpacity
                 style={{
-                  backgroundColor: theme.pill,  // ← was 'black'
-                  borderRadius: 15, height: 30,
-                  alignItems: 'center', marginRight: 20,
+                  backgroundColor: theme.pill,
+                  borderRadius: 15,
+                  height: 30,
+                  alignItems: 'center',
+                  marginRight: 20,
                 }}
                 onPress={() => {
                   this.props.navigation.navigate('OrderCancelScreen', {
                     OrderID: this.state.OrderID,
                     Screen: 'OrderDetailsScreen',
                   });
-                }}>
-                <View style={{flex: 1, justifyContent: 'center'}}>
-                  <Text style={{
-                    color: theme.pillText,       // ← was 'white'
-                    fontSize: 14,
-                    fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                    paddingRight: 15, paddingLeft: 15,
-                  }}>Cancel Order</Text>
+                }}
+              >
+                <View style={{ flex: 1, justifyContent: 'center' }}>
+                  <Text
+                    style={{
+                      color: theme.pillText,
+                      fontSize: 14,
+                      fontFamily:
+                        Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                      paddingRight: 15,
+                      paddingLeft: 15,
+                    }}
+                  >
+                    Cancel Order
+                  </Text>
                 </View>
               </TouchableOpacity>
             ) : null}
           </View>
 
           {/* ── Order date ── */}
-          <Text style={{
-            flex: 1,
-            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-            fontSize: 16, marginLeft: 20, marginTop: 2,
-            color: theme.textMuted,              // ← was '#9c9c9c'
-          }}>Order date : {this.state.InsertDate}</Text>
+          <Text
+            style={{
+              flex: 1,
+              fontFamily:
+                Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+              fontSize: 16,
+              marginLeft: 20,
+              marginTop: 2,
+              color: theme.textMuted,
+            }}
+          >
+            Order date : {this.state.InsertDate}
+          </Text>
 
           {/* ── Quantity ── */}
-          <View style={{
-            flexDirection: 'row', alignItems: 'center',
-            marginTop: 2, marginLeft: 20, marginRight: 35,
-          }}>
-            <Text style={{
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-              fontSize: 16, color: theme.textMuted,
-            }}>Quantity :</Text>
-            <Text style={{
-              flex: 1,
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-              fontSize: 16, marginLeft: 10, color: theme.text,
-            }}>{this.state.OrderItemList.length}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 2,
+              marginLeft: 20,
+              marginRight: 35,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                fontSize: 16,
+                color: theme.textMuted,
+              }}
+            >
+              Quantity :
+            </Text>
+            <Text
+              style={{
+                flex: 1,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                fontSize: 16,
+                marginLeft: 10,
+                color: theme.text,
+              }}
+            >
+              {this.state.OrderItemList.length}
+            </Text>
           </View>
 
           {/* ── Schedule Time ── */}
-          <View style={{
-            flexDirection: 'row', alignItems: 'center',
-            marginTop: 2, marginLeft: 20, marginRight: 35,
-          }}>
-            <Text style={{
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-              fontSize: 16, color: theme.textMuted,
-            }}>Schedule Time :</Text>
-            <Text style={{
-              flex: 1,
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-              fontSize: 16, marginLeft: 10, color: theme.text,
-            }}>{this.state.ScheduleTime}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 2,
+              marginLeft: 20,
+              marginRight: 35,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                fontSize: 16,
+                color: theme.textMuted,
+              }}
+            >
+              Schedule Time :
+            </Text>
+            <Text
+              style={{
+                flex: 1,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                fontSize: 16,
+                marginLeft: 10,
+                color: theme.text,
+              }}
+            >
+              {this.state.ScheduleTime}
+            </Text>
           </View>
 
           {/* ── Branch ── */}
-          <View style={{
-            flexDirection: 'row', alignItems: 'center',
-            marginTop: 2, marginLeft: 20, marginRight: 35,
-          }}>
-            <Text style={{
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-              fontSize: 16, color: theme.textMuted,
-            }}>Branch :</Text>
-            <Text style={{
-              flex: 1,
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-              fontSize: 16, marginLeft: 10, color: theme.text,
-            }}>{this.state.BranchLocation}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 2,
+              marginLeft: 20,
+              marginRight: 35,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                fontSize: 16,
+                color: theme.textMuted,
+              }}
+            >
+              Branch :
+            </Text>
+            <Text
+              style={{
+                flex: 1,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                fontSize: 16,
+                marginLeft: 10,
+                color: theme.text,
+              }}
+            >
+              {this.state.BranchLocation}
+            </Text>
           </View>
 
           <Separator mt={10} mb={15} />
 
           {/* ── Order Process header ── */}
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={{
-              flex: 1,
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-              fontSize: 18, marginLeft: 20, color: theme.text,  // ← NEW
-            }}>Order Process</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text
+              style={{
+                flex: 1,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                fontSize: 18,
+                marginLeft: 20,
+                color: theme.text,
+              }}
+            >
+              Order Process
+            </Text>
             <TouchableOpacity onPress={() => this.onShowlessPress()}>
-              <Text style={{
-                marginRight: 30,
-                fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-                color: theme.textMuted,          // ← was '#7a7a7a'
-              }}>{this.state.isShowLess ? 'Show less' : 'Show more'}</Text>
+              <Text
+                style={{
+                  marginRight: 30,
+                  fontFamily:
+                    Platform.OS === 'ios'
+                      ? 'Asap-Regular_Medium'
+                      : 'AsapMedium',
+                  color: theme.textMuted,
+                }}
+              >
+                {this.state.isShowLess ? 'Show less' : 'Show more'}
+              </Text>
             </TouchableOpacity>
           </View>
 
-          <Text style={{
-            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-            fontSize: 14, marginLeft: 20, marginRight: 20,
-            color: theme.textMuted,              // ← was '#9c9c9c'
-            marginTop: 5,
-          }}>
+          <Text
+            style={{
+              fontFamily:
+                Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+              fontSize: 14,
+              marginLeft: 20,
+              marginRight: 20,
+              color: theme.textMuted,
+              marginTop: 5,
+            }}
+          >
             If you would like to know more about any purchase order you have
             made, then allow order tracking forms to help you.
           </Text>
@@ -566,17 +797,22 @@ class OrderDetailsScreen extends React.PureComponent {
           <Separator mt={15} mb={20} />
 
           {/* ── Collapsible order process timeline ── */}
-          <View style={{overflow: 'hidden', height: this.state.isShowLess ? null : 0}}>
+          <View
+            style={{
+              overflow: 'hidden',
+              height: this.state.isShowLess ? null : 0,
+            }}
+          >
             {!this.state.isLoading ? (
-              <View style={{marginLeft: 30}}>
+              <View style={{ marginLeft: 30 }}>
                 <OrderProcess
                   ScheduleTime={this.state.ScheduleTime}
                   OrderID={this.state.OrderID}
                   OrderStatus={ORDERSTATUS}
                   StatusList={this.state.StatusList}
                   DineType={this.state.DineType}
-                   theme={this.props.theme}    
-  isDark={this.props.isDark}
+                  theme={this.props.theme}
+                  isDark={this.props.isDark}
                 />
               </View>
             ) : null}
@@ -584,25 +820,39 @@ class OrderDetailsScreen extends React.PureComponent {
           </View>
 
           {/* ── Order Items header ── */}
-          <Text style={{
-            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-            fontSize: 18, marginLeft: 20, color: theme.text,
-          }}>Order Items</Text>
-          <Text style={{
-            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-            fontSize: 14, marginLeft: 20, marginRight: 20,
-            color: theme.textMuted, marginTop: 5,
-          }}>
-            The following information is included for each unit on your order summary
+          <Text
+            style={{
+              fontFamily:
+                Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+              fontSize: 18,
+              marginLeft: 20,
+              color: theme.text,
+            }}
+          >
+            Order Items
+          </Text>
+          <Text
+            style={{
+              fontFamily:
+                Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+              fontSize: 14,
+              marginLeft: 20,
+              marginRight: 20,
+              color: theme.textMuted,
+              marginTop: 5,
+            }}
+          >
+            The following information is included for each unit on your order
+            summary
           </Text>
 
           <Separator mt={20} mb={20} />
 
           {/* ── Order items list ── */}
           {this.state.isLoading ? (
-            <ActivityIndicator animating={true} color={theme.accent} />  // ← was 'black'
+            <ActivityIndicator animating={true} color={theme.accent} />
           ) : (
-            <SafeAreaView style={{flex: 1}}>
+            <SafeAreaView style={{ flex: 1 }}>
               {this.renderCartItems(this.state.OrderItemList)}
             </SafeAreaView>
           )}
@@ -610,163 +860,278 @@ class OrderDetailsScreen extends React.PureComponent {
           <Separator mt={20} mb={20} />
 
           {/* ── Billing Information ── */}
-          <Text style={{
-            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-            fontSize: 18, marginLeft: 20, color: theme.text,
-          }}>BILLING INFORMATION</Text>
+          <Text
+            style={{
+              fontFamily:
+                Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+              fontSize: 18,
+              marginLeft: 20,
+              color: theme.text,
+            }}
+          >
+            BILLING INFORMATION
+          </Text>
 
           <Separator mt={20} mb={20} />
 
-          {this.renderBillingRow('Sub Total',     this.state.SubTotal,       true)}
-          {this.renderBillingRow('Tax',           this.state.Tax)}
+          {this.renderBillingRow('Sub Total', this.state.SubTotal, true)}
+          {this.renderBillingRow('Tax', this.state.Tax)}
           {this.state.Discount !== 0
-            ? this.renderBillingRow('Discount',   this.state.Discount)
+            ? this.renderBillingRow('Discount', this.state.Discount)
             : null}
           {this.state.DineType === 'Delivery'
-            ? this.renderBillingRow('Delivery Charge', this.state.DeliveryCharge)
+            ? this.renderBillingRow(
+                'Delivery Charge',
+                this.state.DeliveryCharge,
+              )
             : null}
-          {(this.state.DineType === 'PickUp' || this.state.DineType === 'EatIn')
-            ? this.renderBillingRow('Service Charge',  this.state.ServiceCharge)
+          {this.state.DineType === 'PickUp' || this.state.DineType === 'EatIn'
+            ? this.renderBillingRow('Service Charge', this.state.ServiceCharge)
             : null}
-          {this.renderBillingRow('Net Total',     this.state.NetTotal)}
+          {this.renderBillingRow('Net Total', this.state.NetTotal)}
 
           <Separator mt={20} mb={20} />
 
           {/* ── Order Information ── */}
-          <Text style={{
-            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-            fontSize: 18, marginLeft: 20, color: theme.text,
-          }}>ORDER INFORMATION</Text>
-          <Text style={{
-            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-            fontSize: 14, marginLeft: 20, marginRight: 20,
-            color: theme.textMuted, marginTop: 5,
-          }}>
-            The information presented here is included on your order like payment type, dine type, delivery address
+          <Text
+            style={{
+              fontFamily:
+                Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+              fontSize: 18,
+              marginLeft: 20,
+              color: theme.text,
+            }}
+          >
+            ORDER INFORMATION
+          </Text>
+          <Text
+            style={{
+              fontFamily:
+                Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+              fontSize: 14,
+              marginLeft: 20,
+              marginRight: 20,
+              color: theme.textMuted,
+              marginTop: 5,
+            }}
+          >
+            The information presented here is included on your order like
+            payment type, dine type, delivery address
           </Text>
 
           <Separator mt={20} mb={20} />
 
           {/* Payment Type */}
-          <View style={{
-            flexDirection: 'row', alignItems: 'center',
-            marginLeft: 20, marginRight: 20,
-          }}>
-            <Text style={{
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-              fontSize: 17, color: theme.textMuted,
-            }}>Payment Type :</Text>
-            <Text style={{
-              flex: 1,
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-              fontSize: 17, textAlign: 'right', color: theme.text,
-            }}>{this.state.PaymentType}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                fontSize: 17,
+                color: theme.textMuted,
+              }}
+            >
+              Payment Type :
+            </Text>
+            <Text
+              style={{
+                flex: 1,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                fontSize: 17,
+                textAlign: 'right',
+                color: theme.text,
+              }}
+            >
+              {this.state.PaymentType}
+            </Text>
           </View>
 
           {/* Dine Type */}
-          <View style={{
-            flexDirection: 'row', alignItems: 'center',
-            marginTop: 3, marginLeft: 20, marginRight: 20,
-          }}>
-            <Text style={{
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-              fontSize: 17, color: theme.textMuted,
-            }}>Dine Type :</Text>
-            <Text style={{
-              flex: 1,
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-              fontSize: 17, textAlign: 'right', color: theme.text,
-            }}>{this.state.DineType}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 3,
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                fontSize: 17,
+                color: theme.textMuted,
+              }}
+            >
+              Dine Type :
+            </Text>
+            <Text
+              style={{
+                flex: 1,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                fontSize: 17,
+                textAlign: 'right',
+                color: theme.text,
+              }}
+            >
+              {this.state.DineType}
+            </Text>
           </View>
 
           {/* Delivery Address */}
           {this.state.DineType === 'Delivery' ? (
-            <View style={{
-              flexDirection: 'row', marginTop: 3,
-              marginLeft: 20, marginRight: 20,
-            }}>
-              <Text style={{
-                fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                fontSize: 17, color: theme.textMuted,
-              }}>Delivery Address :</Text>
-              <Text style={{
-                flex: 1,
-                fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-                fontSize: 17, textAlign: 'right', color: theme.text,
-              }}>{this.state.DeliveryAddress}</Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                marginTop: 3,
+                marginLeft: 20,
+                marginRight: 20,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily:
+                    Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                  fontSize: 17,
+                  color: theme.textMuted,
+                }}
+              >
+                Delivery Address :
+              </Text>
+              <Text
+                style={{
+                  flex: 1,
+                  fontFamily:
+                    Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                  fontSize: 17,
+                  textAlign: 'right',
+                  color: theme.text,
+                }}
+              >
+                {this.state.DeliveryAddress}
+              </Text>
             </View>
           ) : null}
 
           <Separator mt={20} mb={20} />
-
         </Animated.ScrollView>
 
         {/* ── Sticky image header ── */}
-        <Animated.View style={[
-          {
-            height: HEADER_MAX_HEIGHT, width: '100%',
-            position: 'absolute',
-            backgroundColor: theme.surface,   // ← was '#F0F0F0'
-            overflow: 'hidden',
-          },
-          {transform: [{translateY: headerTranslateY}]},
-        ]}>
+        <Animated.View
+          style={[
+            {
+              height: HEADER_MAX_HEIGHT,
+              width: '100%',
+              position: 'absolute',
+              backgroundColor: theme.surface,
+              overflow: 'hidden',
+            },
+            { transform: [{ translateY: headerTranslateY }] },
+          ]}
+        >
           {this.state.isLoading ? (
-           <SkeletonPlaceholder
-  backgroundColor={this.props.isDark ? '#252420' : '#e0e0e0'}
-  highlightColor={this.props.isDark ? '#0F0E0C' : '#fafafa'}>
-  <View style={{height: 200}} />
-</SkeletonPlaceholder>
+            <SkeletonPlaceholder
+              backgroundColor={this.props.isDark ? '#252420' : '#e0e0e0'}
+              highlightColor={this.props.isDark ? '#0F0E0C' : '#fafafa'}
+            >
+              <View style={{ height: 200 }} />
+            </SkeletonPlaceholder>
           ) : (
-            <Animated.View style={[
-              {opacity: imageOpacity, transform: [{translateY: imageTranslateY}]},
-            ]}>
+            <Animated.View
+              style={[
+                {
+                  opacity: imageOpacity,
+                  transform: [{ translateY: imageTranslateY }],
+                },
+              ]}
+            >
               <OrderImageSlider ImageList={this.state.ImageList} />
             </Animated.View>
           )}
         </Animated.View>
 
-        {/* ── Back button (absolute) ── */}
+        {/* ── Back button ── */}
         <TouchableOpacity
-          style={{top: Platform.OS === 'ios' ? 30 : 20, left: 20, position: 'absolute'}}
-          onPress={() => this.onBackPress()}>
-          <Animated.View style={[
-            {
-              width: 40, height: 40, borderRadius: 20,
-              backgroundColor: '#FFFFFF', 
-              alignItems: 'center', justifyContent: 'center',
-            },
-            {transform: [{scale: buttonScale}, {translateY: buttonTranslateY}]},
-          ]}>
-            <Image source={require('../assets/left-arrow.png')} style={{width: 20, height: 20}} />
+          style={{
+            top: Platform.OS === 'ios' ? 30 : 20,
+            left: 20,
+            position: 'absolute',
+          }}
+          onPress={() => this.onBackPress()}
+        >
+          <Animated.View
+            style={[
+              {
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: '#FFFFFF',
+                alignItems: 'center',
+                justifyContent: 'center',
+              },
+              {
+                transform: [
+                  { scale: buttonScale },
+                  { translateY: buttonTranslateY },
+                ],
+              },
+            ]}
+          >
+            <Image
+              source={require('../assets/left-arrow.png')}
+              style={{ width: 20, height: 20 }}
+            />
           </Animated.View>
         </TouchableOpacity>
 
         {/* ── ThemeToggle (absolute, top-right) ── */}
-        <View style={{
-          position: 'absolute',
-          top: Platform.OS === 'ios' ? 30 : 20,
-          right: 16,
-        }}>
-          <ThemeToggle />                         
+        <View
+          style={{
+            position: 'absolute',
+            top: Platform.OS === 'ios' ? 30 : 20,
+            right: 16,
+          }}
+        >
+          <ThemeToggle />
         </View>
 
         {/* ── Collapsed title (appears on scroll) ── */}
-        <Animated.View style={[
-          {position: 'absolute', top: 28, left: 100, width: '60%'},
-          {opacity: titleOpacity},
-          {transform: [{translateY: titleTranslateY}]},
-        ]}>
-          <Text numberOfLines={1} style={{
-            fontSize: 20, textTransform: 'uppercase',
-            fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-            color: theme.text,                 // ← NEW
-          }}>Order No : {this.state.OrderID}</Text>
+        <Animated.View
+          style={[
+            { position: 'absolute', top: 28, left: 100, width: '60%' },
+            { opacity: titleOpacity },
+            { transform: [{ translateY: titleTranslateY }] },
+          ]}
+        >
+          <Text
+            numberOfLines={1}
+            style={{
+              fontSize: 20,
+              textTransform: 'uppercase',
+              fontFamily:
+                Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+              color: theme.text,
+            }}
+          >
+            Order No : {this.state.OrderID}
+          </Text>
         </Animated.View>
 
         {/* ── Cancel order RBSheet ── */}
         <RBSheet
-          ref={ref => {this.RBSheet = ref;}}
+          ref={ref => {
+            this.RBSheet = ref;
+          }}
           height={height}
           openDuration={850}
           onClose={() => this.onSheetClose()}
@@ -774,44 +1139,62 @@ class OrderDetailsScreen extends React.PureComponent {
           closeOnPressMask={true}
           keyboardAvoidingViewEnabled={false}
           customStyles={{
-            wrapper: {backgroundColor: 'rgba(0,0,0,0.6)'},
-            draggableIcon: {backgroundColor: theme.textMuted},  // ← was '#000'
+            wrapper: { backgroundColor: 'rgba(0,0,0,0.6)' },
+            draggableIcon: { backgroundColor: theme.textMuted },
             container: {
-              borderTopLeftRadius: 15, borderTopRightRadius: 15,
-              backgroundColor: theme.card,     // ← NEW
+              borderTopLeftRadius: 15,
+              borderTopRightRadius: 15,
+              backgroundColor: theme.card,
             },
-          }}>
-          <View style={{flex: 1}}>
-
+          }}
+        >
+          <View style={{ flex: 1 }}>
             {/* Sheet header */}
-            <View style={{
-              flexDirection: 'row',
-              marginLeft: 30, marginTop: 30, marginBottom: 20,
-            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                marginLeft: 30,
+                marginTop: 30,
+                marginBottom: 20,
+              }}
+            >
               <TouchableOpacity onPress={() => this.RBSheet.close()}>
-                <FontAwesome6 name="xmark" size={30} color={theme.text} solid />  {/* ← was 'black' */}
+                <FontAwesome6 name="xmark" size={30} color={theme.text} solid />
               </TouchableOpacity>
-              <Text style={{
-                fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
-                fontSize: 18, alignSelf: 'center', marginLeft: 30,
-                color: theme.text,             // ← was 'black'
-              }}>Add order cancel remark</Text>
+              <Text
+                style={{
+                  fontFamily:
+                    Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
+                  fontSize: 18,
+                  alignSelf: 'center',
+                  marginLeft: 30,
+                  color: theme.text,
+                }}
+              >
+                Add order cancel remark
+              </Text>
             </View>
 
-            <Text style={{
-              fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-              fontSize: 16, alignSelf: 'center',
-              marginLeft: 30, marginRight: 30,
-              textAlign: 'center', marginBottom: 10,
-              color: theme.textSub,            // ← was 'black'
-            }}>
+            <Text
+              style={{
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                fontSize: 16,
+                alignSelf: 'center',
+                marginLeft: 30,
+                marginRight: 30,
+                textAlign: 'center',
+                marginBottom: 10,
+                color: theme.textSub,
+              }}
+            >
               Cancelling the selected orders will disable them from being
               processed. If the sales channel is not notified, these orders
               can't be restored.
             </Text>
 
             {/* Cancel reason chips */}
-            <View style={{marginLeft: 30, marginRight: 30, marginBottom: 10}}>
+            <View style={{ marginLeft: 30, marginRight: 30, marginBottom: 10 }}>
               <FlatList
                 key={this.state.flatID}
                 extraData={this.state}
@@ -825,46 +1208,65 @@ class OrderDetailsScreen extends React.PureComponent {
             {/* Remark text input */}
             <TextInput
               style={{
-                backgroundColor: theme.inputBg,   // ← was '#f0f0f0'
-                height: 100, paddingLeft: 20,
+                backgroundColor: theme.inputBg,
+                height: 100,
+                paddingLeft: 20,
                 borderRadius: 5,
-                borderColor: theme.inputBorder,   // ← was '#dbdbdb'
-                borderWidth: 1, fontSize: 16,
-                fontFamily: Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
+                borderColor: theme.inputBorder,
+                borderWidth: 1,
+                fontSize: 16,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                 justifyContent: 'center',
-                color: theme.text,                // ← was 'black'
+                color: theme.text,
                 textAlignVertical: 'top',
-                marginLeft: 30, marginRight: 30,
+                marginLeft: 30,
+                marginRight: 30,
               }}
               multiline={true}
               blurOnSubmit={true}
               keyboardType={'default'}
-              placeholderTextColor={theme.textMuted}  // ← was '#7a7a7a'
+              placeholderTextColor={theme.textMuted}
               returnKeyType="done"
-              onChangeText={remark => this.setState({CancelRemark: remark})}
+              onChangeText={remark => this.setState({ CancelRemark: remark })}
             />
 
             {/* Submit button */}
             <TouchableOpacity
               style={{
-                alignItems: 'center', justifyContent: 'flex-end',
-                marginBottom: 10, marginRight: 5, marginLeft: 5, marginTop: 10,
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                marginBottom: 10,
+                marginRight: 5,
+                marginLeft: 5,
+                marginTop: 10,
               }}
-              onPress={() => this.onCancelSubmitPress()}>
-              <View style={{
-                width: '92%', height: 45,
-                alignItems: 'center', justifyContent: 'center',
-                backgroundColor: theme.pill,      // ← was 'black'
-                borderRadius: 5,
-              }}>
-                <Text style={{
-                  color: theme.pillText,           // ← was 'white'
-                  fontFamily: Platform.OS === 'ios' ? 'Asap-Regular_Medium' : 'AsapMedium',
-                  fontSize: 18,
-                }}>Submit</Text>
+              onPress={() => this.onCancelSubmitPress()}
+            >
+              <View
+                style={{
+                  width: '92%',
+                  height: 45,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: theme.pill,
+                  borderRadius: 5,
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.pillText,
+                    fontFamily:
+                      Platform.OS === 'ios'
+                        ? 'Asap-Regular_Medium'
+                        : 'AsapMedium',
+                    fontSize: 18,
+                  }}
+                >
+                  Submit
+                </Text>
               </View>
             </TouchableOpacity>
-
           </View>
         </RBSheet>
       </View>
@@ -874,53 +1276,83 @@ class OrderDetailsScreen extends React.PureComponent {
   LoadOrderDetail = async () => {
     const Mobile = await AsyncStorage.getItem('phonenumber');
     fetch(ORDERVIEW, {
-      method: 'POST', cache: 'no-cache',
-      headers: {'content-type': 'application/json', 'cache-control': 'no-cache'},
-      body: JSON.stringify({MobileNo: Mobile, OrderId: this.state.OrderID}),
+      method: 'POST',
+      cache: 'no-cache',
+      headers: {
+        'content-type': 'application/json',
+        'cache-control': 'no-cache',
+      },
+      body: JSON.stringify({ MobileNo: Mobile, OrderId: this.state.OrderID }),
     })
       .then(res => res.json())
       .then(json => {
         const SList = [];
         const Images = [];
         const {
-          NetTotal, DineType, PaymentType, DeliveryAddress,
-          InsertDate, Tax, Discount, DeliveryCharge, ServiceCharge,
-          SubTotal, OrderStatus, ScheduleTime, BranchLocation, Items,
+          NetTotal,
+          DineType,
+          PaymentType,
+          DeliveryAddress,
+          InsertDate,
+          Tax,
+          Discount,
+          DeliveryCharge,
+          ServiceCharge,
+          SubTotal,
+          OrderStatus,
+          ScheduleTime,
+          BranchLocation,
+          Items,
         } = json;
 
         Items.forEach(element => {
-          Images.push({ProductIMG: element.ProductIMG ? element.ProductIMG.trim() : ''});
+          Images.push({
+            ProductIMG: element.ProductIMG ? element.ProductIMG.trim() : '',
+          });
         });
 
-        if      (OrderStatus == '1') { SList.push('Processing'); }
-        else if (OrderStatus == '2') { SList.push('Processing', 'Accept', 'Preparing'); }
-        else if (OrderStatus == '3') { SList.push('Processing', 'Accept', 'Preparing', 'Delivering'); }
-        else if (OrderStatus == '4') { SList.push('Processing', 'Cancel'); }
-        else if (OrderStatus == '5') { SList.push('Processing', 'Accept', 'Preparing', 'Delivering', 'Finish'); }
+        if (OrderStatus == '1') {
+          SList.push('Processing');
+        } else if (OrderStatus == '2') {
+          SList.push('Processing', 'Accept', 'Preparing');
+        } else if (OrderStatus == '3') {
+          SList.push('Processing', 'Accept', 'Preparing', 'Delivering');
+        } else if (OrderStatus == '4') {
+          SList.push('Processing', 'Cancel');
+        } else if (OrderStatus == '5') {
+          SList.push(
+            'Processing',
+            'Accept',
+            'Preparing',
+            'Delivering',
+            'Finish',
+          );
+        }
 
         this.setState({
-          InsertDate, NetTotal, DineType, PaymentType,
-          DeliveryAddress, Tax, Discount, DeliveryCharge,
-          ServiceCharge, SubTotal, OrderStatus,
+          InsertDate,
+          NetTotal,
+          DineType,
+          PaymentType,
+          DeliveryAddress,
+          Tax,
+          Discount,
+          DeliveryCharge,
+          ServiceCharge,
+          SubTotal,
+          OrderStatus,
           OrderItemList: Items,
           ImageList: Images,
           isLoading: false,
           StatusList: SList,
-          ScheduleTime, BranchLocation,
+          ScheduleTime,
+          BranchLocation,
           isShowLess: OrderStatus === '5' || OrderStatus === '4' ? false : true,
         });
       })
       .catch(er => {
         console.log('LoadOrderDetail', er);
-        Alert.alert(
-          'Warning',
-          "The operation couldn't be completed.",
-          [
-            {text: 'Try Again', onPress: () => this.LoadOrderDetail()},
-            {text: 'Close'},
-          ],
-          {cancelable: false},
-        );
+        showNetworkError(() => this.LoadOrderDetail(), null);
       });
   };
 
@@ -930,5 +1362,4 @@ class OrderDetailsScreen extends React.PureComponent {
   }
 }
 
-// No Redux on this screen — withTheme alone is enough
 export default withTheme(OrderDetailsScreen);

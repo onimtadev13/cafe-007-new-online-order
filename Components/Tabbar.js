@@ -28,7 +28,7 @@ export default class Tabbar extends React.PureComponent {
   }
 
   getScrollAmount = () => {
-    const {currentIndex} = this.props;
+    const { currentIndex } = this.props;
     const position = currentIndex;
     const pageOffset = 0;
     const containerWidth = WindowWidth;
@@ -61,7 +61,7 @@ export default class Tabbar extends React.PureComponent {
   };
 
   onTabLayout = (key, e) => {
-    const {x, width, height} = e.nativeEvent.layout;
+    const { x, width, height } = e.nativeEvent.layout;
     this._tabsMeasurements.push({
       key: key,
       left: x,
@@ -73,16 +73,17 @@ export default class Tabbar extends React.PureComponent {
   };
 
   renderTab = (section, index) => {
-    const {currentItem, onPressClick} = this.props;
+    const { currentItem, onPressClick } = this.props;
     if (section.header)
       return (
         <TouchableOpacity
           onLayout={event => this.onTabLayout(index, event)}
           key={index}
-          style={{flex: 1}}
+          style={{ flex: 1 }}
           onPress={() => {
             onPressClick(index, section.headerindex);
-          }}>
+          }}
+        >
           <View
             style={[
               {
@@ -98,7 +99,8 @@ export default class Tabbar extends React.PureComponent {
                 backgroundColor:
                   currentItem == section.Prod_Name ? 'black' : '#F0F0F0',
               },
-            ]}>
+            ]}
+          >
             <Text
               style={[
                 {
@@ -107,8 +109,9 @@ export default class Tabbar extends React.PureComponent {
                   fontFamily:
                     Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
                 },
-                {color: currentItem == section.Prod_Name ? 'white' : 'black'},
-              ]}>
+                { color: currentItem == section.Prod_Name ? 'white' : 'black' },
+              ]}
+            >
               {section.Prod_Name}
             </Text>
           </View>
@@ -117,18 +120,20 @@ export default class Tabbar extends React.PureComponent {
   };
 
   render() {
-    const {sections} = this.props;
+    const { sections } = this.props;
 
     return (
-      <View style={[{width: WindowWidth}]}>
+      <View style={[{ width: WindowWidth }]}>
         <ScrollView
           ref={r => (this.scrollref = r)}
           showsHorizontalScrollIndicator={false}
           horizontal
-          contentContainerStyle={{flexDirection: 'row'}}>
+          contentContainerStyle={{ flexDirection: 'row' }}
+        >
           <View
             onLayout={this.onTabContainerLayout}
-            style={[{flexDirection: 'row'}]}>
+            style={[{ flexDirection: 'row' }]}
+          >
             {sections.map(this.renderTab)}
           </View>
         </ScrollView>
