@@ -1712,7 +1712,11 @@ class DashboardScreen extends React.PureComponent {
                     powered by
                   </Text>
                   <Image
-                    source={require('../assets/images.png')}
+                    source={
+                      isDark
+                        ? require('../assets/images_dark.png')
+                        : require('../assets/images.png')
+                    }
                     style={{ width: 50, height: 50 }}
                   />
                 </TouchableOpacity>

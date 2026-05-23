@@ -72,52 +72,60 @@ export default class Tabbar extends React.PureComponent {
     this._tabsMeasurements.sort((a, b) => a.key - b.key);
   };
 
-  renderTab = (section, index) => {
-    const { currentItem, onPressClick } = this.props;
-    if (section.header)
-      return (
-        <TouchableOpacity
-          onLayout={event => this.onTabLayout(index, event)}
-          key={index}
-          style={{ flex: 1 }}
-          onPress={() => {
-            onPressClick(index, section.headerindex);
-          }}
+ renderTab = (section, index) => {
+  const { currentItem, onPressClick, theme, isDark } = this.props;  
+
+  if (section.header)
+    return (
+      <TouchableOpacity
+        onLayout={event => this.onTabLayout(index, event)}
+        key={index}
+        style={{ flex: 1 }}
+        onPress={() => {
+          onPressClick(index, section.headerindex);
+        }}
+      >
+        <View
+          style={[
+            {
+              margin: 10,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderColor: theme.text,       
+              borderRadius: 10,
+              borderWidth: 1.2,
+              padding: 9,
+            },
+            {
+              backgroundColor:
+                currentItem === section.Prod_Name
+                  ? theme.text                 
+                  : theme.bg,                 
+            },
+          ]}
         >
-          <View
+          <Text
             style={[
               {
-                margin: 10,
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderColor: 'black',
-                borderRadius: 10,
-                borderWidth: 1.2,
-                padding: 9,
+                fontSize: 16,
+                textAlign: 'center',
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
               },
               {
-                backgroundColor:
-                  currentItem == section.Prod_Name ? 'black' : '#F0F0F0',
+                color:
+                  currentItem === section.Prod_Name
+                    ? theme.bg                 
+                    : theme.text,            
               },
             ]}
           >
-            <Text
-              style={[
-                {
-                  fontSize: 16,
-                  textAlign: 'center',
-                  fontFamily:
-                    Platform.OS === 'ios' ? 'Asap-Regular' : 'AsapRegular',
-                },
-                { color: currentItem == section.Prod_Name ? 'white' : 'black' },
-              ]}
-            >
-              {section.Prod_Name}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      );
-  };
+            {section.Prod_Name}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+};
 
   render() {
     const { sections } = this.props;

@@ -282,6 +282,8 @@ class HomeScreen extends React.PureComponent {
             currentIndex={this.state.anchor}
             currentItem={this.state.select}
             sections={this.state.Productlist}
+            theme={theme}         
+  isDark={isDark}
             onPressClick={(index, headerindex) => {
               this.ref.scrollToIndex({
                 animated: false,
