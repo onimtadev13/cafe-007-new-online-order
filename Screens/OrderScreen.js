@@ -261,7 +261,7 @@ class OrderScreen extends React.PureComponent {
           </Text>
           <Text
             style={{
-              flex: 0.5,
+              flexShrink: 1,
               fontFamily:
                 Platform.OS === 'ios' ? 'Asap-Regular_Bold' : 'AsapBold',
               fontSize: 20,
@@ -269,6 +269,9 @@ class OrderScreen extends React.PureComponent {
               color: theme.textMuted,
               marginRight: 20,
             }}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
           >
             {item.OrderID}
           </Text>
