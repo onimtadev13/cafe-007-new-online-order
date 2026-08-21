@@ -35,12 +35,15 @@ import RadioButtonRN from 'radio-buttons-react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import LottieView from 'lottie-react-native';
+import NetworkContext from '../Components/NetworkContext';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 var db = openDatabase({ name: 'UserDatabase.db' });
 
 class DashboardScreen extends React.PureComponent {
+  static contextType = NetworkContext;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -261,6 +264,7 @@ class DashboardScreen extends React.PureComponent {
   }
 
   GreetingAnimation = () => {
+    console.log('[Dashboard] GreetingAnimation started (reveals screen content)');
     Animated.parallel([
       Animated.spring(this.state.slideDown, {
         toValue: 0,
@@ -277,6 +281,7 @@ class DashboardScreen extends React.PureComponent {
         useNativeDriver: true,
       }),
     ]).start(() => {
+      console.log('[Dashboard] GreetingAnimation finished, scroll enabled');
       this.setState({ isEnableScroll: true });
     });
   };
@@ -457,6 +462,7 @@ class DashboardScreen extends React.PureComponent {
 
   retreiveLocation = async () => {
     await AsyncStorage.multiGet(['LOCA', 'LOCA_NAME']).then(res => {
+      console.log('[Dashboard] retreiveLocation:', res);
       this.setState({ Location: res[0][1], LocationName: res[1][1] }, () => {
         this.LoadFavouriteItem(res[0][1]);
       });
@@ -1942,6 +1948,7 @@ class DashboardScreen extends React.PureComponent {
   }
 
   LoadFavouriteItem(Loca) {
+    console.log('[Dashboard] LoadFavouriteItem: Loca =', Loca);
     fetch(APIURL, {
       method: 'POST',
       cache: 'no-cache',
@@ -1972,9 +1979,11 @@ class DashboardScreen extends React.PureComponent {
       }),
     })
       .then(res => {
+        console.log('[Dashboard] LoadFavouriteItem: response status', res.status);
         return res.json();
       })
       .then(json => {
+        console.log('[Dashboard] LoadFavouriteItem: raw response', JSON.stringify(json));
         const favouritlist = [];
 
         for (let i = 0; i < json.CommonResult.Table.length; i++) {
@@ -1993,13 +2002,15 @@ class DashboardScreen extends React.PureComponent {
           });
         }
 
+        console.log('[Dashboard] LoadFavouriteItem: parsed favouritlist length', favouritlist.length);
+
         this.setState({
           favouritlist: favouritlist,
           isLoading: false,
         });
       })
       .catch(er => {
-        console.log(er);
+        console.log('[Dashboard] LoadFavouriteItem: FETCH/PARSE ERROR', er);
         Alert.alert(
           'Warning',
           "The operation couldn't be completed.",
@@ -2013,12 +2024,14 @@ class DashboardScreen extends React.PureComponent {
         );
       })
       .finally(() => {
+        console.log('[Dashboard] LoadFavouriteItem: finally -> GreetingAnimation + LoadSuggestItem');
         this.GreetingAnimation();
         this.LoadSuggestItem(Loca);
       });
   }
 
   LoadSuggestItem(Loca) {
+    console.log('[Dashboard] LoadSuggestItem: Loca =', Loca);
     fetch(APIURL, {
       method: 'POST',
       cache: 'no-cache',
@@ -2049,9 +2062,11 @@ class DashboardScreen extends React.PureComponent {
       }),
     })
       .then(res => {
+        console.log('[Dashboard] LoadSuggestItem: response status', res.status);
         return res.json();
       })
       .then(json => {
+        console.log('[Dashboard] LoadSuggestItem: raw response', JSON.stringify(json));
         const suggestList = [];
 
         for (let i = 0; i < json.CommonResult.Table.length; i++) {
@@ -2070,12 +2085,14 @@ class DashboardScreen extends React.PureComponent {
           });
         }
 
+        console.log('[Dashboard] LoadSuggestItem: parsed suggestList length', suggestList.length);
+
         this.setState({
           suggestList: suggestList,
         });
       })
       .catch(er => {
-        console.log(er);
+        console.log('[Dashboard] LoadSuggestItem: FETCH/PARSE ERROR', er);
         Alert.alert(
           'Warning',
           "The operation couldn't be completed.",
@@ -2089,11 +2106,13 @@ class DashboardScreen extends React.PureComponent {
         );
       })
       .finally(() => {
+        console.log('[Dashboard] LoadSuggestItem: finally -> LoadOffers');
         this.LoadOffers();
       });
   }
 
   LoadOffers() {
+    console.log('[Dashboard] LoadOffers: calling');
     fetch(APIURL, {
       method: 'POST',
       cache: 'no-cache',
@@ -2117,9 +2136,11 @@ class DashboardScreen extends React.PureComponent {
       }),
     })
       .then(res => {
+        console.log('[Dashboard] LoadOffers: response status', res.status);
         return res.json();
       })
       .then(json => {
+        console.log('[Dashboard] LoadOffers: raw response', JSON.stringify(json));
         const offersList = [];
 
         for (let i = 0; i < json.CommonResult.Table.length; i++) {
@@ -2133,12 +2154,14 @@ class DashboardScreen extends React.PureComponent {
           });
         }
 
+        console.log('[Dashboard] LoadOffers: parsed offersList length', offersList.length);
+
         this.setState({
           offersList: offersList,
         });
       })
       .catch(er => {
-        console.log(er);
+        console.log('[Dashboard] LoadOffers: FETCH/PARSE ERROR', er);
         Alert.alert(
           'Warning',
           "The operation couldn't be completed.",
@@ -2152,11 +2175,13 @@ class DashboardScreen extends React.PureComponent {
         );
       })
       .finally(() => {
+        console.log('[Dashboard] LoadOffers: finally -> LoadInfo');
         this.LoadInfo();
       });
   }
 
   LoadInfo() {
+    console.log('[Dashboard] LoadInfo: calling');
     fetch(APIURL, {
       method: 'POST',
       cache: 'no-cache',
@@ -2180,9 +2205,11 @@ class DashboardScreen extends React.PureComponent {
       }),
     })
       .then(res => {
+        console.log('[Dashboard] LoadInfo: response status', res.status);
         return res.json();
       })
       .then(json => {
+        console.log('[Dashboard] LoadInfo: raw response', JSON.stringify(json));
         this.setState({
           LocationI: json.CommonResult.Table[0].Location,
           LocationIAddress: json.CommonResult.Table[0].Address,
@@ -2195,7 +2222,7 @@ class DashboardScreen extends React.PureComponent {
         });
       })
       .catch(er => {
-        console.log(er);
+        console.log('[Dashboard] LoadInfo: FETCH/PARSE ERROR', er);
         Alert.alert(
           'Warning',
           "The operation couldn't be completed.",
@@ -2277,6 +2304,7 @@ class DashboardScreen extends React.PureComponent {
   // }
 
   GetLocationDetails() {
+    console.log('[Dashboard] GetLocationDetails: calling', APIURL);
     fetch(APIURL, {
       method: 'POST',
       cache: 'no-cache',
@@ -2299,16 +2327,32 @@ class DashboardScreen extends React.PureComponent {
         con: '1',
       }),
     })
-      .then(res => res.json())
+      .then(res => {
+        console.log('[Dashboard] GetLocationDetails: response status', res.status);
+        return res.json();
+      })
       .then(async json => {
-        const LocaData = json.CommonResult.Table.map(item => ({
+        console.log('[Dashboard] GetLocationDetails: raw response', JSON.stringify(json));
+
+        if (!json || !json.CommonResult || !json.CommonResult.Table) {
+          console.warn('[Dashboard] GetLocationDetails: unexpected response shape, CommonResult.Table missing');
+        }
+
+        const LocaData = (json?.CommonResult?.Table || []).map(item => ({
           Val: item.loca,
           label: item.description,
         }));
 
+        console.log('[Dashboard] GetLocationDetails: LocaData length', LocaData.length, LocaData);
+
         this.setState({ LocaData, isLoading: false });
 
+        if (this.context && this.context.setOffline) {
+          this.context.setOffline(LocaData.length === 0);
+        }
+
         if (LocaData.length === 1) {
+          console.log('[Dashboard] GetLocationDetails: single location, auto-selecting and loading favourites');
           const singleLocation = LocaData[0];
           this.setState(
             {
@@ -2323,15 +2367,26 @@ class DashboardScreen extends React.PureComponent {
           );
         } else if (LocaData.length > 1) {
           const storedLoca = await AsyncStorage.getItem('LOCA');
+          console.log('[Dashboard] GetLocationDetails: multiple locations, storedLoca =', storedLoca);
           if (!storedLoca) {
+            console.log('[Dashboard] GetLocationDetails: no stored location, opening LocaSheet (this blocks favourites/animation until user picks one)');
             this.LocaSheet.open();
           } else {
             this.retreiveLocation();
           }
+        } else {
+          console.warn('[Dashboard] GetLocationDetails: LocaData is EMPTY — LoadFavouriteItem/GreetingAnimation will never run, screen will stay blank');
         }
       })
       .catch(er => {
-        console.log('loca', er);
+        console.log('[Dashboard] GetLocationDetails: FETCH ERROR', er);
+
+        this.setState({ isLoading: false });
+
+        if (this.context && this.context.setOffline) {
+          this.context.setOffline(true);
+        }
+
         Alert.alert(
           'Warning',
           "The operation couldn't be completed.",

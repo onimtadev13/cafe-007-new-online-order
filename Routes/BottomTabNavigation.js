@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   AccountStackNavigation,
@@ -10,6 +11,8 @@ import {
 import { connect } from 'react-redux';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/core';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import NetworkContext from '../Components/NetworkContext';
+import OfflineBanner from '../Components/OfflineBanner';
 
 const activeTintLabelColor = 'black';
 const inactiveTintLabelColor = '#808080';
@@ -42,10 +45,20 @@ const iconMap = {
 };
 
 const BottomTabNavigation = props => {
+  const { isOffline } = useContext(NetworkContext);
+
   return (
-    <Tab.Navigator
+    <View style={{ flex: 1 }}>
+      <Tab.Navigator
       initialRouteName="Home"
       safeAreaInsets={{ bottom: 0, top: 0 }}
+      screenListeners={{
+        tabPress: e => {
+          if (isOffline) {
+            e.preventDefault();
+          }
+        },
+      }}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           const iconInfo = iconMap[route.name];
@@ -125,7 +138,10 @@ const BottomTabNavigation = props => {
           tabBarVisible: getTabBarVisible(route),
         })}
       />
-    </Tab.Navigator>
+      </Tab.Navigator>
+
+      <OfflineBanner visible={isOffline} />
+    </View>
   );
 };
 

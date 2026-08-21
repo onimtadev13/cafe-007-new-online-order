@@ -1,5 +1,5 @@
 // import {NavigationContainer, DefaultTheme as NavigationDefaultTheme, DarkTheme as NavigationDarkTheme} from '@react-navigation/native';
-import { useEffect, useState, useRef, useCallback  } from 'react';
+import { useEffect, useState, useCallback, useMemo  } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
 import {
@@ -11,6 +11,7 @@ import {
   AppState,
 } from 'react-native';
 import AuthContext from './Components/Context';
+import NetworkContext from './Components/NetworkContext';
 import BottomTabNavigation from './Routes/BottomTabNavigation';
 import { Provider } from 'react-redux';
 import store from './Store';
@@ -63,7 +64,11 @@ const App = () => {
 
   const navigationRef = React.createRef();
 
-
+  const [isOffline, setOffline] = useState(false);
+  const networkContextValue = useMemo(
+    () => ({ isOffline, setOffline }),
+    [isOffline],
+  );
 
   const [showPromo, setShowPromo] = useState(false);
 
@@ -1282,6 +1287,7 @@ const App = () => {
       style={{ flex: 0, backgroundColor: '#F0F0F0' }}
     />
     <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+      <NetworkContext.Provider value={networkContextValue}>
       <AuthContext.Provider value={authContext}>
         <StatusBar
           animated={true}
@@ -1339,6 +1345,7 @@ const App = () => {
         onClosePress={() => onClosePopUp()}
         onMenuPress={data => onNotification_Model_Press(data)}
       />
+      </NetworkContext.Provider>
     </SafeAreaView>
   </SafeAreaProvider>
 );
