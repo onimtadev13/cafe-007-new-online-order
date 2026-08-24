@@ -8,6 +8,17 @@ import {WaveIndicator} from 'react-native-indicators';
 import {APIURL} from '../Data/CloneData';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
+// The push notification only carries the numeric order status code ('1'..'5'),
+// matching Screens/OrderDetailsScreen.js's OrderStatus. Map it to the text
+// labels this component's own render logic checks against.
+const STATUS_CODE_TO_TEXT = {
+  '1': 'Processing',
+  '2': 'Preparing',
+  '3': 'Delivering',
+  '4': 'Cancel',
+  '5': 'Finish',
+};
+
 export default class OrderProcess extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -114,56 +125,45 @@ export default class OrderProcess extends React.PureComponent {
   };
 
   localNotification = () => {
-  this.messageListner = messaging().onMessage(async remoteMessage => {  // ✅ FIXED
-    if (remoteMessage.data?.OrderID === this.state.orderID) {
-      this.setState({orderStatus: remoteMessage.data.Status});
+    this.messageListner = messaging().onMessage(async remoteMessage => {
+      if (String(remoteMessage.data?.OrderID) !== String(this.state.orderID)) {
+        return;
+      }
 
-          list = this.state.statusList;
-          var index = list.findIndex(i => i === remoteMessage.data.Status);
-          if (index === -1) {
-            list.push(remoteMessage.data.Status);
-            this.setState({statusList: list});
-          }
+      const status = STATUS_CODE_TO_TEXT[remoteMessage.data?.Status];
+      if (!status) {
+        return;
+      }
 
-          // if (this.state.dineType === "Delivery") {
-          //     if (remoteMessage.data.Status === "Preparing") {
-          //         this.ProcessAnimate();
-          //         this.AcceptAnimate();
-          //     } else if (remoteMessage.data.Status === "Delivering") {
-          //         this.PrepairAnimate();
-          //     } else if (remoteMessage.data.Status === "Complete") {
-          //         this.DeliveryAnimate();
-          //     }
-          // } else {
-          //     if (remoteMessage.data.Status === "Preparing") {
-          //         this.ProcessAnimate();
-          //         this.AcceptAnimate();
-          //     } else if (remoteMessage.data.Status === "Complete") {
-          //         this.PrepairAnimate();
-          //         this.DeliveryAnimate();
-          //     }
-          // }
+      this.setState({orderStatus: status});
 
-          if (remoteMessage.data.Status === 'Preparing') {
-            list.push('Accept');
-            this.setState({statusList: list});
-            this.ProcessAnimate();
-            this.AcceptAnimate();
-            this.GetReminderTime();
-          } else if (remoteMessage.data.Status === 'Cancel') {
-            list.push('Cancel');
-            this.setState({statusList: list});
-            this.ProcessAnimate();
-            this.AcceptAnimate();
-          } else if (remoteMessage.data.Status === 'Delivering') {
-            this.PrepairAnimate();
-          } else if (remoteMessage.data.Status === 'Finish') {
-            this.DeliveryAnimate();
-          }
+      const list = this.state.statusList;
+      if (!list.includes(status)) {
+        list.push(status);
+      }
 
-          // console.log(this.state.statusList);
+      if (status === 'Preparing') {
+        if (!list.includes('Accept')) {
+          list.push('Accept');
         }
-      });
+        this.setState({statusList: list});
+        this.ProcessAnimate();
+        this.AcceptAnimate();
+        this.GetReminderTime();
+      } else if (status === 'Cancel') {
+        this.setState({statusList: list});
+        this.ProcessAnimate();
+        this.AcceptAnimate();
+      } else if (status === 'Delivering') {
+        this.setState({statusList: list});
+        this.PrepairAnimate();
+      } else if (status === 'Finish') {
+        this.setState({statusList: list});
+        this.DeliveryAnimate();
+      } else {
+        this.setState({statusList: list});
+      }
+    });
   };
 
   render() {

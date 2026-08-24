@@ -172,6 +172,23 @@ export default class LoginScreen extends React.PureComponent {
     this.context.OTPVerification(OTP, mobilenumber, this.props.navigation);
   };
 
+  onOTPModalShow = () => {
+    // OTPInputView's autoFocusOnLoad calls .focus() from its own
+    // componentDidMount, which fires as soon as the Modal is set visible —
+    // often before the Android Dialog window backing the Modal has actually
+    // taken input focus, so the keyboard silently fails to open on some
+    // devices. Re-trigger focus once the modal has actually finished
+    // presenting (Modal's onShow fires after that on both platforms).
+    setTimeout(
+      () => {
+        if (this.otpInput) {
+          this.otpInput.focusField(0);
+        }
+      },
+      Platform.OS === 'android' ? 300 : 0,
+    );
+  };
+
   onPressFlag = () => {
     const index = CountryCodes.findIndex((_, i) => i === this.state.position);
     Promise.all([this.myCountryPicker.open()]).then(() => {
@@ -251,7 +268,7 @@ export default class LoginScreen extends React.PureComponent {
   render() {
     return (
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : null}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1, paddingBottom: Platform.OS === 'ios' ? 60 : 20 }}
       >
         <ScrollView
@@ -517,6 +534,7 @@ export default class LoginScreen extends React.PureComponent {
               transparent={true}
               animated={true}
               animationType={'fade'}
+              onShow={() => this.onOTPModalShow()}
             >
               <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -594,6 +612,9 @@ export default class LoginScreen extends React.PureComponent {
                         </Text>
 
                         <OTPInputView
+                          ref={ref => {
+                            this.otpInput = ref;
+                          }}
                           style={{ width: '80%', height: 100 }}
                           pinCount={4}
                           code={this.state.otpcode}

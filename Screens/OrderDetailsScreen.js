@@ -94,27 +94,18 @@ export default class OrderDetailsScreen extends React.PureComponent {
   }
 
  localNotification = () => {
-  this.messageListner = messaging().onMessage(async remoteMessage => {  // ✅ FIXED
-    const status = remoteMessage.data?.Status;  // Added optional chaining for safety
-    
-    switch (status) {
-      case 'Processing':
-        this.setState({OrderStatus: '1'});
-        break;
-      case 'Preparing':
-        this.setState({OrderStatus: '2'});
-        break;
-      case 'Delivery':
-        this.setState({OrderStatus: '3'});
-        break;
-      case 'Cancel':
-        this.setState({OrderStatus: '4'});
-        break;
-      case 'Finish':
-        this.setState({OrderStatus: '5'});
-        break;
-      default:
-        break;
+  this.messageListner = messaging().onMessage(async remoteMessage => {
+    console.log('[OrderDetailsScreen] Received message:', remoteMessage.data);
+
+    // The push only carries the numeric order status code ('1'..'5'), which
+    // is already the exact format this.state.OrderStatus uses.
+    if (String(remoteMessage.data?.OrderID) !== String(this.state.OrderID)) {
+      return;
+    }
+
+    const status = remoteMessage.data?.Status;
+    if (status) {
+      this.setState({OrderStatus: status});
     }
   });
 };
